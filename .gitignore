@@ -1,0 +1,8 @@
+node_modules/
+.taste-skill/
+data/*.sqlite-shm
+data/*.sqlite-wal
+data/backups/
+.env
+.DS_Store
+Thumbs.db

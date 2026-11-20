@@ -1,0 +1,2117 @@
+<!doctype html>
+<html lang="id" data-type="software" data-radius="soft" data-buttons="arrow" data-motion>
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>RAHMA: Platform Governance KPI &amp; Mitigasi Risiko untuk Korporasi</title>
+  <meta name="description"
+    content="Sistem pemantauan KPI korporasi dengan skoring polaritas otomatis, gerbang mitigasi wajib di bawah 85%, dan isolasi RBAC 3-peran. Mulai dari Rp 2,5 jt/bulan.">
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="RAHMA: Platform Governance KPI &amp; Mitigasi Risiko untuk Korporasi">
+  <meta property="og:description"
+    content="Skoring KPI otomatis, gerbang mitigasi wajib, dan RBAC 3-peran dalam satu sistem mandiri.">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="theme-color" content="#eef4ff">
+  <meta name="site-kind" content="software">
+  <meta name="page-type" content="software">
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="assets/system.css">
+  <link rel="stylesheet" href="assets/ui/cards.css">
+  <link rel="stylesheet" href="assets/motion/motion.css">
+  <link rel="stylesheet" href="assets/layout/layout.css">
+  <link rel="stylesheet" href="assets/icons/icon.css">
+  <link rel="stylesheet" href="assets/ui/base.css">
+  <link rel="stylesheet" href="assets/ui/stat/fragment.css">
+  <link rel="stylesheet" href="assets/ui/checklist/fragment.css">
+  <link rel="stylesheet" href="assets/diagrams/diagram.css">
+
+  <style>
+    @font-face {
+      font-family: 'Commissioner';
+      src: url('/fonts/Commissioner-VariableFont.ttf') format('truetype');
+      font-weight: 100 900;
+      font-style: normal;
+      font-display: swap;
+    }
+    @font-face { font-family: 'Sarabun'; src: url('/fonts/Sarabun/Sarabun-Thin.ttf') format('truetype'); font-weight: 100; font-style: normal; font-display: swap; }
+    @font-face { font-family: 'Sarabun'; src: url('/fonts/Sarabun/Sarabun-ThinItalic.ttf') format('truetype'); font-weight: 100; font-style: italic; font-display: swap; }
+    @font-face { font-family: 'Sarabun'; src: url('/fonts/Sarabun/Sarabun-ExtraLight.ttf') format('truetype'); font-weight: 200; font-style: normal; font-display: swap; }
+    @font-face { font-family: 'Sarabun'; src: url('/fonts/Sarabun/Sarabun-ExtraLightItalic.ttf') format('truetype'); font-weight: 200; font-style: italic; font-display: swap; }
+    @font-face { font-family: 'Sarabun'; src: url('/fonts/Sarabun/Sarabun-Light.ttf') format('truetype'); font-weight: 300; font-style: normal; font-display: swap; }
+    @font-face { font-family: 'Sarabun'; src: url('/fonts/Sarabun/Sarabun-LightItalic.ttf') format('truetype'); font-weight: 300; font-style: italic; font-display: swap; }
+    @font-face { font-family: 'Sarabun'; src: url('/fonts/Sarabun/Sarabun-Regular.ttf') format('truetype'); font-weight: 400; font-style: normal; font-display: swap; }
+    @font-face { font-family: 'Sarabun'; src: url('/fonts/Sarabun/Sarabun-Italic.ttf') format('truetype'); font-weight: 400; font-style: italic; font-display: swap; }
+    @font-face { font-family: 'Sarabun'; src: url('/fonts/Sarabun/Sarabun-Medium.ttf') format('truetype'); font-weight: 500; font-style: normal; font-display: swap; }
+    @font-face { font-family: 'Sarabun'; src: url('/fonts/Sarabun/Sarabun-MediumItalic.ttf') format('truetype'); font-weight: 500; font-style: italic; font-display: swap; }
+    @font-face { font-family: 'Sarabun'; src: url('/fonts/Sarabun/Sarabun-SemiBold.ttf') format('truetype'); font-weight: 600; font-style: normal; font-display: swap; }
+    @font-face { font-family: 'Sarabun'; src: url('/fonts/Sarabun/Sarabun-SemiBoldItalic.ttf') format('truetype'); font-weight: 600; font-style: italic; font-display: swap; }
+    @font-face { font-family: 'Sarabun'; src: url('/fonts/Sarabun/Sarabun-Bold.ttf') format('truetype'); font-weight: 700; font-style: normal; font-display: swap; }
+    @font-face { font-family: 'Sarabun'; src: url('/fonts/Sarabun/Sarabun-BoldItalic.ttf') format('truetype'); font-weight: 700; font-style: italic; font-display: swap; }
+    @font-face { font-family: 'Sarabun'; src: url('/fonts/Sarabun/Sarabun-ExtraBold.ttf') format('truetype'); font-weight: 800; font-style: normal; font-display: swap; }
+    @font-face { font-family: 'Sarabun'; src: url('/fonts/Sarabun/Sarabun-ExtraBoldItalic.ttf') format('truetype'); font-weight: 800; font-style: italic; font-display: swap; }
+
+    :root {
+      /* Light Beveled Frosted Glass System — Matching RAHMA Dashboard */
+      --p-bg: #eef4ff;
+      --p-surface: rgba(255, 255, 255, 0.84);
+      --p-ink: #0f172a;
+      --p-muted: #475569;
+      --p-accent: #007BC8;
+      --p-accent-ink: #ffffff;
+      --p-action: #007BC8;
+      --p-action-ink: #ffffff;
+
+      --p-inv-bg: #0f172a;
+      --p-inv-surface: rgba(30, 41, 59, 0.78);
+      --p-inv-ink: #f8fafc;
+      --p-inv-muted: #94a3b8;
+      --p-inv-accent: #38BDF8;
+      --p-inv-accent-ink: #0f172a;
+      --p-inv-action: #007BC8;
+      --p-inv-action-ink: #ffffff;
+
+      --font-display: 'Commissioner', 'Sarabun', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      --font-text: 'Sarabun', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      --font-mono: 'IBM Plex Mono', ui-monospace, 'SFMono-Regular', Consolas, monospace;
+      --display-weight: 600;
+      --display-tracking: -0.03em;
+      --display-tracking-xl: -0.04em;
+      --ly-scale: 0.97;
+
+      --primary: #007BC8;
+      --primary-hover: #0065A8;
+      --success: #16a34a;
+      --success-pill-bg: #dcfce7;
+      --success-text: #065f46;
+      --warning: #f68400;
+      --warning-pill-bg: #fef3c7;
+      --warning-text: #92400e;
+      --danger: #dc2626;
+      --danger-pill-bg: #fee2e2;
+      --danger-text: #991b1b;
+
+      --radius-board: 20px;
+      --radius-ui: 15px;
+      --glass-bg: rgba(255, 255, 255, 0.78);
+      --glass-bg-strong: rgba(255, 255, 255, 0.88);
+      --glass-blur: blur(28px) saturate(190%);
+      --glass-bevel-border: rgba(255, 255, 255, 0.90);
+      --glass-bevel-shadow:
+        0 14px 36px rgba(15, 23, 42, 0.10),
+        inset 0 1.5px 0 rgba(255, 255, 255, 0.96),
+        inset 0 -1.5px 0 rgba(15, 23, 42, 0.06);
+    }
+
+    * {
+      scrollbar-width: thin;
+      scrollbar-color: rgba(148, 163, 184, 0.52) transparent;
+    }
+
+    ::-webkit-scrollbar {
+      width: 8px;
+      height: 8px;
+      background: transparent;
+    }
+
+    ::-webkit-scrollbar-track,
+    ::-webkit-scrollbar-track-piece {
+      background: transparent;
+    }
+
+    ::-webkit-scrollbar-thumb {
+      background: rgba(148, 163, 184, 0.45);
+      border-radius: 99px;
+      border: 1px solid rgba(255, 255, 255, 0.38);
+    }
+
+    ::-webkit-scrollbar-thumb:hover {
+      background: rgba(0, 123, 200, 0.72);
+    }
+
+    body {
+      font-family: var(--font-text);
+      color: var(--p-ink);
+      font-weight: 450;
+      background: transparent;
+      position: relative;
+    }
+
+    .home-magnifik-backdrop {
+      position: fixed;
+      inset: 0;
+      z-index: -1;
+      background-color: #dbeafe;
+      background-image:
+        linear-gradient(135deg, rgba(255, 255, 255, 0.66) 0%, rgba(241, 245, 249, 0.56) 48%, rgba(240, 253, 248, 0.64) 100%),
+        var(--home-magnifik-bg, url('/assets/photos/img/m44931831-2400.webp'));
+      background-size: cover;
+      background-position: center;
+      background-repeat: no-repeat;
+      transition: background-image 0.45s ease;
+    }
+
+    /* Frosted Glass Navigation Bar */
+    .nav {
+      background: rgba(255, 255, 255, 0.80) !important;
+      backdrop-filter: var(--glass-blur);
+      -webkit-backdrop-filter: var(--glass-blur);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.92);
+      box-shadow: 0 6px 24px rgba(15, 23, 42, 0.06), inset 0 1px 0 rgba(255, 255, 255, 0.96);
+    }
+
+    .nav__menu {
+      background: rgba(255, 255, 255, 0.88) !important;
+      backdrop-filter: var(--glass-blur);
+      -webkit-backdrop-filter: var(--glass-blur);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.9);
+      box-shadow: 0 18px 40px rgba(15, 23, 42, 0.12);
+    }
+
+    .rahma-wordmark {
+      height: 44px;
+      width: auto;
+      display: block;
+      object-fit: contain;
+    }
+
+    .hero-brand-logo {
+      height: 52px;
+      width: auto;
+      display: block;
+      margin-bottom: 18px;
+      object-fit: contain;
+    }
+
+    header.nav .nav__logo {
+      opacity: 0;
+      pointer-events: none;
+      transform: translateY(-6px);
+      transition: opacity 0.38s cubic-bezier(0.22, 1, 0.36, 1), transform 0.38s cubic-bezier(0.22, 1, 0.36, 1);
+    }
+
+    header.nav.is-logo-visible .nav__logo {
+      opacity: 1;
+      pointer-events: auto;
+      transform: translateY(0);
+    }
+
+    .brand-badge {
+      width: 34px;
+      height: 34px;
+      border-radius: 11px;
+      background: linear-gradient(135deg, #007BC8 0%, #0065A8 100%);
+      color: #ffffff;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 650;
+      font-size: 16px;
+      box-shadow: 0 4px 12px rgba(0, 123, 200, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.4);
+      margin-right: 10px;
+    }
+
+    .nav__logo {
+      display: inline-flex;
+      align-items: center;
+      font-weight: 650 !important;
+      letter-spacing: -0.02em;
+      color: #0f172a !important;
+    }
+
+    /* Dashboard-Matched Buttons */
+    .btn--primary {
+      background: linear-gradient(135deg, #007BC8 0%, #0065A8 100%) !important;
+      color: #ffffff !important;
+      border-radius: var(--radius-ui) !important;
+      border: 1px solid rgba(255, 255, 255, 0.28) !important;
+      box-shadow: 0 8px 20px rgba(0, 123, 200, 0.28), inset 0 1px 0 rgba(255, 255, 255, 0.3) !important;
+      font-weight: 600 !important;
+    }
+
+    .btn--secondary {
+      background: var(--glass-bg-strong) !important;
+      backdrop-filter: var(--glass-blur);
+      -webkit-backdrop-filter: var(--glass-blur);
+      color: #0f172a !important;
+      border-radius: var(--radius-ui) !important;
+      border: 1px solid var(--glass-bevel-border) !important;
+      box-shadow: var(--glass-bevel-shadow) !important;
+      font-weight: 600 !important;
+    }
+
+    /* Clean Section Rhythm (Natural Height except Hero & Pinned-Chapters) */
+    main>.section:not(.hero):not([data-moment="pinned-chapters"]),
+    footer.closing {
+      height: auto !important;
+      min-height: 0 !important;
+      padding-block: clamp(72px, 8vw, 108px) !important;
+    }
+
+    main>.section:not(.hero)>.wrap {
+      height: auto !important;
+    }
+
+    main>.section .section-head {
+      margin-bottom: clamp(28px, 3.5vw, 44px) !important;
+      max-width: 760px;
+    }
+
+    /* Beveled Frosted Glass Surface Mixin */
+    .card,
+    .proof-stat,
+    .tier-card,
+    .rk-stage-window {
+      background: var(--glass-bg) !important;
+      backdrop-filter: var(--glass-blur);
+      -webkit-backdrop-filter: var(--glass-blur);
+      border: 1px solid var(--glass-bevel-border) !important;
+      border-radius: var(--radius-board) !important;
+      box-shadow: var(--glass-bevel-shadow) !important;
+    }
+
+    .card {
+      padding: 20px !important;
+      display: flex !important;
+      flex-direction: column !important;
+      gap: 14px !important;
+    }
+
+    .card h3 {
+      font-size: 19px !important;
+      font-weight: 700 !important;
+      margin-top: 4px;
+      color: #0f172a;
+    }
+
+    .card p {
+      font-size: 14.5px !important;
+      line-height: 1.55 !important;
+      color: #475569;
+    }
+
+    .card .panel,
+    .ui-panel,
+    .dg {
+      background: rgba(255, 255, 255, 0.78) !important;
+      border: 1px solid rgba(255, 255, 255, 0.94) !important;
+      border-radius: var(--radius-ui) !important;
+      color: #0f172a !important;
+    }
+
+    /* Triptych Hero Alignment & Frosted Glass Left Hero Card */
+    .hero--triptych .hero__grid {
+      align-items: center !important;
+    }
+
+    .hero--triptych .hero__grid > .span-3:first-child {
+      background: rgba(255, 255, 255, 0.80);
+      backdrop-filter: blur(28px) saturate(185%);
+      -webkit-backdrop-filter: blur(28px) saturate(185%);
+      border: 1.5px solid rgba(255, 255, 255, 0.94);
+      border-radius: var(--radius-board);
+      box-shadow: var(--glass-bevel-shadow);
+      padding: clamp(22px, 2.4vw, 30px);
+    }
+
+    @media (min-width: 1024px) {
+      .hero--triptych .hero__grid {
+        grid-template-columns: minmax(235px, 2.8fr) minmax(0, 7.25fr) minmax(185px, 1.95fr) !important;
+        column-gap: clamp(20px, 2vw, 28px) !important;
+      }
+
+      .hero--triptych .hero__grid > .span-3:first-child {
+        grid-column: 1 / 2 !important;
+        grid-row: 1 !important;
+        align-self: center !important;
+      }
+
+      .hero--triptych .ly-collage {
+        grid-column: 2 / 3 !important;
+        grid-row: 1 !important;
+        width: 100% !important;
+        height: 100% !important;
+      }
+
+      .hero--triptych .start-10 {
+        grid-column: 3 / 4 !important;
+        grid-row: 1 !important;
+        width: 100% !important;
+      }
+    }
+
+    .hero--triptych .start-10 {
+      display: flex;
+      justify-content: flex-end;
+      align-items: center;
+    }
+
+    .hero--triptych .start-10 .btn--xl {
+      width: 100% !important;
+      height: clamp(60px, 1.4vw + 46px, 68px) !important;
+      padding-inline: 24px !important;
+      font-size: clamp(18px, 0.45vw + 14.5px, 22px) !important;
+      white-space: nowrap !important;
+    }
+
+    @media (max-width: 1023px) {
+      .hero--triptych {
+        height: auto !important;
+        min-height: 100svh;
+        padding-bottom: 56px !important;
+      }
+
+      .hero--triptych .start-10 {
+        justify-content: flex-start;
+        margin-top: 16px;
+      }
+    }
+
+    /* Hero Collage Pieces — Beveled Frosted Glass Dashboard Cards over Magnifik Landscape Window */
+    .ly-collage {
+      container-type: inline-size;
+      background-image:
+        linear-gradient(160deg, rgba(15, 23, 42, 0.12) 0%, rgba(15, 23, 42, 0.28) 100%),
+        var(--home-magnifik-bg, url('/assets/photos/img/m44931831-1200.webp'));
+      background-size: cover;
+      background-position: center;
+      border-radius: 24px;
+      border: 1.5px solid rgba(255, 255, 255, 0.88);
+      box-shadow:
+        0 24px 60px rgba(15, 23, 42, 0.16),
+        inset 0 1.5px 0 rgba(255, 255, 255, 0.92);
+      overflow: hidden;
+      transition: background-image 0.45s ease;
+    }
+
+    .rk-stage-photo-banner {
+      position: relative;
+      width: 100%;
+      height: 118px;
+      border-radius: 14px;
+      overflow: hidden;
+      border: 1px solid rgba(255, 255, 255, 0.9);
+      box-shadow: 0 6px 18px rgba(15, 23, 42, 0.1);
+    }
+
+    .rk-stage-photo-banner img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+      transition: transform 0.5s cubic-bezier(0.22, 1, 0.36, 1);
+    }
+
+    .rk-stage-window:hover .rk-stage-photo-banner img {
+      transform: scale(1.03);
+    }
+
+    .rk-stage-photo-pill {
+      position: absolute;
+      left: 10px;
+      bottom: 10px;
+      padding: 4px 10px;
+      border-radius: 999px;
+      background: rgba(15, 23, 42, 0.65);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      border: 1px solid rgba(255, 255, 255, 0.32);
+      color: #ffffff;
+      font-size: 11px;
+      font-weight: 700;
+    }
+
+    /* Magnifik Landscape Gallery Section (#atmosphere) */
+    .magnifik-gallery-grid {
+      display: grid;
+      grid-template-columns: repeat(12, minmax(0, 1fr));
+      gap: 20px;
+    }
+
+    .magnifik-card {
+      position: relative;
+      border-radius: var(--radius-board);
+      overflow: hidden;
+      border: 2px solid rgba(255, 255, 255, 0.86);
+      box-shadow: var(--glass-bevel-shadow);
+      cursor: pointer;
+      background: #0f172a;
+      height: 230px;
+      padding: 0;
+      text-align: left;
+      transition: transform 0.22s cubic-bezier(0.22, 1, 0.36, 1), border-color 0.22s ease, box-shadow 0.22s ease;
+    }
+
+    .magnifik-card--wide {
+      grid-column: span 6;
+      height: 260px;
+    }
+
+    .magnifik-card--third {
+      grid-column: span 4;
+      height: 220px;
+    }
+
+    @media (max-width: 960px) {
+      .magnifik-card--wide,
+      .magnifik-card--third {
+        grid-column: span 12;
+        height: 210px;
+      }
+    }
+
+    .magnifik-card img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+      transition: transform 0.55s cubic-bezier(0.22, 1, 0.36, 1);
+    }
+
+    .magnifik-card:hover {
+      transform: translateY(-2px);
+    }
+
+    .magnifik-card:hover img {
+      transform: scale(1.03);
+    }
+
+    .magnifik-card.active {
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px rgba(0, 123, 200, 0.28), 0 18px 40px rgba(0, 123, 200, 0.22);
+    }
+
+    .magnifik-card-overlay {
+      position: absolute;
+      left: 14px;
+      right: 14px;
+      bottom: 14px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      pointer-events: none;
+    }
+
+    .magnifik-card-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 13px;
+      border-radius: 999px;
+      background: rgba(15, 23, 42, 0.68);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border: 1px solid rgba(255, 255, 255, 0.35);
+      color: #ffffff;
+      font-size: 12.5px;
+      font-weight: 700;
+    }
+
+    .magnifik-card.active .magnifik-card-status {
+      background: rgba(0, 123, 200, 0.92);
+      border-color: rgba(255, 255, 255, 0.75);
+    }
+
+    .ly-collage .ly-piece {
+      border-radius: var(--radius-board);
+      overflow: hidden;
+      backdrop-filter: blur(26px) saturate(185%);
+      -webkit-backdrop-filter: blur(26px) saturate(185%);
+      box-shadow:
+        0 20px 44px rgba(15, 23, 42, 0.14),
+        inset 0 1.5px 0 rgba(255, 255, 255, 0.95),
+        inset 0 -1px 0 rgba(15, 23, 42, 0.06);
+    }
+
+    .ly-collage .ly-piece.rk-scorecard,
+    .rk-scorecard {
+      background: rgba(255, 255, 255, 0.88) !important;
+      color: #0f172a;
+      border: 1.5px solid rgba(255, 255, 255, 0.95);
+      padding: 2.6cqw 3cqw;
+      display: grid;
+      gap: 1.25cqw;
+      font: 500 clamp(12px, 1.55cqw, 14.5px)/1.32 var(--font-text);
+    }
+
+    .rk-scorecard__top {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 1.5cqw;
+    }
+
+    .rk-scorecard__top small {
+      color: #64748b;
+      font-size: clamp(10.5px, 1.3cqw, 12.5px);
+      font-weight: 700;
+      letter-spacing: 0.03em;
+    }
+
+    .rk-scorecard__val {
+      font: 650 clamp(26px, 4.8cqw, 42px)/1 var(--font-display);
+      letter-spacing: -0.03em;
+      color: #007BC8;
+      margin-top: 0.5cqw;
+    }
+
+    .rk-dept-row {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      align-items: center;
+      gap: 0.8cqw 1.6cqw;
+      padding-top: 1.05cqw;
+      border-top: 1px solid rgba(15, 23, 42, 0.08);
+    }
+
+    .rk-dept-row b {
+      font-weight: 600;
+      color: #1e293b;
+    }
+
+    .rk-pill {
+      padding: 0.45cqw 1.25cqw;
+      border-radius: 99px;
+      font: 700 clamp(10.5px, 1.3cqw, 12.5px)/1.2 var(--font-mono);
+    }
+
+    .rk-pill--green {
+      background: #dcfce7;
+      color: #065f46;
+      border: 1px solid #86efac;
+    }
+
+    .rk-pill--yellow {
+      background: #fef3c7;
+      color: #92400e;
+      border: 1px solid #fde68a;
+    }
+
+    .rk-pill--red {
+      background: #fee2e2;
+      color: #991b1b;
+      border: 1px solid #fecaca;
+    }
+
+    .ly-collage .ly-piece.rk-gate-card,
+    .rk-gate-card {
+      background: rgba(254, 242, 242, 0.90) !important;
+      color: #7f1d1d;
+      border: 1.5px solid rgba(252, 165, 165, 0.94);
+      padding: 2.5cqw 2.8cqw;
+      display: grid;
+      gap: 1.2cqw;
+      font: 500 clamp(11.5px, 1.5cqw, 14px)/1.35 var(--font-text);
+    }
+
+    .rk-gate-card strong {
+      color: #991b1b;
+      font-weight: 650;
+      font-size: clamp(12.5px, 1.65cqw, 15.5px);
+    }
+
+    .rk-gate-tag {
+      display: inline-block;
+      background: #fee2e2;
+      color: #991b1b;
+      border: 1px solid #fca5a5;
+      padding: 0.4cqw 1.15cqw;
+      border-radius: 99px;
+      font-size: clamp(10.5px, 1.25cqw, 12px);
+      font-weight: 700;
+      font-family: var(--font-mono);
+      justify-self: start;
+    }
+
+    .ly-collage .ly-piece.rk-rbac-card,
+    .rk-rbac-card {
+      background: rgba(255, 255, 255, 0.90) !important;
+      color: #0f172a;
+      border: 1.5px solid rgba(255, 255, 255, 0.96);
+      padding: 2.3cqw 7cqw 2.3cqw 2.8cqw;
+      display: grid;
+      gap: 1cqw;
+      font: 600 clamp(12px, 1.55cqw, 14.5px)/1.3 var(--font-text);
+    }
+
+    .rk-rbac-card .rk-role-line {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding-top: 0.9cqw;
+      border-top: 1px solid rgba(15, 23, 42, 0.08);
+      font-size: clamp(11px, 1.4cqw, 13.5px);
+    }
+
+    .rk-rbac-card code {
+      font-family: var(--font-mono);
+      font-size: clamp(10.5px, 1.25cqw, 12px);
+      background: #dbeafe;
+      color: #0065A8;
+      font-weight: 700;
+      padding: 0.3cqw 0.85cqw;
+      border-radius: 0.65cqw;
+    }
+
+    .ly-collage .ly-piece.rk-hex-card,
+    .rk-hex-card {
+      background: rgba(255, 255, 255, 0.88) !important;
+      color: #0f172a;
+      border: 1.5px solid rgba(255, 255, 255, 0.92);
+      padding: 2.6cqw 3cqw;
+      display: grid;
+      gap: 1.3cqw;
+      font: 500 clamp(12px, 1.55cqw, 14.5px)/1.35 var(--font-text);
+    }
+
+    .rk-swatch-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 1cqw;
+      align-items: center;
+    }
+
+    .rk-swatch-chip {
+      padding: 0.55cqw 1.3cqw;
+      border-radius: 99px;
+      font: 700 clamp(10.5px, 1.3cqw, 12.5px)/1.2 var(--font-text);
+      color: #fff;
+    }
+
+    /* Platform Cards */
+    #platform {
+      background: rgba(255, 255, 255, 0.25);
+      border-top: 1px solid rgba(255, 255, 255, 0.65);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.65);
+    }
+
+    #platform .panel {
+      --p-h: auto;
+      height: auto !important;
+      min-height: 320px;
+      overflow: hidden !important;
+      display: flex !important;
+      flex-direction: column !important;
+      padding: 0 !important;
+    }
+
+    #platform .panel>.ui-panel,
+    #platform .panel>.dg {
+      height: auto !important;
+      flex: 1 1 auto !important;
+      margin: 0 !important;
+      border: none !important;
+    }
+
+    #platform .panel>.dg {
+      min-height: 320px;
+    }
+
+    /* Interactive Dashboard-Native Feature Simulators inside #platform */
+    .rk-demo-box {
+      background: rgba(255, 255, 255, 0.78);
+      border: 1.5px solid rgba(255, 255, 255, 0.94);
+      border-radius: var(--radius-ui);
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      min-height: 340px;
+      box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.96), 0 6px 18px rgba(15, 23, 42, 0.05);
+    }
+
+    .rk-demo-top {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .rk-seg {
+      display: inline-flex;
+      background: rgba(226, 232, 240, 0.72);
+      padding: 3px;
+      border-radius: 12px;
+      gap: 3px;
+    }
+
+    .rk-seg-btn {
+      border: none;
+      background: transparent;
+      padding: 6px 11px;
+      border-radius: 9px;
+      font-size: 12px;
+      font-weight: 700;
+      color: #475569;
+      cursor: pointer;
+      transition: background-color 0.18s ease, color 0.18s ease, box-shadow 0.18s ease;
+    }
+
+    .rk-seg-btn.active {
+      background: #ffffff;
+      color: #007BC8;
+      box-shadow: 0 2px 6px rgba(15, 23, 42, 0.08);
+    }
+
+    .rk-gauge-wrap {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .rk-gauge-svg {
+      width: 210px;
+      height: 118px;
+      overflow: visible;
+    }
+
+    .rk-gauge-needle {
+      transition: transform 0.45s cubic-bezier(0.22, 1, 0.36, 1);
+      transform-origin: 105px 100px;
+    }
+
+    .rk-traffic-mini {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 6px;
+      text-align: center;
+    }
+
+    .rk-traffic-cell {
+      padding: 8px 6px;
+      border-radius: 11px;
+      font-size: 11px;
+      font-weight: 700;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 2px;
+    }
+
+    .rk-traffic-cell strong {
+      font-size: 15px;
+      font-weight: 650;
+    }
+
+    .rk-slider {
+      width: 100%;
+      accent-color: #007BC8;
+      cursor: pointer;
+    }
+
+    .rk-gate-preview {
+      padding: 12px;
+      border-radius: 12px;
+      font-size: 12.5px;
+      line-height: 1.45;
+      transition: all 0.25s ease;
+    }
+
+    .rk-gate-preview.is-red {
+      background: rgba(254, 242, 242, 0.9);
+      border: 1px solid rgba(252, 165, 165, 0.9);
+      color: #991b1b;
+    }
+
+    .rk-gate-preview.is-ok {
+      background: rgba(236, 253, 245, 0.9);
+      border: 1px solid rgba(134, 239, 172, 0.9);
+      color: #065f46;
+    }
+
+    .rk-tag-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin-top: 8px;
+    }
+
+    .rk-tag-btn {
+      border: none;
+      padding: 5px 10px;
+      border-radius: 99px;
+      font-size: 11px;
+      font-weight: 700;
+      color: #ffffff;
+      cursor: pointer;
+      opacity: 0.42;
+      transition: opacity 0.18s ease, transform 0.18s ease, box-shadow 0.18s ease;
+    }
+
+    .rk-tag-btn.selected {
+      opacity: 1;
+      box-shadow: 0 3px 10px rgba(15, 23, 42, 0.2);
+      transform: translateY(-1px);
+    }
+
+    .rk-perm-list {
+      display: grid;
+      gap: 7px;
+    }
+
+    .rk-perm-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 8px 11px;
+      border-radius: 11px;
+      background: rgba(248, 250, 252, 0.85);
+      border: 1px solid rgba(226, 232, 240, 0.9);
+      font-size: 12px;
+      font-weight: 600;
+      color: #1e293b;
+    }
+
+    .rk-perm-badge {
+      padding: 3px 9px;
+      border-radius: 99px;
+      font-size: 10.5px;
+      font-weight: 700;
+      font-family: var(--font-mono);
+    }
+
+    /* Workflow Pinned Chapters & Stage Window */
+    #workflow.is-live>.mo-pc__grid {
+      padding-top: calc(var(--nav, 72px) + 36px) !important;
+      align-items: center !important;
+    }
+
+    #workflow .mo-pc__visuals.frame {
+      background: transparent !important;
+      border: none !important;
+      overflow: visible !important;
+    }
+
+    .rk-stage-window {
+      width: 100%;
+      height: 100%;
+      color: #0f172a;
+      padding: clamp(22px, 3vw, 32px);
+      display: grid;
+      align-content: center;
+      gap: 20px;
+    }
+
+    .rk-stage-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 1px solid rgba(15, 23, 42, 0.1);
+      padding-bottom: 14px;
+      font-family: var(--font-mono);
+      font-size: 12.5px;
+      font-weight: 700;
+      color: #475569;
+    }
+
+    .rk-stage-head code {
+      background: #dbeafe;
+      color: #0065A8;
+      padding: 4px 10px;
+      border-radius: 99px;
+    }
+
+    .rk-stage-rows {
+      display: grid;
+      gap: 12px;
+    }
+
+    .rk-stage-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 14px 16px;
+      background: rgba(255, 255, 255, 0.68);
+      border: 1px solid rgba(255, 255, 255, 0.92);
+      border-radius: var(--radius-ui);
+      box-shadow: 0 4px 12px rgba(15, 23, 42, 0.04);
+      font-size: 14px;
+      font-weight: 600;
+    }
+
+    .rk-stage-row code {
+      font-family: var(--font-mono);
+      font-size: 12px;
+      font-weight: 700;
+      color: #007BC8;
+    }
+
+    /* Proof Counter Strip */
+    .proof-grid {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 24px;
+      margin-top: 0;
+    }
+
+    @media (max-width: 1023px) {
+      .proof-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+    }
+
+    @media (max-width: 639px) {
+      .proof-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .proof-stat {
+      padding: 24px;
+      display: grid;
+      gap: 10px;
+    }
+
+    .proof-stat .t-stat {
+      font: 650 clamp(36px, 4vw, 54px)/1 var(--font-display);
+      letter-spacing: var(--display-tracking);
+      color: #007BC8;
+    }
+
+    .proof-stat p {
+      margin: 0;
+      color: #334155;
+      font-size: 15px;
+      line-height: 1.5;
+    }
+
+    /* Pricing Section (Frosted Dark Navy Glass Accent Band for Commercial Contrast) */
+    .pricing-band {
+      background:
+        radial-gradient(circle at 18% 20%, rgba(0, 123, 200, 0.28) 0%, transparent 45%),
+        radial-gradient(circle at 82% 80%, rgba(16, 185, 129, 0.18) 0%, transparent 45%),
+        #0f172a;
+      color: #f8fafc;
+    }
+
+    .pricing-band .section-head h2 {
+      color: #ffffff;
+    }
+
+    .pricing-band .section-head p {
+      color: #cbd5e1;
+    }
+
+    .pricing-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 24px;
+      margin-top: 0;
+    }
+
+    @media (max-width: 1023px) {
+      .pricing-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .pricing-band .tier-card {
+      background: rgba(255, 255, 255, 0.08) !important;
+      backdrop-filter: blur(22px) saturate(160%);
+      -webkit-backdrop-filter: blur(22px) saturate(160%);
+      border: 1px solid rgba(255, 255, 255, 0.18) !important;
+      box-shadow: 0 18px 40px rgba(0, 0, 0, 0.25), inset 0 1px 0 rgba(255, 255, 255, 0.2) !important;
+      padding: var(--s-6);
+      display: grid;
+      align-content: space-between;
+      gap: var(--s-5);
+      color: #f8fafc;
+    }
+
+    .pricing-band .tier-card--featured {
+      background: rgba(0, 123, 200, 0.16) !important;
+      border: 1.5px solid #38BDF8 !important;
+    }
+
+    .pricing-band .btn--secondary {
+      background: rgba(255, 255, 255, 0.14) !important;
+      color: #ffffff !important;
+      border-color: rgba(255, 255, 255, 0.25) !important;
+    }
+
+    .tier-price {
+      font: 650 clamp(26px, 2.8vw, 34px)/1.1 var(--font-display);
+      letter-spacing: -0.02em;
+      margin: var(--s-2) 0;
+    }
+
+    .tier-list {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+      display: grid;
+      gap: 10px;
+      font-size: 15px;
+      color: #cbd5e1;
+    }
+
+    .tier-list li::before {
+      content: "✓ ";
+      color: #38BDF8;
+      font-weight: 650;
+    }
+
+    /* FAQ Retractable Frosted-Glass Accordion */
+    .faq-stack {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .faq-accordion-item {
+      background: rgba(255, 255, 255, 0.62);
+      backdrop-filter: var(--glass-blur);
+      -webkit-backdrop-filter: var(--glass-blur);
+      border: 1.5px solid rgba(255, 255, 255, 0.86);
+      border-radius: var(--radius-ui);
+      box-shadow: var(--glass-bevel-shadow);
+      overflow: hidden;
+      transition: background-color 0.2s ease, border-color 0.2s ease, transform 0.2s cubic-bezier(0.22, 1, 0.36, 1);
+    }
+
+    .faq-accordion-item:hover {
+      background: rgba(255, 255, 255, 0.76);
+      transform: translateY(-1px);
+    }
+
+    .faq-accordion-item.is-open {
+      background: rgba(255, 255, 255, 0.82);
+      border-color: rgba(0, 123, 200, 0.45);
+    }
+
+    .faq-accordion-trigger {
+      width: 100%;
+      border: none;
+      background: transparent;
+      padding: 18px 20px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      text-align: left;
+      cursor: pointer;
+      color: #0f172a;
+      font-family: var(--font-text);
+    }
+
+    .faq-q-title {
+      font-size: 16px;
+      font-weight: 700;
+      line-height: 1.4;
+      color: #0f172a;
+      flex: 1;
+    }
+
+    .faq-q-right {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      flex-shrink: 0;
+    }
+
+    .faq-pill-tag {
+      background: rgba(219, 234, 254, 0.85);
+      border: 1px solid rgba(147, 197, 253, 0.8);
+      color: #0065A8;
+      padding: 5px 13px;
+      border-radius: 99px;
+      font-size: 12.5px;
+      font-weight: 700;
+      white-space: nowrap;
+    }
+
+    .faq-chevron-box {
+      width: 32px;
+      height: 32px;
+      border-radius: 10px;
+      background: rgba(0, 123, 200, 0.1);
+      border: 1px solid rgba(0, 123, 200, 0.22);
+      color: #007BC8;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      transition: transform 0.28s cubic-bezier(0.22, 1, 0.36, 1), background-color 0.2s ease, color 0.2s ease;
+    }
+
+    .faq-chevron-box svg {
+      width: 16px;
+      height: 16px;
+      stroke: currentColor;
+      fill: none;
+      stroke-width: 22;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+      transition: transform 0.28s cubic-bezier(0.22, 1, 0.36, 1);
+    }
+
+    .faq-accordion-item.is-open .faq-chevron-box {
+      background: #007BC8;
+      border-color: #007BC8;
+      color: #ffffff;
+    }
+
+    .faq-accordion-item.is-open .faq-chevron-box svg {
+      transform: rotate(180deg);
+    }
+
+    .faq-accordion-panel {
+      display: grid;
+      grid-template-rows: 0fr;
+      opacity: 0;
+      transition: grid-template-rows 0.28s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.22s ease;
+    }
+
+    .faq-accordion-item.is-open .faq-accordion-panel {
+      grid-template-rows: 1fr;
+      opacity: 1;
+    }
+
+    .faq-accordion-inner {
+      overflow: hidden;
+    }
+
+    .faq-answer-body {
+      padding: 0 20px 18px;
+      margin: 0;
+      font-size: 14.5px;
+      line-height: 1.6;
+      color: #334155;
+      border-top: 1px solid rgba(15, 23, 42, 0.08);
+      padding-top: 12px;
+    }
+
+    .faq-toggle-all-btn {
+      margin-top: 16px;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      height: 40px;
+      padding: 0 16px;
+      border-radius: var(--radius-ui);
+      background: rgba(255, 255, 255, 0.66);
+      backdrop-filter: var(--glass-blur);
+      -webkit-backdrop-filter: var(--glass-blur);
+      border: 1px solid rgba(255, 255, 255, 0.88);
+      box-shadow: var(--glass-bevel-shadow);
+      color: #007BC8;
+      font-size: 13px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: transform 0.16s ease, background-color 0.16s ease;
+    }
+
+    .faq-toggle-all-btn:hover {
+      background: rgba(255, 255, 255, 0.88);
+      transform: translateY(-1px);
+    }
+
+    /* Footer Frosted Glass */
+    .footer.closing {
+      background: rgba(255, 255, 255, 0.45);
+      backdrop-filter: var(--glass-blur);
+      -webkit-backdrop-filter: var(--glass-blur);
+      border-top: 1px solid rgba(255, 255, 255, 0.85);
+    }
+
+    .footer.closing>.wrap {
+      display: flex;
+      flex-direction: column;
+      gap: clamp(40px, 5vw, 64px);
+    }
+
+    .footer.closing .closing__cta {
+      display: flex;
+      flex-direction: column;
+      gap: 24px;
+    }
+  </style>
+
+  <script>document.documentElement.classList.add('m-enter'); setTimeout(() => document.documentElement.classList.add('m-enter-done'), 700)</script>
+  <script>document.documentElement.classList.add('mo-js'); setTimeout(() => document.documentElement.classList.add('mo-safe'), 2500)</script>
+  <link rel="modulepreload" href="assets/moments/moments.js">
+  <link rel="modulepreload" href="assets/moments/lib.js">
+  <link rel="modulepreload" href="assets/moments/pinned-chapters/moment.js">
+  <link rel="modulepreload" href="assets/moments/counter-rolls/moment.js">
+</head>
+
+<body>
+  <div class="home-magnifik-backdrop" id="homeMagnifikBackdrop" aria-hidden="true"></div>
+  <header class="nav">
+    <div class="wrap nav__bar">
+      <a class="skip-link" href="#top">Lewati ke konten</a>
+      <a class="nav__logo" href="#top"><img src="/images/rahma-logo.png" alt="Rahma" class="rahma-wordmark"></a>
+      <nav class="nav__links" aria-label="Utama">
+        <div class="nav__item">
+          <a class="nav__link" href="#platform">Platform <svg class="chev" viewBox="0 0 12 12" aria-hidden="true">
+              <path d="M3 4.5l3 3 3-3" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"
+                stroke-linejoin="round" />
+            </svg></a>
+          <div class="nav__menu">
+            <div class="wrap grid">
+              <div class="menu-col span-4">
+                <p class="t-label">Pengukuran KPI</p>
+                <a href="#platform">Skoring Polaritas Otomatis<span>Maximize, Minimize, dan Cap 120%</span></a>
+                <a href="#platform">Gerbang Mitigasi Wajib<span>Blokir simpan jika kolom risiko kosong</span></a>
+              </div>
+              <div class="menu-col span-4">
+                <p class="t-label">Tata Kelola CPMD</p>
+                <a href="#workflow">RBAC 3-Peran Terisolasi<span>CPMD Admin, Division Leader, dan Direksi</span></a>
+                <a href="#workflow">Studio Atribut Warna HEX<span>Label strategis tervalidasi kontras WCAG</span></a>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="nav__item"><a class="nav__link" href="#workflow">Alur Kerja</a></div>
+        <div class="nav__item"><a class="nav__link" href="#atmosphere">Atmosfer</a></div>
+        <div class="nav__item"><a class="nav__link" href="#pricing">Paket Harga</a></div>
+        <div class="nav__item"><a class="nav__link" href="#faq">FAQ</a></div>
+      </nav>
+      <div class="nav__actions">
+        <a class="nav__link" href="/">Masuk Aplikasi</a>
+        <a class="btn btn--primary" href="/">Coba Demo<svg class="m-arrow" viewBox="0 0 12 12" aria-hidden="true">
+            <path class="m-arrow__stem" d="M1 6h8" />
+            <path class="m-arrow__head" d="M4.5 2.5 8 6l-3.5 3.5" />
+          </svg></a>
+      </div>
+      <button class="nav__toggle" type="button" aria-expanded="false" aria-label="Menu"><svg width="18" height="18"
+          viewBox="0 0 18 18" aria-hidden="true">
+          <path d="M2 5h14M2 13h14" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" />
+        </svg></button>
+    </div>
+  </header>
+
+  <main id="top">
+    <!-- HERO: TRIPTYCH -->
+    <section class="hero hero--triptych" data-enter aria-labelledby="hero-h">
+      <div class="wrap">
+        <div class="hero-text grid hero__grid">
+          <div class="span-3">
+            <img src="/images/rahma-logo.png" alt="Rahma" class="hero-brand-logo">
+            <h1 id="hero-h">Kontrol KPI dan mitigasi risiko korporasi</h1>
+            <p class="hero__lead">Skoring otomatis, gerbang mitigasi wajib di bawah 85%, dan RBAC 3-peran. Mulai dari Rp
+              2,5 jt/bulan.</p>
+          </div>
+
+          <div class="ly-collage span-6 start-4" role="img"
+            aria-label="Tampilan kartu skor KPI eksekutif, gerbang mitigasi wajib, dan isolasi peran RBAC pada sistem RAHMA">
+            <div class="ly-collage__set is-on">
+              <div class="ly-piece rk-scorecard" style="left: 3%; top: 4%; width: 52%">
+                <div class="rk-scorecard__top">
+                  <div>
+                    <small>EXECUTIVE SCORECARD &middot; NOV 2026</small>
+                    <div class="rk-scorecard__val">96.4%</div>
+                  </div>
+                  <span class="rk-pill rk-pill--green">ON TRACK</span>
+                </div>
+                <div class="rk-dept-row"><b>OPS &middot; Operasional Tambang</b><span
+                    class="rk-pill rk-pill--green">98.2%</span></div>
+                <div class="rk-dept-row"><b>FIN &middot; Keuangan &amp; Arus Kas</b><span
+                    class="rk-pill rk-pill--green">101.4%</span></div>
+                <div class="rk-dept-row"><b>COM &middot; Kontrak Baru B2B</b><span
+                    class="rk-pill rk-pill--red">78.4%</span></div>
+                <div class="rk-dept-row"><b>HC &middot; Pemenuhan Talenta</b><span
+                    class="rk-pill rk-pill--yellow">91.0%</span></div>
+              </div>
+
+              <div class="ly-piece rk-gate-card" style="left: 58%; top: 6%; width: 39%">
+                <span class="rk-gate-tag">LOGIC GATE &lt; 85%</span>
+                <strong>Mitigasi Wajib Aktif</strong>
+                <span>Problem Identification, Corrective Action, dan Need Support BOD wajib terisi sebelum
+                  simpan.</span>
+              </div>
+
+              <div class="ly-piece rk-rbac-card" style="left: 22%; top: 63%; width: 75%; height: 33%">
+                <strong>Isolasi Sesi RBAC Aktif</strong>
+                <div class="rk-role-line"><span>CPMD Admin</span><code>FULL WRITE + LOCK</code></div>
+                <div class="rk-role-line"><span>Division Leader</span><code>DEPT ISOLATED</code></div>
+                <div class="rk-role-line"><span>Executive BOD</span><code>READ-ONLY PDF</code></div>
+              </div>
+            </div>
+
+            <div class="ly-collage__set" aria-hidden="true">
+              <div class="ly-piece rk-hex-card" style="left: 3%; top: 6%; width: 52%">
+                <small style="color:#64748b;font-weight:600;font-family:var(--font-mono)">ATRIBUT WARNA HEX &middot;
+                  WCAG</small>
+                <strong style="font-size:clamp(13.5px,1.85cqw,16.5px)">Tag Strategis Terstandarisasi</strong>
+                <div class="rk-swatch-row">
+                  <span class="rk-swatch-chip" style="background:#0D9488">ESG &amp; K3</span>
+                  <span class="rk-swatch-chip" style="background:#007BC8">SLA Utama</span>
+                  <span class="rk-swatch-chip" style="background:#F68400">Capex BOD</span>
+                </div>
+              </div>
+
+              <div class="ly-piece rk-scorecard" style="left: 58%; top: 8%; width: 39%">
+                <small style="color:#64748b;font-weight:600;font-family:var(--font-mono)">MESIN AGREGASI YTD</small>
+                <div class="rk-dept-row"><b>Mode SUM</b><span class="rk-pill rk-pill--green">Akumulatif</span></div>
+                <div class="rk-dept-row"><b>Mode AVG</b><span class="rk-pill rk-pill--yellow">Rata-rata</span></div>
+                <div class="rk-dept-row"><b>Cap Skor</b><span class="rk-pill rk-pill--green">Maks 120%</span></div>
+              </div>
+
+              <div class="ly-piece rk-rbac-card" style="left: 22%; top: 63%; width: 75%; height: 33%">
+                <strong>Snapshot &amp; Lock Periode</strong>
+                <div class="rk-role-line"><span>Status Periode</span><code>LOCKED BY CPMD</code></div>
+                <div class="rk-role-line"><span>Backup SQLite</span><code>EXPORT .JSON</code></div>
+              </div>
+            </div>
+          </div>
+
+          <div class="span-3 start-10">
+            <a class="btn btn--primary btn--xl" href="/">Coba Demo<svg class="m-arrow" viewBox="0 0 12 12"
+                aria-hidden="true">
+                <path class="m-arrow__stem" d="M1 6h8" />
+                <path class="m-arrow__head" d="M4.5 2.5 8 6l-3.5 3.5" />
+              </svg></a>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- SECTION 1: PLATFORM CAPABILITIES -->
+    <section class="section" id="platform" aria-labelledby="platform-h">
+      <div class="wrap">
+        <div class="section-head">
+          <h2 id="platform-h">Satu sistem untuk kamus KPI, input realisasi, dan audit direksi</h2>
+          <p>Menggantikan spreadsheet terpisah dengan validasi server-side, skoring polaritas, dan laporan rapat
+            eksekutif siap cetak.</p>
+        </div>
+
+        <div class="grid" style="gap: 24px;">
+          <!-- INTERACTIVE CARD 1: GAUGE EKSEKUTIF & MODE YTD -->
+          <article class="card span-4" id="demoGaugeCard">
+            <div class="rk-demo-box">
+              <div class="rk-demo-top">
+                <div class="rk-seg" role="group" aria-label="Pilih mode perhitungan">
+                  <button type="button" class="rk-seg-btn active" data-demo-mode="MONTHLY">Bulan Ini</button>
+                  <button type="button" class="rk-seg-btn" data-demo-mode="YTD">YTD</button>
+                </div>
+                <div class="rk-seg" role="group" aria-label="Pilih departemen">
+                  <button type="button" class="rk-seg-btn active" data-demo-dept="ALL">Semua</button>
+                  <button type="button" class="rk-seg-btn" data-demo-dept="OPS">OPS</button>
+                  <button type="button" class="rk-seg-btn" data-demo-dept="COM">COM</button>
+                </div>
+              </div>
+
+              <div class="rk-gauge-wrap">
+                <svg class="rk-gauge-svg" viewBox="0 0 210 118" aria-hidden="true">
+                  <path d="M 22 100 A 83 83 0 0 1 188 100" fill="none" stroke="#e2e8f0" stroke-width="14"
+                    stroke-linecap="round" />
+                  <path d="M 22 100 A 83 83 0 0 1 118 18" fill="none" stroke="#fca5a5" stroke-width="14"
+                    stroke-linecap="round" />
+                  <path d="M 118 18 A 83 83 0 0 1 160 36" fill="none" stroke="#fde68a" stroke-width="14" />
+                  <path d="M 160 36 A 83 83 0 0 1 188 100" fill="none" stroke="#86efac" stroke-width="14"
+                    stroke-linecap="round" />
+                  <g class="rk-gauge-needle" id="demoGaugeNeedle">
+                    <line x1="105" y1="100" x2="105" y2="32" stroke="#0f172a" stroke-width="3.5"
+                      stroke-linecap="round" />
+                    <circle cx="105" cy="100" r="6" fill="#0f172a" />
+                  </g>
+                  <text x="105" y="76" text-anchor="middle" font-size="22" font-weight="700" fill="#0f172a"
+                    id="demoGaugeScore">81.5%</text>
+                </svg>
+                <span class="rk-pill rk-pill--red" id="demoGaugePill">Critical &bull; 81.47%</span>
+              </div>
+
+              <div class="rk-traffic-mini">
+                <div class="rk-traffic-cell" style="background:#dcfce7;color:#065f46">
+                  <strong id="demoCountGreen">8</strong><span>On Track</span>
+                </div>
+                <div class="rk-traffic-cell" style="background:#fef3c7;color:#92400e">
+                  <strong id="demoCountYellow">0</strong><span>Warning</span>
+                </div>
+                <div class="rk-traffic-cell" style="background:#fee2e2;color:#991b1b">
+                  <strong id="demoCountRed">4</strong><span>Critical</span>
+                </div>
+              </div>
+            </div>
+            <h3>Gauge Eksekutif &amp; YTD Interaktif</h3>
+            <p>Klik <strong>Bulan Ini / YTD</strong> atau filter divisi untuk melihat bagaimana jarum gauge dan
+              distribusi status bereaksi langsung.</p>
+          </article>
+
+          <!-- INTERACTIVE CARD 2: SIMULATOR GERBANG MITIGASI < 85% -->
+          <article class="card span-4" id="demoGateCard">
+            <div class="rk-demo-box">
+              <div class="rk-demo-top">
+                <div>
+                  <div style="font-size:11px;font-weight:600;color:#64748b">KPI-COM-01 &bull; Target: 12.5 M</div>
+                  <strong style="font-size:14px;color:#0f172a">Actual: <span id="demoActualLabel">8.9</span> M (<span
+                      id="demoAchLabel">71.2%</span>)</strong>
+                </div>
+                <span class="rk-pill rk-pill--red" id="demoGateStatusPill">RED</span>
+              </div>
+
+              <input type="range" class="rk-slider" id="demoActualSlider" min="7.0" max="14.5" step="0.1" value="8.9"
+                aria-label="Simulasi nilai actual KPI">
+
+              <div class="rk-gate-preview is-red" id="demoGateBox">
+                <strong id="demoGateHeading">Gerbang Mitigasi Wajib Aktif (&lt; 85%)</strong>
+                <div id="demoGateDesc">Tombol simpan terkunci hingga akar masalah, tindakan perbaikan, dan dukungan BOD
+                  diisi.</div>
+                <div class="rk-tag-row" id="demoQuickTags">
+                  <button type="button" class="rk-tag-btn selected" style="background:#7C3AED">Capex BOD</button>
+                  <button type="button" class="rk-tag-btn" style="background:#DC2626">Kendala Vendor</button>
+                  <button type="button" class="rk-tag-btn" style="background:#F68400">Man-Power</button>
+                  <button type="button" class="rk-tag-btn" style="background:#0284C7">Jadwal Klien</button>
+                </div>
+              </div>
+            </div>
+            <h3>Simulator Gerbang Mitigasi</h3>
+            <p>Geser nilai <strong>Actual</strong> di atas dan klik Quick-Tag akar masalah untuk menguji aturan
+              penguncian di bawah ambang 85%.</p>
+          </article>
+
+          <!-- INTERACTIVE CARD 3: MATRIKS RBAC & AUTO-BACKUP OFFLINE -->
+          <article class="card span-4" id="demoRbacCard">
+            <div class="rk-demo-box">
+              <div class="rk-demo-top">
+                <div class="rk-seg" role="group" aria-label="Pilih peran RBAC">
+                  <button type="button" class="rk-seg-btn active" data-demo-role="CPMD_ADMIN">CPMD</button>
+                  <button type="button" class="rk-seg-btn" data-demo-role="DIV_LEADER">Leader</button>
+                  <button type="button" class="rk-seg-btn" data-demo-role="EXECUTIVE">BOD</button>
+                </div>
+                <button type="button" class="rk-seg-btn active" id="demoNetToggle"
+                  style="border:1px solid rgba(0, 123, 200,0.25);border-radius:99px">
+                  Online
+                </button>
+              </div>
+
+              <div class="rk-perm-list" id="demoPermList">
+                <div class="rk-perm-item"><span>Kamus KPI &amp; Atribut HEX</span><span
+                    class="rk-perm-badge rk-pill--green">FULL CRUD</span></div>
+                <div class="rk-perm-item"><span>Input Realisasi KPI</span><span
+                    class="rk-perm-badge rk-pill--green">SEMUA DIVISI</span></div>
+                <div class="rk-perm-item"><span>Kunci Periode &amp; Backup</span><span
+                    class="rk-perm-badge rk-pill--green">DIIZINKAN</span></div>
+                <div class="rk-perm-item"><span>Auto-Backup Offline</span><span
+                    class="rk-perm-badge rk-pill--green">SNAPSHOT SIAP</span></div>
+              </div>
+            </div>
+            <h3>Pratinjau RBAC &amp; Auto-Backup</h3>
+            <p>Ubah peran (<strong>CPMD / Leader / BOD</strong>) atau status jaringan untuk melihat isolasi hak akses
+              dan antrean cadangan offline.</p>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <!-- SECTION 2: WORKFLOW (PINNED CHAPTERS) -->
+    <section class="section" id="workflow" style="--h: 2" data-moment="pinned-chapters" aria-labelledby="workflow-h">
+      <div class="wrap mo-pc__grid">
+        <div class="mo-pc__text">
+          <h2 id="workflow-h">Dari penyusunan kamus hingga rapat direksi</h2>
+          <ol class="mo-pc__steps">
+            <li class="mo-pc__step">
+              <h3>1. Susun Kamus KPI &amp; Atribut HEX</h3>
+              <p>CPMD Admin menetapkan departemen, bobot KPI, polaritas, serta label warna HEX yang kontrasnya otomatis
+                tervalidasi.</p>
+              <figure class="mo-pc__visual">
+                <div class="rk-stage-window">
+                  <div class="rk-stage-photo-banner">
+                    <img src="/assets/photos/img/m44931831-1200.webp" alt="Pemandangan Sløverfjorden di Lofoten" />
+                    <span class="rk-stage-photo-pill">Sløverfjorden, Lofoten</span>
+                  </div>
+                  <div class="rk-stage-head"><span>CPMD HUB &middot; KAMUS KPI</span><code>ROLE: CPMD_ADMIN</code></div>
+                  <div class="rk-stage-rows">
+                    <div class="rk-stage-row"><span>KPI-COM-01 &middot; Kontrak Baru
+                        B2B</span><code>MAX &middot; Bobot 45%</code></div>
+                    <div class="rk-stage-row"><span>KPI-OPS-02 &middot; Insiden
+                        Kecelakaan</span><code>MIN &middot; Cap 100%</code></div>
+                    <div class="rk-stage-row"><span>Studio Atribut &middot; Strategic
+                        Priority</span><code>#007BC8 &middot; Kontras AA</code></div>
+                  </div>
+                </div>
+              </figure>
+            </li>
+            <li class="mo-pc__step">
+              <h3>2. Input Realisasi &amp; Mitigasi Wajib</h3>
+              <p>Division Leader mengisi realisasi bulanan di departemennya. Skor di bawah 85% langsung mengunci tombol
+                simpan hingga mitigasi diisi.</p>
+              <figure class="mo-pc__visual">
+                <div class="rk-stage-window">
+                  <div class="rk-stage-photo-banner">
+                    <img src="/assets/photos/img/m113462760-1200.webp" alt="Pemandangan Viðareiði di Faroe Islands" />
+                    <span class="rk-stage-photo-pill">Viðareiði Sunbeams, Faroe</span>
+                  </div>
+                  <div class="rk-stage-head"><span>INPUT SPREADSHEET &middot; OPS</span><code>ROLE: DIV_LEADER</code>
+                  </div>
+                  <div class="rk-stage-rows">
+                    <div class="rk-stage-row"><span>Target: 12.5 M &middot; Actual: 8.9 M</span><code
+                        style="background:#fee2e2;color:#991b1b;padding:4px 10px;border-radius:99px">71.2% &middot; RED</code>
+                    </div>
+                    <div class="rk-stage-row"><span>Quick-Tag: Kendala Vendor / Capex
+                        BOD</span><code>3 KOLOM WAJIB</code></div>
+                    <div class="rk-stage-row"><span>Akses Departemen Lain (FIN / HC)</span><code>TERKUNCI (403)</code>
+                    </div>
+                  </div>
+                </div>
+              </figure>
+            </li>
+            <li class="mo-pc__step">
+              <h3>3. Kunci Periode &amp; Presentasi Direksi</h3>
+              <p>CPMD mengunci periode pelaporan agar historis tetap utuh, lalu Direksi meninjau heatmap YTD dan
+                mencetak PDF satu klik.</p>
+              <figure class="mo-pc__visual">
+                <div class="rk-stage-window">
+                  <div class="rk-stage-photo-banner">
+                    <img src="/assets/photos/img/m164989354-1200.webp" alt="Pemandangan pegunungan salju pesisir timur Islandia" />
+                    <span class="rk-stage-photo-pill">East Coast Peaks, Iceland</span>
+                  </div>
+                  <div class="rk-stage-head"><span>BOARDROOM VIEW &middot; YTD</span><code>ROLE: EXECUTIVE</code></div>
+                  <div class="rk-stage-rows">
+                    <div class="rk-stage-row"><span>Heatmap 12 Bulan &amp; Fokus Merah</span><code>READ-ONLY</code>
+                    </div>
+                    <div class="rk-stage-row"><span>Kunci Periode November 2026</span><code>LOCKED</code></div>
+                    <div class="rk-stage-row"><span>One-Click Executive PDF &amp; JSON</span><code>SIAP CETAK</code>
+                    </div>
+                  </div>
+                </div>
+              </figure>
+            </li>
+          </ol>
+        </div>
+        <div class="mo-pc__visuals frame"></div>
+      </div>
+    </section>
+
+    <!-- SECTION 2B: ATMOSFER RUANG KERJA & GALERI LANSKAP MAGNIFIK -->
+    <section class="section" id="atmosphere" aria-labelledby="atmosphere-h">
+      <div class="wrap">
+        <div class="section-head">
+          <h2 id="atmosphere-h">Atmosfer ruang kerja kaca di atas lanskap Magnifik</h2>
+          <p>Klik salah satu fotografi pemandangan resolusi tinggi di bawah untuk mengubah latar belakang live pada halaman ini, halaman Login, dan halaman Sign Up.</p>
+        </div>
+
+        <div class="magnifik-gallery-grid" role="group" aria-label="Galeri Pemandangan Magnifik">
+          <button type="button" class="magnifik-card magnifik-card--wide active" data-scene-id="lofoten" data-img-2400="/assets/photos/img/m44931831-2400.webp" data-label="Sløverfjorden, Lofoten">
+            <img src="/assets/photos/img/m44931831-1200.webp" alt="Pemandangan air tenang Sløverfjorden memantulkan pegunungan Lofoten" />
+            <div class="magnifik-card-overlay">
+              <span class="magnifik-card-pill">Sløverfjorden, Lofoten</span>
+              <span class="magnifik-card-pill magnifik-card-status">Aktif</span>
+            </div>
+          </button>
+
+          <button type="button" class="magnifik-card magnifik-card--wide" data-scene-id="faroe-sun" data-img-2400="/assets/photos/img/m113462760-2400.webp" data-label="Viðareiði Sunbeams, Faroe">
+            <img src="/assets/photos/img/m113462760-1200.webp" alt="Pemandangan sinar matahari menembus awan di atas tebing Viðareiði Faroe Islands" />
+            <div class="magnifik-card-overlay">
+              <span class="magnifik-card-pill">Viðareiði Sunbeams, Faroe</span>
+              <span class="magnifik-card-pill magnifik-card-status">Terapkan</span>
+            </div>
+          </button>
+
+          <button type="button" class="magnifik-card magnifik-card--third" data-scene-id="iceland-peaks" data-img-2400="/assets/photos/img/m164989354-2400.webp" data-label="East Coast Peaks, Iceland">
+            <img src="/assets/photos/img/m164989354-1200.webp" alt="Pemandangan jajaran gunung bersalju dan pesisir timur Islandia" />
+            <div class="magnifik-card-overlay">
+              <span class="magnifik-card-pill">East Coast Peaks, Iceland</span>
+              <span class="magnifik-card-pill magnifik-card-status">Terapkan</span>
+            </div>
+          </button>
+
+          <button type="button" class="magnifik-card magnifik-card--third" data-scene-id="westfjords" data-img-2400="/assets/photos/img/m111881197-2400.webp" data-label="Westfjords Valley, Iceland">
+            <img src="/assets/photos/img/m111881197-1200.webp" alt="Pemandangan lembah fjord di Westfjords Islandia" />
+            <div class="magnifik-card-overlay">
+              <span class="magnifik-card-pill">Westfjords Valley, Iceland</span>
+              <span class="magnifik-card-pill magnifik-card-status">Terapkan</span>
+            </div>
+          </button>
+
+          <button type="button" class="magnifik-card magnifik-card--third" data-scene-id="funnings" data-img-2400="/assets/photos/img/m21913761-2400.webp" data-label="Funningsfjørður Cliffs, Faroe">
+            <img src="/assets/photos/img/m21913761-1200.webp" alt="Pemandangan tebing bersalju Funningsfjørður di Faroe Islands" />
+            <div class="magnifik-card-overlay">
+              <span class="magnifik-card-pill">Funningsfjørður Cliffs, Faroe</span>
+              <span class="magnifik-card-pill magnifik-card-status">Terapkan</span>
+            </div>
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <!-- SECTION 3: PROOF METRICS (COUNTER ROLLS) -->
+    <section class="section" id="proof" data-moment="counter-rolls" aria-labelledby="proof-h">
+      <div class="wrap">
+        <div class="section-head">
+          <h2 id="proof-h">Dirancang untuk akurasi angka dan ketahanan audit</h2>
+          <p>Seluruh kalkulasi polaritas, gerbang mitigasi, dan kontrol akses dijalankan langsung di mesin server SQLite
+            tanpa ketergantungan eksternal.</p>
+        </div>
+        <div class="proof-grid">
+          <div class="proof-stat">
+            <span class="t-stat" data-count-to="3">3</span>
+            <p>Peran RBAC terisolasi dengan sesi cookie terenkripsi HMAC-SHA256</p>
+          </div>
+          <div class="proof-stat">
+            <span class="t-stat" data-count-to="120" data-suffix="%">120%</span>
+            <p>Batas Cap Skor otomatis untuk menjaga keseimbangan bobot indikator</p>
+          </div>
+          <div class="proof-stat">
+            <span class="t-stat" data-count-to="85" data-suffix="%">85%</span>
+            <p>Ambang batas merah pemicu wajib analisis akar masalah dan eskalasi BOD</p>
+          </div>
+          <div class="proof-stat">
+            <span class="t-stat" data-count-to="10000">10000</span>
+            <p>Simulasi agregasi YTD teruji tuntas dalam 12,6 ms pada engine mandiri</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- SECTION 4: COMMERCIAL PRICING -->
+    <section class="section pricing-band" id="pricing" aria-labelledby="pricing-h">
+      <div class="wrap">
+        <div class="section-head">
+          <h2 id="pricing-h">Paket lisensi komersial untuk skala tim hingga korporasi</h2>
+          <p>Tersedia sebagai layanan cloud terkelola maupun instalasi on-premise mandiri di jaringan internal
+            perusahaan.</p>
+        </div>
+
+        <div class="pricing-grid">
+          <article class="tier-card">
+            <div>
+              <p class="t-label">Starter Divisi</p>
+              <div class="tier-price">Rp 2,5 jt<span style="font-size:15px;font-weight:400;color:#94a3b8"> /
+                  bulan</span></div>
+              <ul class="tier-list">
+                <li>Hingga 5 departemen &amp; 50 KPI aktif</li>
+                <li>Skoring Polaritas &amp; Mode YTD</li>
+                <li>Gerbang Logika Mitigasi wajib</li>
+                <li>Ekspor Executive PDF satu klik</li>
+              </ul>
+            </div>
+            <a class="btn btn--secondary" href="/">Mulai Uji Coba<svg class="m-arrow" viewBox="0 0 12 12"
+                aria-hidden="true">
+                <path class="m-arrow__stem" d="M1 6h8" />
+                <path class="m-arrow__head" d="M4.5 2.5 8 6l-3.5 3.5" />
+              </svg></a>
+          </article>
+
+          <article class="tier-card tier-card--featured">
+            <div>
+              <p class="t-label" style="color:#38BDF8">Enterprise CPMD &middot; Populer</p>
+              <div class="tier-price">Rp 6,5 jt<span style="font-size:15px;font-weight:400;color:#94a3b8"> /
+                  bulan</span></div>
+              <ul class="tier-list">
+                <li>Departemen &amp; indikator KPI tak terbatas</li>
+                <li>RBAC 3-peran + isolasi departemen</li>
+                <li>Studio Atribut Warna HEX (WCAG)</li>
+                <li>Kunci periode &amp; backup snapshot JSON</li>
+              </ul>
+            </div>
+            <a class="btn btn--primary" href="/">Coba Demo<svg class="m-arrow" viewBox="0 0 12 12" aria-hidden="true">
+                <path class="m-arrow__stem" d="M1 6h8" />
+                <path class="m-arrow__head" d="M4.5 2.5 8 6l-3.5 3.5" />
+              </svg></a>
+          </article>
+
+          <article class="tier-card">
+            <div>
+              <p class="t-label">Dedicated On-Premise</p>
+              <div class="tier-price">Penawaran Khusus</div>
+              <ul class="tier-list">
+                <li>Instalasi server internal / air-gapped</li>
+                <li>Integrasi SSO korporasi &amp; audit trail</li>
+                <li>Kustomisasi template laporan direksi</li>
+                <li>Pendampingan migrasi kamus KPI</li>
+              </ul>
+            </div>
+            <a class="btn btn--secondary" href="#contact">Hubungi Tim<svg class="m-arrow" viewBox="0 0 12 12"
+                aria-hidden="true">
+                <path class="m-arrow__stem" d="M1 6h8" />
+                <path class="m-arrow__head" d="M4.5 2.5 8 6l-3.5 3.5" />
+              </svg></a>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <!-- SECTION 5: FAQ (RETRACTABLE ACCORDION) -->
+    <section class="section" id="faq" aria-labelledby="faq-h">
+      <div class="wrap grid grid--top">
+        <div class="span-5">
+          <div class="section-head">
+            <h2 id="faq-h">Pertanyaan umum implementasi</h2>
+            <p>Ringkasan teknis mengenai keamanan akses, arsitektur database, dan proses onboarding tim CPMD. Klik pertanyaan untuk membuka atau menyembunyikan jawaban.</p>
+            <button type="button" class="faq-toggle-all-btn" id="btnToggleAllFaq">
+              Buka Semua Jawaban
+            </button>
+          </div>
+        </div>
+        <div class="span-7 start-6">
+          <div class="faq-stack" id="faqAccordionList">
+            <div class="faq-accordion-item is-open">
+              <button type="button" class="faq-accordion-trigger" aria-expanded="true">
+                <span class="faq-q-title">Apakah RAHMA dapat berjalan tanpa koneksi internet (on-premise)?</span>
+                <span class="faq-q-right">
+                  <span class="faq-pill-tag">On-Premise</span>
+                  <span class="faq-chevron-box" aria-hidden="true">
+                    <svg viewBox="0 0 256 256"><polyline points="208 96 128 176 48 96"/></svg>
+                  </span>
+                </span>
+              </button>
+              <div class="faq-accordion-panel">
+                <div class="faq-accordion-inner">
+                  <p class="faq-answer-body">Ya. Engine Node.js dan SQLite berjalan mandiri di server lokal perusahaan tanpa ketergantungan cloud pihak ketiga.</p>
+                </div>
+              </div>
+            </div>
+
+            <div class="faq-accordion-item">
+              <button type="button" class="faq-accordion-trigger" aria-expanded="false">
+                <span class="faq-q-title">Bagaimana keamanan antar departemen dijaga?</span>
+                <span class="faq-q-right">
+                  <span class="faq-pill-tag">RBAC Strict</span>
+                  <span class="faq-chevron-box" aria-hidden="true">
+                    <svg viewBox="0 0 256 256"><polyline points="208 96 128 176 48 96"/></svg>
+                  </span>
+                </span>
+              </button>
+              <div class="faq-accordion-panel">
+                <div class="faq-accordion-inner">
+                  <p class="faq-answer-body">Server memverifikasi cookie sesi HttpOnly dan menolak akses tulis lintas departemen dengan status HTTP 403.</p>
+                </div>
+              </div>
+            </div>
+
+            <div class="faq-accordion-item">
+              <button type="button" class="faq-accordion-trigger" aria-expanded="false">
+                <span class="faq-q-title">Bisakah bobot dan nama departemen diubah oleh tim CPMD?</span>
+                <span class="faq-q-right">
+                  <span class="faq-pill-tag">Dinamis</span>
+                  <span class="faq-chevron-box" aria-hidden="true">
+                    <svg viewBox="0 0 256 256"><polyline points="208 96 128 176 48 96"/></svg>
+                  </span>
+                </span>
+              </button>
+              <div class="faq-accordion-panel">
+                <div class="faq-accordion-inner">
+                  <p class="faq-answer-body">CPMD Admin dapat menambah, mengubah nama, mengganti pimpinan, serta merekalkulasi skor historis dari antarmuka hub.</p>
+                </div>
+              </div>
+            </div>
+
+            <div class="faq-accordion-item">
+              <button type="button" class="faq-accordion-trigger" aria-expanded="false">
+                <span class="faq-q-title">Apakah tersedia akun demo untuk langsung mencoba seluruh peran?</span>
+                <span class="faq-q-right">
+                  <span class="faq-pill-tag">Siap Uji</span>
+                  <span class="faq-chevron-box" aria-hidden="true">
+                    <svg viewBox="0 0 256 256"><polyline points="208 96 128 176 48 96"/></svg>
+                  </span>
+                </span>
+              </button>
+              <div class="faq-accordion-panel">
+                <div class="faq-accordion-inner">
+                  <p class="faq-answer-body">Tersedia akun demo CPMD Admin, Division Leader OPS, dan Executive BOD di halaman login aplikasi.</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="footer closing" id="contact" aria-labelledby="close-h">
+    <div class="wrap">
+      <div class="closing__cta close--type">
+        <div class="section-head">
+          <h2 id="close-h">Mulai tata kelola KPI yang terukur</h2>
+          <p>Masuk ke aplikasi demo untuk menguji login RBAC, input realisasi, dan dashboard eksekutif.</p>
+        </div>
+        <a class="btn btn--primary btn--xl btn--wide" href="/">Coba Demo<svg class="m-arrow" viewBox="0 0 12 12"
+            aria-hidden="true">
+            <path class="m-arrow__stem" d="M1 6h8" />
+            <path class="m-arrow__head" d="M4.5 2.5 8 6l-3.5 3.5" />
+          </svg></a>
+      </div>
+
+      <div class="closing__links">
+        <div class="grid">
+          <div class="span-4 stack-4">
+            <div style="display:flex;align-items:center;gap:14px;flex-wrap:wrap;">
+              <a class="nav__logo" href="#top"><img src="/images/rahma-logo.png" alt="Rahma" class="rahma-wordmark"></a>
+              <span style="width:1px;height:28px;background:rgba(15,23,42,0.16);display:inline-block;" aria-hidden="true"></span>
+              <img src="/images/gsi-logo.png" alt="PT Global Service Indonesia" style="height:36px;width:auto;object-fit:contain;">
+            </div>
+            <p class="footer__lede">Platform tata kelola KPI korporasi, mitigasi risiko wajib, dan pelaporan direksi
+              mandiri.</p>
+          </div>
+          <div class="span-2 footer__col">
+            <h3>Platform</h3>
+            <ul>
+              <li><a href="#platform">Mesin Polaritas</a></li>
+              <li><a href="#platform">Gerbang Mitigasi</a></li>
+            </ul>
+          </div>
+          <div class="span-2 footer__col">
+            <h3>Alur Kerja</h3>
+            <ul>
+              <li><a href="#workflow">Kamus CPMD</a></li>
+              <li><a href="#workflow">Boardroom PDF</a></li>
+            </ul>
+          </div>
+          <div class="span-2 footer__col">
+            <h3>Komersial</h3>
+            <ul>
+              <li><a href="#pricing">Paket Harga</a></li>
+              <li><a href="#faq">FAQ</a></li>
+            </ul>
+          </div>
+          <div class="span-2 footer__col">
+            <h3>Aplikasi</h3>
+            <ul>
+              <li><a href="/">Masuk Login</a></li>
+              <li><a href="mailto:sales@rahma-kpi.example">sales@rahma-kpi.example</a></li>
+            </ul>
+          </div>
+        </div>
+        <div class="footer__legal" style="flex-wrap:wrap;gap:8px 16px;">
+          <span>&copy; 2026 RAHMA KPI Governance &middot; PT Global Service Indonesia</span>
+          <span style="font-size:12px;color:#64748b;">Fotografi lanskap via Wikimedia Commons: Simo Räsänen, Sanshiro Kubota, Eric Kilby, Barry Marsh, Vincent van Zeijst (CC BY-SA).</span>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  <script type="module" src="assets/system.js"></script>
+  <script type="module" src="assets/motion/motion.js"></script>
+  <script type="module" src="assets/layout/layout.js"></script>
+  <script type="module" src="assets/diagrams/mount.js"></script>
+  <script>
+      (() => {
+        // 1. Interactive Gauge & YTD Simulator
+        const GAUGE_DATA = {
+          MONTHLY: {
+            ALL: { score: 81.5, g: 8, y: 0, r: 4, status: 'RED', pill: 'Critical • 81.47%' },
+            OPS: { score: 95.0, g: 2, y: 0, r: 1, status: 'YELLOW', pill: 'Warning • 94.97%' },
+            COM: { score: 87.7, g: 1, y: 0, r: 1, status: 'YELLOW', pill: 'Warning • 87.69%' }
+          },
+          YTD: {
+            ALL: { score: 97.4, g: 10, y: 2, r: 0, status: 'GREEN', pill: 'On Track • 97.39%' },
+            OPS: { score: 97.5, g: 3, y: 0, r: 0, status: 'GREEN', pill: 'On Track • 97.45%' },
+            COM: { score: 95.5, g: 2, y: 0, r: 0, status: 'GREEN', pill: 'On Track • 95.53%' }
+          }
+        };
+        let demoMode = 'MONTHLY';
+        let demoDept = 'ALL';
+
+        function renderDemoGauge() {
+          const d = GAUGE_DATA[demoMode][demoDept];
+          const deg = -90 + (Math.min(120, Math.max(0, d.score)) / 120) * 180;
+          const needle = document.getElementById('demoGaugeNeedle');
+          if (needle) needle.style.transform = `rotate(${deg}deg)`;
+          document.getElementById('demoGaugeScore').textContent = `${d.score.toFixed(1)}%`;
+          const pill = document.getElementById('demoGaugePill');
+          pill.textContent = d.pill;
+          pill.className = `rk-pill rk-pill--${d.status === 'GREEN' ? 'green' : d.status === 'YELLOW' ? 'yellow' : 'red'}`;
+          document.getElementById('demoCountGreen').textContent = d.g;
+          document.getElementById('demoCountYellow').textContent = d.y;
+          document.getElementById('demoCountRed').textContent = d.r;
+        }
+
+        document.querySelectorAll('[data-demo-mode]').forEach((btn) => {
+          btn.addEventListener('click', () => {
+            document.querySelectorAll('[data-demo-mode]').forEach((b) => b.classList.remove('active'));
+            btn.classList.add('active');
+            demoMode = btn.dataset.demoMode;
+            renderDemoGauge();
+          });
+        });
+
+        document.querySelectorAll('[data-demo-dept]').forEach((btn) => {
+          btn.addEventListener('click', () => {
+            document.querySelectorAll('[data-demo-dept]').forEach((b) => b.classList.remove('active'));
+            btn.classList.add('active');
+            demoDept = btn.dataset.demoDept;
+            renderDemoGauge();
+          });
+        });
+        renderDemoGauge();
+
+        // 2. Interactive Logic Gate < 85% Simulator
+        const slider = document.getElementById('demoActualSlider');
+        function renderDemoGate() {
+          const actual = Number(slider.value);
+          const ach = Math.min(120, (actual / 12.5) * 100);
+          document.getElementById('demoActualLabel').textContent = actual.toFixed(1);
+          document.getElementById('demoAchLabel').textContent = `${ach.toFixed(1)}%`;
+
+          const pill = document.getElementById('demoGateStatusPill');
+          const box = document.getElementById('demoGateBox');
+          const head = document.getElementById('demoGateHeading');
+          const desc = document.getElementById('demoGateDesc');
+          const tags = document.getElementById('demoQuickTags');
+
+          if (ach < 85) {
+            pill.textContent = 'RED';
+            pill.className = 'rk-pill rk-pill--red';
+            box.className = 'rk-gate-preview is-red';
+            head.textContent = 'Gerbang Mitigasi Wajib Aktif (< 85%)';
+            desc.textContent = 'Tombol simpan terkunci hingga akar masalah, tindakan perbaikan, dan dukungan BOD diisi.';
+            tags.style.display = 'flex';
+          } else if (ach < 100) {
+            pill.textContent = 'YELLOW';
+            pill.className = 'rk-pill rk-pill--yellow';
+            box.className = 'rk-gate-preview is-ok';
+            head.textContent = 'Di Atas Ambang Merah (85%–99.9%)';
+            desc.textContent = 'Data dapat langsung disimpan. Catatan mitigasi bersifat opsional sebagai pemantauan preventif.';
+            tags.style.display = 'none';
+          } else {
+            pill.textContent = 'GREEN';
+            pill.className = 'rk-pill rk-pill--green';
+            box.className = 'rk-gate-preview is-ok';
+            head.textContent = 'Target Tercapai (>= 100%)';
+            desc.textContent = 'Skor berbobot penuh dihitung otomatis hingga Cap maksimal 120% tanpa blokir mitigasi.';
+            tags.style.display = 'none';
+          }
+        }
+        if (slider) {
+          slider.addEventListener('input', renderDemoGate);
+          renderDemoGate();
+        }
+        document.querySelectorAll('#demoQuickTags .rk-tag-btn').forEach((btn) => {
+          btn.addEventListener('click', () => btn.classList.toggle('selected'));
+        });
+
+        // 3. Interactive RBAC & Offline Auto-Backup Matrix
+        let demoRole = 'CPMD_ADMIN';
+        let demoOnline = true;
+        function renderDemoRbac() {
+          const list = document.getElementById('demoPermList');
+          const netBtn = document.getElementById('demoNetToggle');
+          netBtn.textContent = demoOnline ? 'Online' : 'Offline';
+          netBtn.style.background = demoOnline ? '#ffffff' : '#fef3c7';
+          netBtn.style.color = demoOnline ? '#007BC8' : '#92400e';
+
+          const rows = [
+            {
+              label: 'Kamus KPI & Atribut HEX',
+              val: demoRole === 'CPMD_ADMIN' ? ['FULL CRUD', 'green'] : ['TERSEMBUNYI', 'red']
+            },
+            {
+              label: 'Input Realisasi KPI',
+              val:
+                demoRole === 'CPMD_ADMIN'
+                  ? ['SEMUA DIVISI', 'green']
+                  : demoRole === 'DIV_LEADER'
+                    ? ['DEPT SENDIRI', 'yellow']
+                    : ['READ-ONLY', 'red']
+            },
+            {
+              label: 'Kunci Periode & Backup',
+              val: demoRole === 'CPMD_ADMIN' ? ['DIIZINKAN', 'green'] : ['403 FORBIDDEN', 'red']
+            },
+            {
+              label: 'Auto-Backup Offline',
+              val: demoOnline ? ['SNAPSHOT SIAP', 'green'] : ['ANTREAN LOKAL', 'yellow']
+            }
+          ];
+          list.innerHTML = rows
+            .map(
+              (r) =>
+                `<div class="rk-perm-item"><span>${r.label}</span><span class="rk-perm-badge rk-pill--${r.val[1]}">${r.val[0]}</span></div>`
+            )
+            .join('');
+        }
+        document.querySelectorAll('[data-demo-role]').forEach((btn) => {
+          btn.addEventListener('click', () => {
+            document.querySelectorAll('[data-demo-role]').forEach((b) => b.classList.remove('active'));
+            btn.classList.add('active');
+            demoRole = btn.dataset.demoRole;
+            renderDemoRbac();
+          });
+        });
+        document.getElementById('demoNetToggle').addEventListener('click', () => {
+          demoOnline = !demoOnline;
+          renderDemoRbac();
+        });
+        renderDemoRbac();
+
+        // 4. Scroll-triggered fade-in for Navbar Rahma logo (hidden in Hero, visible from #platform onward)
+        const navHeader = document.querySelector('header.nav');
+        const platformSection = document.getElementById('platform');
+        function updateNavbarLogoVisibility() {
+          if (!navHeader || !platformSection) return;
+          const rect = platformSection.getBoundingClientRect();
+          const showLogo = rect.top <= 140;
+          navHeader.classList.toggle('is-logo-visible', showLogo);
+        }
+        window.addEventListener('scroll', updateNavbarLogoVisibility, { passive: true });
+        window.addEventListener('resize', updateNavbarLogoVisibility, { passive: true });
+        updateNavbarLogoVisibility();
+
+        // 5. Interactive Magnifik Landscape Switcher (Synced with Login & Sign Up)
+        const homeCards = document.querySelectorAll('#atmosphere .magnifik-card');
+        function applyHomeMagnifikScene(cardBtn) {
+          if (!cardBtn) return;
+          const img2400 = cardBtn.getAttribute('data-img-2400');
+          const sceneId = cardBtn.getAttribute('data-scene-id');
+          const label = cardBtn.getAttribute('data-label');
+          if (!img2400) return;
+          document.documentElement.style.setProperty('--home-magnifik-bg', `url('${img2400}')`);
+          homeCards.forEach((c) => {
+            const isActive = c === cardBtn;
+            c.classList.toggle('active', isActive);
+            const st = c.querySelector('.magnifik-card-status');
+            if (st) st.textContent = isActive ? 'Aktif' : 'Terapkan';
+          });
+          try {
+            localStorage.setItem('rahma_magnifik_scene', sceneId);
+            localStorage.setItem('rahma_magnifik_url', img2400);
+            localStorage.setItem('rahma_magnifik_label', label);
+          } catch (_e) {}
+        }
+
+        homeCards.forEach((card) => {
+          card.addEventListener('click', () => applyHomeMagnifikScene(card));
+        });
+
+        const savedSceneId = localStorage.getItem('rahma_magnifik_scene');
+        const savedCard = savedSceneId
+          ? document.querySelector(`#atmosphere .magnifik-card[data-scene-id="${savedSceneId}"]`)
+          : null;
+        applyHomeMagnifikScene(savedCard || homeCards[0]);
+
+        // 6. Retractable FAQ Accordion & Toggle All
+        const faqItems = Array.from(document.querySelectorAll('#faqAccordionList .faq-accordion-item'));
+        const toggleAllFaqBtn = document.getElementById('btnToggleAllFaq');
+
+        function syncToggleAllLabel() {
+          if (!toggleAllFaqBtn) return;
+          const allOpen = faqItems.every((item) => item.classList.contains('is-open'));
+          toggleAllFaqBtn.textContent = allOpen ? 'Tutup Semua Jawaban' : 'Buka Semua Jawaban';
+        }
+
+        faqItems.forEach((item) => {
+          const trigger = item.querySelector('.faq-accordion-trigger');
+          if (!trigger) return;
+          trigger.addEventListener('click', () => {
+            const isOpen = item.classList.toggle('is-open');
+            trigger.setAttribute('aria-expanded', String(isOpen));
+            syncToggleAllLabel();
+          });
+        });
+
+        if (toggleAllFaqBtn) {
+          toggleAllFaqBtn.addEventListener('click', () => {
+            const allOpen = faqItems.every((item) => item.classList.contains('is-open'));
+            const nextState = !allOpen;
+            faqItems.forEach((item) => {
+              item.classList.toggle('is-open', nextState);
+              const trigger = item.querySelector('.faq-accordion-trigger');
+              if (trigger) trigger.setAttribute('aria-expanded', String(nextState));
+            });
+            syncToggleAllLabel();
+          });
+        }
+        syncToggleAllLabel();
+      })();
+  </script>
+</body>
+
+</html>
