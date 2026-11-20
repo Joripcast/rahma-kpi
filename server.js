@@ -1063,9 +1063,11 @@ const server = http.createServer(async (req, res) => {
     // =========================================================================
     // STATIC FILES (PUBLIC FRONTEND)
     // =========================================================================
-    let filePath = pathname === '/' ? '/index.html' : pathname;
-    if (pathname === '/home' || pathname === '/promo') {
+    let filePath = pathname;
+    if (pathname === '/' || pathname === '/home' || pathname === '/promo') {
       filePath = '/home.html';
+    } else if (pathname === '/app' || pathname === '/dashboard') {
+      filePath = '/index.html';
     } else if (pathname === '/login') {
       filePath = '/login.html';
     } else if (pathname === '/signup' || pathname === '/register') {

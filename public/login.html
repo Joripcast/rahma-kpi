@@ -496,7 +496,7 @@
               <circle cx="108" cy="100" r="60" />
               <path d="M22.2,200a112,112,0,0,1,171.6,0" />
             </svg> Daftar Akun Baru (Sign Up)</a>
-          <a href="/home.html" class="login-home-link" style="color:var(--text-caption);font-weight:600;"><svg
+          <a href="/" class="login-home-link" style="color:var(--text-caption);font-weight:600;"><svg
               class="ph-icon ph-icon-sm" viewBox="0 0 256 256" aria-hidden="true">
               <line x1="40" y1="128" x2="216" y2="128" />
               <polyline points="144 56 216 128 144 200" />
@@ -600,7 +600,7 @@
         if (meRes.ok) {
           const meData = await meRes.json();
           if (meData && meData.authenticated && meData.user) {
-            window.location.replace('/');
+            window.location.replace('/app');
             return;
           }
         }
@@ -765,7 +765,7 @@
             showLoginError(data.error || 'Email atau kata sandi salah.');
             return;
           }
-          window.location.replace('/');
+          window.location.replace('/app');
         } catch (_err) {
           showLoginError('Gagal menghubungi server autentikasi.');
         } finally {

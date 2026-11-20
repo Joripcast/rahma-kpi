@@ -432,7 +432,7 @@
 
         <div class="auth-links-footer">
           <a href="/login.html" class="login-home-link"><svg class="ph-icon ph-icon-sm" viewBox="0 0 256 256" aria-hidden="true"><polyline points="94 170 136 128 94 86"/><line x1="24" y1="128" x2="136" y2="128"/><path d="M136,40h56a8,8,0,0,1,8,8V208a8,8,0,0,1-8,8H136"/></svg> Sudah punya akun? Masuk ke Portal KPI</a>
-          <a href="/home.html" class="login-home-link" style="color:var(--text-caption);font-weight:600;"><svg class="ph-icon ph-icon-sm" viewBox="0 0 256 256" aria-hidden="true"><line x1="40" y1="128" x2="216" y2="128"/><polyline points="144 56 216 128 144 200"/></svg> Kembali ke Homepage Produk</a>
+          <a href="/" class="login-home-link" style="color:var(--text-caption);font-weight:600;"><svg class="ph-icon ph-icon-sm" viewBox="0 0 256 256" aria-hidden="true"><line x1="40" y1="128" x2="216" y2="128"/><polyline points="144 56 216 128 144 200"/></svg> Kembali ke Homepage Produk</a>
         </div>
       </section>
 
@@ -516,7 +516,7 @@
         if (meRes.ok) {
           const meData = await meRes.json();
           if (meData && meData.authenticated && meData.user) {
-            window.location.replace('/');
+            window.location.replace('/app');
             return;
           }
         }
@@ -732,7 +732,7 @@
             showSignupError(data.error || 'Gagal membuat akun.');
             return;
           }
-          window.location.replace('/');
+          window.location.replace('/app');
         } catch (_err) {
           showSignupError('Gagal menghubungi server pendaftaran.');
         } finally {
