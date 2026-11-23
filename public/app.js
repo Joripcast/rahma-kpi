@@ -1852,6 +1852,10 @@ function applyThemeMode(theme) {
     prefThemeSelect.value = isDark ? 'dark' : 'light';
   }
 
+  document.querySelectorAll('[data-theme-choice]').forEach((btn) => {
+    btn.classList.toggle('active', btn.dataset.themeChoice === (isDark ? 'dark' : 'light'));
+  });
+
   refreshGlassDensityForTheme();
 }
 
@@ -1884,6 +1888,17 @@ function initThemeController() {
       );
     });
   }
+
+  document.querySelectorAll('[data-theme-choice]').forEach((btn) => {
+    btn.addEventListener('click', () => {
+      applyThemeMode(btn.dataset.themeChoice);
+      showToast(
+        btn.dataset.themeChoice === 'dark'
+          ? 'Mode Malam (Dark Mode) diaktifkan untuk kenyamanan mata.'
+          : 'Mode Terang (Light Mode) diaktifkan.'
+      );
+    });
+  });
 }
 
 // ============================================================================
