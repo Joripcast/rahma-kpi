@@ -4,13 +4,17 @@
   "description": "RAHMA - Standalone SaaS KPI Monitoring & Executive Reporting System for PT Global Service Indonesia (GSI)",
   "main": "server.js",
   "scripts": {
-    "start": "node --no-warnings server.js",
-    "dev": "node --no-warnings server.js",
-    "test": "node --no-warnings tests/engine.test.js"
+    "start": "node server.js",
+    "dev": "node server.js",
+    "test": "node tests/engine.test.js",
+    "migrate:pg": "node --no-warnings scripts/migrate-sqlite-to-pg.js"
   },
   "engines": {
     "node": ">=22.5.0"
   },
   "author": "PT Global Service Indonesia (CPMD)",
-  "license": "PROPRIETARY"
+  "license": "PROPRIETARY",
+  "dependencies": {
+    "pg": "^8.23.1"
+  }
 }

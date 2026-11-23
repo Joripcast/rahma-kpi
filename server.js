@@ -1,5 +1,5 @@
 /**
- * RAHMA Standalone SaaS Server (Zero External Framework Dependencies)
+ * RAHMA Standalone SaaS Server (PostgreSQL Relational Backend)
  * PT Global Service Indonesia (GSI)
  */
 
@@ -11,6 +11,7 @@ const { URL } = require('node:url');
 
 const {
   db,
+  initDatabase,
   getAllAttributes,
   getEnrichedKpis,
   getDashboardSummary,
@@ -63,7 +64,7 @@ function createSessionToken(user) {
   return `${payload}.${sig}`;
 }
 
-function getAuthenticatedUser(req) {
+async function getAuthenticatedUser(req) {
   const cookies = parseCookies(req);
   const token = cookies[SESSION_COOKIE];
   if (!token || !token.includes('.')) return null;
@@ -78,15 +79,14 @@ function getAuthenticatedUser(req) {
   try {
     const parsed = JSON.parse(Buffer.from(payloadB64, 'base64url').toString('utf8'));
     if (!parsed.id || Date.now() > Number(parsed.exp)) return null;
-    const dbUser = db
-      .prepare(
-        `SELECT u.id, u.department_id, u.name, u.email, u.role, u.title,
-                d.code as department_code, d.name as department_name
-         FROM users u
-         LEFT JOIN departments d ON d.id = u.department_id
-         WHERE u.id = ?`
-      )
-      .get(parsed.id);
+    const dbUser = await db.get(
+      `SELECT u.id, u.department_id, u.name, u.email, u.role, u.title,
+              d.code as department_code, d.name as department_name
+       FROM users u
+       LEFT JOIN departments d ON d.id = u.department_id
+       WHERE u.id = ?`,
+      parsed.id
+    );
     return dbUser || null;
   } catch {
     return null;
@@ -132,7 +132,7 @@ function parseJsonBody(req) {
       if (!raw) return resolve({});
       try {
         resolve(JSON.parse(raw));
-      } catch (err) {
+      } catch (_err) {
         reject(new Error('Invalid JSON payload'));
       }
     });
@@ -142,6 +142,8 @@ function parseJsonBody(req) {
 
 const server = http.createServer(async (req, res) => {
   try {
+    await initDatabase();
+
     const parsedUrl = new URL(req.url, `http://${req.headers.host || 'localhost'}`);
     const pathname = parsedUrl.pathname;
     const method = req.method.toUpperCase();
@@ -151,7 +153,7 @@ const server = http.createServer(async (req, res) => {
     // =========================================================================
     if (pathname === '/api/auth/login' && method === 'POST') {
       const body = await parseJsonBody(req);
-      const user = authenticateUser(body.email, body.password);
+      const user = await authenticateUser(body.email, body.password);
       if (!user) {
         return sendJson(res, 401, {
           error: 'Email atau kata sandi tidak valid. Silakan periksa kembali kredensial Anda.'
@@ -182,7 +184,7 @@ const server = http.createServer(async (req, res) => {
     }
 
     if (pathname === '/api/auth/me' && method === 'GET') {
-      const currentUser = getAuthenticatedUser(req);
+      const currentUser = await getAuthenticatedUser(req);
       if (!currentUser) {
         return sendJson(res, 200, { authenticated: false, user: null });
       }
@@ -190,9 +192,9 @@ const server = http.createServer(async (req, res) => {
     }
 
     if (pathname === '/api/auth/departments' && method === 'GET') {
-      const departments = db
-        .prepare(`SELECT id, code, name FROM departments WHERE is_active = 1 ORDER BY code ASC`)
-        .all();
+      const departments = await db.all(
+        `SELECT id, code, name FROM departments WHERE is_active = 1 ORDER BY code ASC`
+      );
       return sendJson(res, 200, { departments });
     }
 
@@ -215,26 +217,27 @@ const server = http.createServer(async (req, res) => {
         return sendJson(res, 400, { error: 'Kata sandi minimal 6 karakter.' });
       }
       if (role === 'DIV_LEADER') {
-        const dept = db
-          .prepare(`SELECT id FROM departments WHERE id = ? AND is_active = 1`)
-          .get(departmentId);
+        const dept = await db.get(
+          `SELECT id FROM departments WHERE id = ? AND is_active = 1`,
+          departmentId
+        );
         if (!dept) {
           return sendJson(res, 400, { error: 'Silakan pilih departemen yang valid untuk Division Leader.' });
         }
       }
 
-      const existing = db
-        .prepare(`SELECT id FROM users WHERE LOWER(email) = LOWER(?)`)
-        .get(email);
+      const existing = await db.get(
+        `SELECT id FROM users WHERE LOWER(email) = LOWER(?)`,
+        email
+      );
       if (existing) {
         return sendJson(res, 409, { error: `Email "${email}" sudah terdaftar. Silakan masuk.` });
       }
 
       const userId = `user-${Date.now()}`;
-      db.prepare(
+      await db.run(
         `INSERT INTO users (id, department_id, name, email, role, title, password_hash)
-         VALUES (?, ?, ?, ?, ?, ?, ?)`
-      ).run(
+         VALUES (?, ?, ?, ?, ?, ?, ?)`,
         userId,
         departmentId,
         name,
@@ -244,15 +247,14 @@ const server = http.createServer(async (req, res) => {
         hashPassword(password)
       );
 
-      const newUser = db
-        .prepare(
-          `SELECT u.id, u.department_id, u.name, u.email, u.role, u.title,
-                  d.code as department_code, d.name as department_name
-           FROM users u
-           LEFT JOIN departments d ON d.id = u.department_id
-           WHERE u.id = ?`
-        )
-        .get(userId);
+      const newUser = await db.get(
+        `SELECT u.id, u.department_id, u.name, u.email, u.role, u.title,
+                d.code as department_code, d.name as department_name
+         FROM users u
+         LEFT JOIN departments d ON d.id = u.department_id
+         WHERE u.id = ?`,
+        userId
+      );
       const token = createSessionToken(newUser);
 
       return sendJson(
@@ -272,7 +274,7 @@ const server = http.createServer(async (req, res) => {
     // =========================================================================
     let authUser = null;
     if (pathname.startsWith('/api/')) {
-      authUser = getAuthenticatedUser(req);
+      authUser = await getAuthenticatedUser(req);
       if (!authUser) {
         return sendJson(res, 401, {
           error: 'Akses ditolak: Anda harus login terlebih dahulu.'
@@ -304,12 +306,13 @@ const server = http.createServer(async (req, res) => {
       if (nextName.length < 2) {
         return sendJson(res, 400, { error: 'Nama lengkap minimal 2 karakter.' });
       }
-      db.prepare(`UPDATE users SET name = ?, title = ? WHERE id = ?`).run(
+      await db.run(
+        `UPDATE users SET name = ?, title = ? WHERE id = ?`,
         nextName,
         nextTitle || authUser.title || '',
         authUser.id
       );
-      const updatedUser = getAuthenticatedUser(req);
+      const updatedUser = await getAuthenticatedUser(req);
       return sendJson(res, 200, {
         message: 'Profil akun berhasil diperbarui.',
         user: updatedUser
@@ -329,9 +332,11 @@ const server = http.createServer(async (req, res) => {
       }
 
       if (purpose === 'email') {
-        const conflict = db
-          .prepare(`SELECT id FROM users WHERE LOWER(email) = LOWER(?) AND id != ?`)
-          .get(targetEmail, authUser.id);
+        const conflict = await db.get(
+          `SELECT id FROM users WHERE LOWER(email) = LOWER(?) AND id != ?`,
+          targetEmail,
+          authUser.id
+        );
         if (conflict) {
           return sendJson(res, 409, {
             error: `Email "${targetEmail}" sudah digunakan oleh akun lain.`
@@ -365,7 +370,7 @@ const server = http.createServer(async (req, res) => {
         return sendJson(res, 400, { error: 'Format email baru tidak valid.' });
       }
 
-      const dbRow = db.prepare(`SELECT password_hash FROM users WHERE id = ?`).get(authUser.id);
+      const dbRow = await db.get(`SELECT password_hash FROM users WHERE id = ?`, authUser.id);
       if (!dbRow || !verifyPassword(currentPassword, dbRow.password_hash)) {
         return sendJson(res, 401, { error: 'Kata sandi saat ini salah.' });
       }
@@ -378,16 +383,18 @@ const server = http.createServer(async (req, res) => {
         return sendJson(res, 400, { error: 'Kode OTP tidak cocok dengan email baru.' });
       }
 
-      const conflict = db
-        .prepare(`SELECT id FROM users WHERE LOWER(email) = LOWER(?) AND id != ?`)
-        .get(newEmail, authUser.id);
+      const conflict = await db.get(
+        `SELECT id FROM users WHERE LOWER(email) = LOWER(?) AND id != ?`,
+        newEmail,
+        authUser.id
+      );
       if (conflict) {
         return sendJson(res, 409, { error: `Email "${newEmail}" sudah terdaftar.` });
       }
 
-      db.prepare(`UPDATE users SET email = ? WHERE id = ?`).run(newEmail, authUser.id);
+      await db.run(`UPDATE users SET email = ? WHERE id = ?`, newEmail, authUser.id);
       otpStore.delete(`${authUser.id}:email`);
-      const updatedUser = getAuthenticatedUser(req);
+      const updatedUser = await getAuthenticatedUser(req);
       return sendJson(res, 200, {
         message: `Email akun berhasil diubah menjadi ${newEmail}.`,
         user: updatedUser
@@ -400,7 +407,7 @@ const server = http.createServer(async (req, res) => {
       const newPassword = String(body.newPassword || '');
       const otpCode = String(body.otpCode || '').trim();
 
-      const dbRow = db.prepare(`SELECT password_hash FROM users WHERE id = ?`).get(authUser.id);
+      const dbRow = await db.get(`SELECT password_hash FROM users WHERE id = ?`, authUser.id);
       if (!dbRow || !verifyPassword(currentPassword, dbRow.password_hash)) {
         return sendJson(res, 401, { error: 'Kata sandi saat ini tidak sesuai.' });
       }
@@ -417,7 +424,8 @@ const server = http.createServer(async (req, res) => {
         return sendJson(res, 400, { error: 'Kode OTP salah.' });
       }
 
-      db.prepare(`UPDATE users SET password_hash = ? WHERE id = ?`).run(
+      await db.run(
+        `UPDATE users SET password_hash = ? WHERE id = ?`,
         hashPassword(newPassword),
         authUser.id
       );
@@ -431,10 +439,10 @@ const server = http.createServer(async (req, res) => {
     // 1. GET /api/bootstrap
     // =========================================================================
     if (pathname === '/api/bootstrap' && method === 'GET') {
-      const departments = db
-        .prepare(`SELECT * FROM departments WHERE is_active = 1 ORDER BY code ASC`)
-        .all();
-      const attributes = getAllAttributes();
+      const [departments, attributes] = await Promise.all([
+        db.all(`SELECT * FROM departments WHERE is_active = 1 ORDER BY code ASC`),
+        getAllAttributes()
+      ]);
 
       return sendJson(res, 200, {
         organization: 'PT Global Service Indonesia (GSI)',
@@ -454,7 +462,7 @@ const server = http.createServer(async (req, res) => {
       const year = Number(parsedUrl.searchParams.get('year') || 2026);
       const month = Number(parsedUrl.searchParams.get('month') || 11);
       const mode = (parsedUrl.searchParams.get('mode') || 'MONTHLY').toUpperCase();
-      const summary = getDashboardSummary({ year, month, mode });
+      const summary = await getDashboardSummary({ year, month, mode });
       return sendJson(res, 200, summary);
     }
 
@@ -465,7 +473,7 @@ const server = http.createServer(async (req, res) => {
       const departmentId = parsedUrl.searchParams.get('departmentId') || 'ALL';
       const year = Number(parsedUrl.searchParams.get('year') || 2026);
       const month = Number(parsedUrl.searchParams.get('month') || 11);
-      const kpis = getEnrichedKpis({ departmentId, year, month });
+      const kpis = await getEnrichedKpis({ departmentId, year, month });
       return sendJson(res, 200, { kpis });
     }
 
@@ -494,7 +502,7 @@ const server = http.createServer(async (req, res) => {
       } = body;
       const updatedBy = authUser.name;
 
-      const kpi = db.prepare(`SELECT * FROM kpi_dictionary WHERE id = ?`).get(kpiId);
+      const kpi = await db.get(`SELECT * FROM kpi_dictionary WHERE id = ?`, kpiId);
       if (!kpi) {
         return sendJson(res, 404, { error: 'KPI tidak ditemukan di dalam Kamus KPI.' });
       }
@@ -505,11 +513,12 @@ const server = http.createServer(async (req, res) => {
         });
       }
 
-      const existing = db
-        .prepare(
-          `SELECT * FROM kpi_monthly_records WHERE kpi_id = ? AND period_year = ? AND period_month = ?`
-        )
-        .get(kpiId, Number(year), Number(month));
+      const existing = await db.get(
+        `SELECT * FROM kpi_monthly_records WHERE kpi_id = ? AND period_year = ? AND period_month = ?`,
+        kpiId,
+        Number(year),
+        Number(month)
+      );
 
       if (existing && existing.is_locked) {
         return sendJson(res, 423, {
@@ -530,11 +539,11 @@ const server = http.createServer(async (req, res) => {
 
       const achievementPct = hasActual
         ? calculateAchievementPct(
-          effectiveTarget,
-          numericActual,
-          kpi.polarity,
-          kpi.cap_score
-        )
+            effectiveTarget,
+            numericActual,
+            kpi.polarity,
+            kpi.cap_score
+          )
         : null;
       const weightedScore = hasActual
         ? calculateWeightedScore(achievementPct, kpi.weight)
@@ -565,7 +574,7 @@ const server = http.createServer(async (req, res) => {
       const tagsJson = JSON.stringify(Array.isArray(mitigationTagIds) ? mitigationTagIds : []);
 
       if (existing) {
-        db.prepare(
+        await db.run(
           `UPDATE kpi_monthly_records
            SET target_value = ?,
                actual_value = ?,
@@ -578,9 +587,8 @@ const server = http.createServer(async (req, res) => {
                mitigation_tags = ?,
                is_draft = ?,
                updated_by = ?,
-               updated_at = CURRENT_TIMESTAMP
-           WHERE id = ?`
-        ).run(
+               updated_at = CURRENT_TIMESTAMP::TEXT
+           WHERE id = ?`,
           effectiveTarget,
           numericActual,
           achievementPct,
@@ -596,14 +604,13 @@ const server = http.createServer(async (req, res) => {
         );
       } else {
         const recId = `rec-${kpiId}-${year}-${month}`;
-        db.prepare(
+        await db.run(
           `INSERT INTO kpi_monthly_records (
             id, kpi_id, period_year, period_month, target_value, actual_value,
             achievement_pct, weighted_score, status_color,
             problem_identification, corrective_action, need_support, mitigation_tags,
             is_draft, is_locked, updated_by
-          ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 0, ?)`
-        ).run(
+          ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 0, ?)`,
           recId,
           kpiId,
           Number(year),
@@ -622,11 +629,12 @@ const server = http.createServer(async (req, res) => {
         );
       }
 
-      const updatedKpi = getEnrichedKpis({
+      const deptKpis = await getEnrichedKpis({
         departmentId: kpi.department_id,
         year: Number(year),
         month: Number(month)
-      }).find((item) => item.id === kpiId);
+      });
+      const updatedKpi = deptKpis.find((item) => item.id === kpiId);
 
       return sendJson(res, 200, {
         message: isDraft
@@ -644,16 +652,23 @@ const server = http.createServer(async (req, res) => {
       const { departmentId = 'ALL', year = 2026, month = 11, locked = true } = body;
 
       if (departmentId === 'ALL') {
-        db.prepare(
-          `UPDATE kpi_monthly_records SET is_locked = ? WHERE period_year = ? AND period_month = ?`
-        ).run(locked ? 1 : 0, Number(year), Number(month));
+        await db.run(
+          `UPDATE kpi_monthly_records SET is_locked = ? WHERE period_year = ? AND period_month = ?`,
+          locked ? 1 : 0,
+          Number(year),
+          Number(month)
+        );
       } else {
-        db.prepare(
+        await db.run(
           `UPDATE kpi_monthly_records
            SET is_locked = ?
            WHERE period_year = ? AND period_month = ?
-             AND kpi_id IN (SELECT id FROM kpi_dictionary WHERE department_id = ?)`
-        ).run(locked ? 1 : 0, Number(year), Number(month), departmentId);
+             AND kpi_id IN (SELECT id FROM kpi_dictionary WHERE department_id = ?)`,
+          locked ? 1 : 0,
+          Number(year),
+          Number(month),
+          departmentId
+        );
       }
 
       return sendJson(res, 200, {
@@ -667,7 +682,7 @@ const server = http.createServer(async (req, res) => {
     // 6. CRUD KPI ATTRIBUTES & HEX COLOR-CODED ACCENTS (/api/attributes)
     // =========================================================================
     if (pathname === '/api/attributes' && method === 'GET') {
-      return sendJson(res, 200, { attributes: getAllAttributes() });
+      return sendJson(res, 200, { attributes: await getAllAttributes() });
     }
 
     if (pathname === '/api/attributes' && method === 'POST') {
@@ -685,22 +700,28 @@ const server = http.createServer(async (req, res) => {
         });
       }
 
-      const duplicate = db
-        .prepare(`SELECT id FROM kpi_attributes WHERE LOWER(name) = LOWER(?)`)
-        .get(name.trim());
+      const duplicate = await db.get(
+        `SELECT id FROM kpi_attributes WHERE LOWER(name) = LOWER(?)`,
+        name.trim()
+      );
       if (duplicate) {
         return sendJson(res, 409, { error: `Atribut dengan nama "${name.trim()}" sudah terdaftar.` });
       }
 
       const id = `attr-${Date.now()}`;
-      db.prepare(
+      await db.run(
         `INSERT INTO kpi_attributes (id, attribute_group, name, hex_color, description)
-         VALUES (?, ?, ?, ?, ?)`
-      ).run(id, attribute_group, name.trim(), validHex, description.trim());
+         VALUES (?, ?, ?, ?, ?)`,
+        id,
+        attribute_group,
+        name.trim(),
+        validHex,
+        description.trim()
+      );
 
       return sendJson(res, 201, {
         message: `Atribut "${name.trim()}" (${validHex}) berhasil ditambahkan.`,
-        attributes: getAllAttributes()
+        attributes: await getAllAttributes()
       });
     }
 
@@ -709,7 +730,7 @@ const server = http.createServer(async (req, res) => {
       const body = await parseJsonBody(req);
       const { name, attribute_group, hex_color, description } = body;
 
-      const existing = db.prepare(`SELECT * FROM kpi_attributes WHERE id = ?`).get(attrId);
+      const existing = await db.get(`SELECT * FROM kpi_attributes WHERE id = ?`, attrId);
       if (!existing) {
         return sendJson(res, 404, { error: 'Atribut KPI tidak ditemukan.' });
       }
@@ -722,21 +743,22 @@ const server = http.createServer(async (req, res) => {
       }
 
       const nextName = name && name.trim() ? name.trim() : existing.name;
-      const duplicate = db
-        .prepare(`SELECT id FROM kpi_attributes WHERE LOWER(name) = LOWER(?) AND id != ?`)
-        .get(nextName, attrId);
+      const duplicate = await db.get(
+        `SELECT id FROM kpi_attributes WHERE LOWER(name) = LOWER(?) AND id != ?`,
+        nextName,
+        attrId
+      );
       if (duplicate) {
         return sendJson(res, 409, { error: `Nama atribut "${nextName}" sudah digunakan atribut lain.` });
       }
 
-      db.prepare(
+      await db.run(
         `UPDATE kpi_attributes
          SET name = ?,
              attribute_group = ?,
              hex_color = ?,
              description = ?
-         WHERE id = ?`
-      ).run(
+         WHERE id = ?`,
         nextName,
         attribute_group || existing.attribute_group,
         validHex,
@@ -746,23 +768,23 @@ const server = http.createServer(async (req, res) => {
 
       return sendJson(res, 200, {
         message: `Atribut "${nextName}" (${validHex}) berhasil diperbarui di seluruh sistem.`,
-        attributes: getAllAttributes()
+        attributes: await getAllAttributes()
       });
     }
 
     if (pathname.startsWith('/api/attributes/') && method === 'DELETE') {
       const attrId = pathname.replace('/api/attributes/', '');
-      const existing = db.prepare(`SELECT * FROM kpi_attributes WHERE id = ?`).get(attrId);
+      const existing = await db.get(`SELECT * FROM kpi_attributes WHERE id = ?`, attrId);
       if (!existing) {
         return sendJson(res, 404, { error: 'Atribut KPI tidak ditemukan.' });
       }
 
-      db.prepare(`DELETE FROM kpi_attribute_assignments WHERE attribute_id = ?`).run(attrId);
-      db.prepare(`DELETE FROM kpi_attributes WHERE id = ?`).run(attrId);
+      await db.run(`DELETE FROM kpi_attribute_assignments WHERE attribute_id = ?`, attrId);
+      await db.run(`DELETE FROM kpi_attributes WHERE id = ?`, attrId);
 
       return sendJson(res, 200, {
         message: `Atribut "${existing.name}" berhasil dihapus.`,
-        attributes: getAllAttributes()
+        attributes: await getAllAttributes()
       });
     }
 
@@ -770,9 +792,9 @@ const server = http.createServer(async (req, res) => {
     // 6B. CRUD MASTER DEPARTEMEN (/api/departments — CPMD Admin)
     // =========================================================================
     if (pathname === '/api/departments' && method === 'GET') {
-      const departments = db
-        .prepare(`SELECT * FROM departments WHERE is_active = 1 ORDER BY code ASC`)
-        .all();
+      const departments = await db.all(
+        `SELECT * FROM departments WHERE is_active = 1 ORDER BY code ASC`
+      );
       return sendJson(res, 200, { departments });
     }
 
@@ -787,22 +809,28 @@ const server = http.createServer(async (req, res) => {
       }
 
       const normCode = code.trim().toUpperCase();
-      const dup = db
-        .prepare(`SELECT id FROM departments WHERE UPPER(code) = UPPER(?)`)
-        .get(normCode);
+      const dup = await db.get(
+        `SELECT id FROM departments WHERE UPPER(code) = UPPER(?)`,
+        normCode
+      );
       if (dup) {
         return sendJson(res, 409, { error: `Kode departemen "${normCode}" sudah terdaftar.` });
       }
 
       const deptId = `dept-${Date.now()}`;
-      db.prepare(
+      await db.run(
         `INSERT INTO departments (id, code, name, leader_name, description, is_active)
-         VALUES (?, ?, ?, ?, ?, 1)`
-      ).run(deptId, normCode, name.trim(), leader_name.trim(), description.trim());
+         VALUES (?, ?, ?, ?, ?, 1)`,
+        deptId,
+        normCode,
+        name.trim(),
+        leader_name.trim(),
+        description.trim()
+      );
 
-      const departments = db
-        .prepare(`SELECT * FROM departments WHERE is_active = 1 ORDER BY code ASC`)
-        .all();
+      const departments = await db.all(
+        `SELECT * FROM departments WHERE is_active = 1 ORDER BY code ASC`
+      );
 
       return sendJson(res, 201, {
         message: `Departemen "${normCode} — ${name.trim()}" berhasil ditambahkan.`,
@@ -812,7 +840,7 @@ const server = http.createServer(async (req, res) => {
 
     if (pathname.startsWith('/api/departments/') && method === 'PUT') {
       const deptId = pathname.replace('/api/departments/', '');
-      const existing = db.prepare(`SELECT * FROM departments WHERE id = ?`).get(deptId);
+      const existing = await db.get(`SELECT * FROM departments WHERE id = ?`, deptId);
       if (!existing) {
         return sendJson(res, 404, { error: 'Departemen tidak ditemukan.' });
       }
@@ -827,24 +855,31 @@ const server = http.createServer(async (req, res) => {
       const nextDesc =
         body.description !== undefined ? body.description.trim() : existing.description || '';
 
-      const dup = db
-        .prepare(`SELECT id FROM departments WHERE UPPER(code) = UPPER(?) AND id != ?`)
-        .get(nextCode, deptId);
+      const dup = await db.get(
+        `SELECT id FROM departments WHERE UPPER(code) = UPPER(?) AND id != ?`,
+        nextCode,
+        deptId
+      );
       if (dup) {
         return sendJson(res, 409, {
           error: `Kode departemen "${nextCode}" sudah digunakan departemen lain.`
         });
       }
 
-      db.prepare(
+      await db.run(
         `UPDATE departments
          SET code = ?, name = ?, leader_name = ?, description = ?
-         WHERE id = ?`
-      ).run(nextCode, nextName, nextLeader, nextDesc, deptId);
+         WHERE id = ?`,
+        nextCode,
+        nextName,
+        nextLeader,
+        nextDesc,
+        deptId
+      );
 
-      const departments = db
-        .prepare(`SELECT * FROM departments WHERE is_active = 1 ORDER BY code ASC`)
-        .all();
+      const departments = await db.all(
+        `SELECT * FROM departments WHERE is_active = 1 ORDER BY code ASC`
+      );
 
       return sendJson(res, 200, {
         message: `Departemen "${nextCode} — ${nextName}" berhasil diperbarui di seluruh sistem.`,
@@ -854,24 +889,25 @@ const server = http.createServer(async (req, res) => {
 
     if (pathname.startsWith('/api/departments/') && method === 'DELETE') {
       const deptId = pathname.replace('/api/departments/', '');
-      const existing = db.prepare(`SELECT * FROM departments WHERE id = ?`).get(deptId);
+      const existing = await db.get(`SELECT * FROM departments WHERE id = ?`, deptId);
       if (!existing) {
         return sendJson(res, 404, { error: 'Departemen tidak ditemukan.' });
       }
 
-      const kpiCount = db
-        .prepare(`SELECT COUNT(*) as cnt FROM kpi_dictionary WHERE department_id = ?`)
-        .get(deptId);
-      if (kpiCount && kpiCount.cnt > 0) {
+      const kpiCount = await db.get(
+        `SELECT COUNT(*) as cnt FROM kpi_dictionary WHERE department_id = ?`,
+        deptId
+      );
+      if (kpiCount && Number(kpiCount.cnt) > 0) {
         return sendJson(res, 409, {
           error: `Departemen "${existing.code}" masih memiliki ${kpiCount.cnt} KPI aktif. Pindahkan atau hapus KPI tersebut terlebih dahulu.`
         });
       }
 
-      db.prepare(`DELETE FROM departments WHERE id = ?`).run(deptId);
-      const departments = db
-        .prepare(`SELECT * FROM departments WHERE is_active = 1 ORDER BY code ASC`)
-        .all();
+      await db.run(`DELETE FROM departments WHERE id = ?`, deptId);
+      const departments = await db.all(
+        `SELECT * FROM departments WHERE is_active = 1 ORDER BY code ASC`
+      );
 
       return sendJson(res, 200, {
         message: `Departemen "${existing.code} — ${existing.name}" berhasil dihapus.`,
@@ -905,20 +941,20 @@ const server = http.createServer(async (req, res) => {
         });
       }
 
-      const dup = db
-        .prepare(`SELECT id FROM kpi_dictionary WHERE UPPER(code) = UPPER(?)`)
-        .get(code.trim());
+      const dup = await db.get(
+        `SELECT id FROM kpi_dictionary WHERE UPPER(code) = UPPER(?)`,
+        code.trim()
+      );
       if (dup) {
         return sendJson(res, 409, { error: `Kode KPI "${code.trim()}" sudah terdaftar.` });
       }
 
       const kpiId = `kpi-${Date.now()}`;
-      db.prepare(
+      await db.run(
         `INSERT INTO kpi_dictionary (
           id, department_id, code, title, unit, weight, polarity, ytd_method,
           red_threshold, yellow_threshold, cap_score, baseline_target, fiscal_year
-        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 2026)`
-      ).run(
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 2026)`,
         kpiId,
         department_id,
         code.trim().toUpperCase(),
@@ -933,21 +969,25 @@ const server = http.createServer(async (req, res) => {
         Number(baseline_target)
       );
 
-      const insertAssign = db.prepare(
-        `INSERT OR IGNORE INTO kpi_attribute_assignments (kpi_id, attribute_id) VALUES (?, ?)`
-      );
       for (const attrId of attributeIds) {
-        insertAssign.run(kpiId, attrId);
+        await db.run(
+          `INSERT OR IGNORE INTO kpi_attribute_assignments (kpi_id, attribute_id) VALUES (?, ?)`,
+          kpiId,
+          attrId
+        );
       }
 
       // Initialize 12 monthly target records for 2026
-      const insertRec = db.prepare(
-        `INSERT INTO kpi_monthly_records (
-          id, kpi_id, period_year, period_month, target_value, actual_value, status_color
-        ) VALUES (?, ?, 2026, ?, ?, NULL, 'UNREPORTED')`
-      );
       for (let m = 1; m <= 12; m++) {
-        insertRec.run(`rec-${kpiId}-2026-${m}`, kpiId, m, Number(baseline_target));
+        await db.run(
+          `INSERT INTO kpi_monthly_records (
+            id, kpi_id, period_year, period_month, target_value, actual_value, status_color
+          ) VALUES (?, ?, 2026, ?, ?, NULL, 'UNREPORTED')`,
+          `rec-${kpiId}-2026-${m}`,
+          kpiId,
+          m,
+          Number(baseline_target)
+        );
       }
 
       return sendJson(res, 201, {
@@ -958,7 +998,7 @@ const server = http.createServer(async (req, res) => {
     if (pathname.startsWith('/api/kpis/') && method === 'PUT') {
       const kpiId = pathname.replace('/api/kpis/', '');
       const body = await parseJsonBody(req);
-      const existing = db.prepare(`SELECT * FROM kpi_dictionary WHERE id = ?`).get(kpiId);
+      const existing = await db.get(`SELECT * FROM kpi_dictionary WHERE id = ?`, kpiId);
       if (!existing) {
         return sendJson(res, 404, { error: 'KPI tidak ditemukan.' });
       }
@@ -977,12 +1017,11 @@ const server = http.createServer(async (req, res) => {
         attributeIds
       } = body;
 
-      db.prepare(
+      await db.run(
         `UPDATE kpi_dictionary
          SET code = ?, title = ?, unit = ?, weight = ?, polarity = ?, ytd_method = ?,
              red_threshold = ?, yellow_threshold = ?, cap_score = ?, baseline_target = ?
-         WHERE id = ?`
-      ).run(
+         WHERE id = ?`,
         code.trim().toUpperCase(),
         title.trim(),
         unit.trim(),
@@ -997,23 +1036,20 @@ const server = http.createServer(async (req, res) => {
       );
 
       if (Array.isArray(attributeIds)) {
-        db.prepare(`DELETE FROM kpi_attribute_assignments WHERE kpi_id = ?`).run(kpiId);
-        const insertAssign = db.prepare(
-          `INSERT OR IGNORE INTO kpi_attribute_assignments (kpi_id, attribute_id) VALUES (?, ?)`
-        );
+        await db.run(`DELETE FROM kpi_attribute_assignments WHERE kpi_id = ?`, kpiId);
         for (const attrId of attributeIds) {
-          insertAssign.run(kpiId, attrId);
+          await db.run(
+            `INSERT OR IGNORE INTO kpi_attribute_assignments (kpi_id, attribute_id) VALUES (?, ?)`,
+            kpiId,
+            attrId
+          );
         }
       }
 
       // Recalculate existing monthly records with updated weight/polarity/thresholds
-      const records = db
-        .prepare(`SELECT * FROM kpi_monthly_records WHERE kpi_id = ?`)
-        .all(kpiId);
-      const updateRec = db.prepare(
-        `UPDATE kpi_monthly_records
-         SET achievement_pct = ?, weighted_score = ?, status_color = ?
-         WHERE id = ?`
+      const records = await db.all(
+        `SELECT * FROM kpi_monthly_records WHERE kpi_id = ?`,
+        kpiId
       );
       for (const r of records) {
         if (r.actual_value !== null && r.actual_value !== undefined) {
@@ -1025,7 +1061,15 @@ const server = http.createServer(async (req, res) => {
           );
           const wScore = calculateWeightedScore(ach, Number(weight));
           const st = classifyStatusColor(ach, Number(red_threshold), Number(yellow_threshold));
-          updateRec.run(ach, wScore, st, r.id);
+          await db.run(
+            `UPDATE kpi_monthly_records
+             SET achievement_pct = ?, weighted_score = ?, status_color = ?
+             WHERE id = ?`,
+            ach,
+            wScore,
+            st,
+            r.id
+          );
         }
       }
 
@@ -1036,11 +1080,11 @@ const server = http.createServer(async (req, res) => {
 
     if (pathname.startsWith('/api/kpis/') && method === 'DELETE') {
       const kpiId = pathname.replace('/api/kpis/', '');
-      const existing = db.prepare(`SELECT * FROM kpi_dictionary WHERE id = ?`).get(kpiId);
+      const existing = await db.get(`SELECT * FROM kpi_dictionary WHERE id = ?`, kpiId);
       if (!existing) {
         return sendJson(res, 404, { error: 'KPI tidak ditemukan.' });
       }
-      db.prepare(`DELETE FROM kpi_dictionary WHERE id = ?`).run(kpiId);
+      await db.run(`DELETE FROM kpi_dictionary WHERE id = ?`, kpiId);
       return sendJson(res, 200, {
         message: `KPI "${existing.code}" berhasil dihapus dari Kamus KPI.`
       });
@@ -1050,12 +1094,17 @@ const server = http.createServer(async (req, res) => {
     // 8. GET /api/export/backup (Standalone Database Snapshot Export)
     // =========================================================================
     if (pathname === '/api/export/backup' && method === 'GET') {
+      const [departments, attributes, kpis] = await Promise.all([
+        db.all(`SELECT * FROM departments`),
+        getAllAttributes(),
+        getEnrichedKpis({ year: 2026, month: 11 })
+      ]);
       const snapshot = {
         exportedAt: new Date().toISOString(),
         system: 'RAHMA Standalone KPI System - PT Global Service Indonesia',
-        departments: db.prepare(`SELECT * FROM departments`).all(),
-        attributes: getAllAttributes(),
-        kpis: getEnrichedKpis({ year: 2026, month: 11 })
+        departments,
+        attributes,
+        kpis
       };
       return sendJson(res, 200, snapshot);
     }
@@ -1095,13 +1144,23 @@ const server = http.createServer(async (req, res) => {
 });
 
 if (require.main === module) {
-  server.listen(PORT, () => {
-    console.log(`====================================================================`);
-    console.log(`🚀 RAHMA Standalone KPI System (PT Global Service Indonesia) Active`);
-    console.log(`🔗 URL Aplikasi : http://localhost:${PORT}`);
-    console.log(`🗄️  Database     : Standalone SQLite (data/rahma.sqlite)`);
-    console.log(`====================================================================`);
-  });
+  initDatabase()
+    .then(() => {
+      server.listen(PORT, () => {
+        const pgHost = db.pgConfig.host || '127.0.0.1';
+        const pgPort = db.pgConfig.port || 5432;
+        const pgDb = db.pgConfig.database || 'rahma_kpi';
+        console.log(`====================================================================`);
+        console.log(`🚀 RAHMA Standalone KPI System (PT Global Service Indonesia) Active`);
+        console.log(`🔗 URL Aplikasi : http://localhost:${PORT}`);
+        console.log(`🐘 Database     : PostgreSQL (${pgHost}:${pgPort}/${pgDb})`);
+        console.log(`====================================================================`);
+      });
+    })
+    .catch((err) => {
+      console.error('❌ Failed to initialize PostgreSQL database:', err);
+      process.exit(1);
+    });
 }
 
 module.exports = { server };

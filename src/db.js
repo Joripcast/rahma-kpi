@@ -1,12 +1,10 @@
 /**
- * RAHMA Standalone Relational Database Layer (SQLite via node:sqlite)
+ * RAHMA Relational Database Layer (PostgreSQL via node-postgres `pg`)
  * PT Global Service Indonesia (GSI)
  */
 
-const fs = require('node:fs');
-const path = require('node:path');
 const crypto = require('node:crypto');
-const { DatabaseSync } = require('node:sqlite');
+const { Pool, Client, types } = require('pg');
 const {
   normalizeHexColor,
   computeHexAccentMeta,
@@ -16,16 +14,62 @@ const {
   calculateYtdMetrics
 } = require('./engine');
 
-const DATA_DIR = path.join(__dirname, '..', 'data');
-if (!fs.existsSync(DATA_DIR)) {
-  fs.mkdirSync(DATA_DIR, { recursive: true });
+// Parse PostgreSQL BIGINT (COUNT(*), OID 20) and NUMERIC (OID 1700) into native JS Numbers
+types.setTypeParser(20, (val) => (val === null ? null : Number(val)));
+types.setTypeParser(1700, (val) => (val === null ? null : Number(val)));
+
+const PG_CONFIG = process.env.DATABASE_URL
+  ? { connectionString: process.env.DATABASE_URL }
+  : {
+      host: process.env.PGHOST || '127.0.0.1',
+      port: Number(process.env.PGPORT || 5432),
+      user: process.env.PGUSER || 'postgres',
+      password:
+        process.env.PGPASSWORD && process.env.PGPASSWORD !== 'NULL'
+          ? process.env.PGPASSWORD
+          : undefined,
+      database: process.env.PGDATABASE || 'rahma_kpi',
+      max: 15,
+      idleTimeoutMillis: 30000
+    };
+
+const pool = new Pool(PG_CONFIG);
+
+function normalizeSqlForPg(sql) {
+  let index = 0;
+  let converted = sql.replace(
+    /INSERT\s+OR\s+IGNORE\s+INTO\s+kpi_attribute_assignments\s*\(([^)]+)\)\s*VALUES\s*\(([^)]+)\)/gi,
+    'INSERT INTO kpi_attribute_assignments ($1) VALUES ($2) ON CONFLICT (kpi_id, attribute_id) DO NOTHING'
+  );
+  converted = converted.replace(/\?/g, () => `$${++index}`);
+  return converted;
 }
 
-const DB_PATH = path.join(DATA_DIR, 'rahma.sqlite');
-const db = new DatabaseSync(DB_PATH);
-
-db.exec('PRAGMA foreign_keys = ON;');
-db.exec('PRAGMA journal_mode = WAL;');
+const db = {
+  pool,
+  pgConfig: PG_CONFIG,
+  async query(sql, params = []) {
+    return pool.query(normalizeSqlForPg(sql), params);
+  },
+  async all(sql, ...params) {
+    const flatParams =
+      params.length === 1 && Array.isArray(params[0]) ? params[0] : params;
+    const res = await pool.query(normalizeSqlForPg(sql), flatParams);
+    return res.rows;
+  },
+  async get(sql, ...params) {
+    const flatParams =
+      params.length === 1 && Array.isArray(params[0]) ? params[0] : params;
+    const res = await pool.query(normalizeSqlForPg(sql), flatParams);
+    return res.rows[0] || null;
+  },
+  async run(sql, ...params) {
+    const flatParams =
+      params.length === 1 && Array.isArray(params[0]) ? params[0] : params;
+    const res = await pool.query(normalizeSqlForPg(sql), flatParams);
+    return { rowCount: res.rowCount, rows: res.rows };
+  }
+};
 
 function hashPassword(plainPassword) {
   const salt = crypto.randomBytes(16).toString('hex');
@@ -42,45 +86,28 @@ function verifyPassword(plainPassword, storedHash) {
   return crypto.timingSafeEqual(keyBuf, derivedBuf);
 }
 
-function ensureUserPasswordColumn() {
-  const cols = db.prepare(`PRAGMA table_info(users)`).all();
-  const hasPwdCol = cols.some((c) => c.name === 'password_hash');
-  if (!hasPwdCol) {
-    db.exec(`ALTER TABLE users ADD COLUMN password_hash TEXT;`);
-  }
-  // Ensure any existing seeded users without password_hash get default UAT password 'rahma2026'
-  const usersWithoutPwd = db
-    .prepare(`SELECT id FROM users WHERE password_hash IS NULL OR password_hash = ''`)
-    .all();
-  if (usersWithoutPwd.length > 0) {
-    const defaultHash = hashPassword('rahma2026');
-    const upd = db.prepare(`UPDATE users SET password_hash = ? WHERE id = ?`);
-    for (const u of usersWithoutPwd) {
-      upd.run(defaultHash, u.id);
+async function ensureDatabaseExists() {
+  if (process.env.DATABASE_URL) return;
+  const adminClient = new Client({
+    ...PG_CONFIG,
+    database: 'postgres'
+  });
+  try {
+    await adminClient.connect();
+    const res = await adminClient.query(
+      `SELECT 1 FROM pg_database WHERE datname = $1`,
+      [PG_CONFIG.database]
+    );
+    if (res.rowCount === 0) {
+      await adminClient.query(`CREATE DATABASE "${PG_CONFIG.database}"`);
     }
+  } finally {
+    await adminClient.end().catch(() => {});
   }
 }
 
-function authenticateUser(email, password) {
-  if (!email || !password) return null;
-  const user = db
-    .prepare(
-      `SELECT u.id, u.department_id, u.name, u.email, u.role, u.title, u.password_hash,
-              d.code as department_code, d.name as department_name
-       FROM users u
-       LEFT JOIN departments d ON d.id = u.department_id
-       WHERE LOWER(u.email) = LOWER(?)`
-    )
-    .get(email.trim());
-  if (!user || !verifyPassword(password, user.password_hash)) {
-    return null;
-  }
-  const { password_hash, ...safeUser } = user;
-  return safeUser;
-}
-
-function initSchema() {
-  db.exec(`
+async function initSchema() {
+  await pool.query(`
     CREATE TABLE IF NOT EXISTS departments (
       id TEXT PRIMARY KEY,
       code TEXT UNIQUE NOT NULL,
@@ -88,18 +115,17 @@ function initSchema() {
       leader_name TEXT NOT NULL,
       description TEXT,
       is_active INTEGER DEFAULT 1,
-      created_at TEXT DEFAULT CURRENT_TIMESTAMP
+      created_at TEXT DEFAULT CURRENT_TIMESTAMP::TEXT
     );
 
     CREATE TABLE IF NOT EXISTS users (
       id TEXT PRIMARY KEY,
-      department_id TEXT,
+      department_id TEXT REFERENCES departments(id) ON DELETE SET NULL,
       name TEXT NOT NULL,
       email TEXT UNIQUE NOT NULL,
       role TEXT NOT NULL,
       title TEXT,
-      password_hash TEXT,
-      FOREIGN KEY (department_id) REFERENCES departments(id) ON DELETE SET NULL
+      password_hash TEXT
     );
 
     CREATE TABLE IF NOT EXISTS kpi_attributes (
@@ -109,45 +135,42 @@ function initSchema() {
       hex_color TEXT NOT NULL,
       description TEXT,
       is_active INTEGER DEFAULT 1,
-      created_at TEXT DEFAULT CURRENT_TIMESTAMP
+      created_at TEXT DEFAULT CURRENT_TIMESTAMP::TEXT
     );
 
     CREATE TABLE IF NOT EXISTS kpi_dictionary (
       id TEXT PRIMARY KEY,
-      department_id TEXT NOT NULL,
+      department_id TEXT NOT NULL REFERENCES departments(id) ON DELETE CASCADE,
       code TEXT UNIQUE NOT NULL,
       title TEXT NOT NULL,
       unit TEXT NOT NULL,
-      weight REAL NOT NULL,
+      weight DOUBLE PRECISION NOT NULL,
       polarity TEXT NOT NULL DEFAULT 'MAXIMIZE',
       ytd_method TEXT NOT NULL DEFAULT 'SUM',
-      red_threshold REAL NOT NULL DEFAULT 85,
-      yellow_threshold REAL NOT NULL DEFAULT 100,
-      cap_score REAL NOT NULL DEFAULT 120,
-      baseline_target REAL NOT NULL DEFAULT 100,
+      red_threshold DOUBLE PRECISION NOT NULL DEFAULT 85,
+      yellow_threshold DOUBLE PRECISION NOT NULL DEFAULT 100,
+      cap_score DOUBLE PRECISION NOT NULL DEFAULT 120,
+      baseline_target DOUBLE PRECISION NOT NULL DEFAULT 100,
       fiscal_year INTEGER NOT NULL DEFAULT 2026,
       is_active INTEGER DEFAULT 1,
-      created_at TEXT DEFAULT CURRENT_TIMESTAMP,
-      FOREIGN KEY (department_id) REFERENCES departments(id) ON DELETE CASCADE
+      created_at TEXT DEFAULT CURRENT_TIMESTAMP::TEXT
     );
 
     CREATE TABLE IF NOT EXISTS kpi_attribute_assignments (
-      kpi_id TEXT NOT NULL,
-      attribute_id TEXT NOT NULL,
-      PRIMARY KEY (kpi_id, attribute_id),
-      FOREIGN KEY (kpi_id) REFERENCES kpi_dictionary(id) ON DELETE CASCADE,
-      FOREIGN KEY (attribute_id) REFERENCES kpi_attributes(id) ON DELETE CASCADE
+      kpi_id TEXT NOT NULL REFERENCES kpi_dictionary(id) ON DELETE CASCADE,
+      attribute_id TEXT NOT NULL REFERENCES kpi_attributes(id) ON DELETE CASCADE,
+      PRIMARY KEY (kpi_id, attribute_id)
     );
 
     CREATE TABLE IF NOT EXISTS kpi_monthly_records (
       id TEXT PRIMARY KEY,
-      kpi_id TEXT NOT NULL,
+      kpi_id TEXT NOT NULL REFERENCES kpi_dictionary(id) ON DELETE CASCADE,
       period_year INTEGER NOT NULL,
       period_month INTEGER NOT NULL,
-      target_value REAL NOT NULL,
-      actual_value REAL,
-      achievement_pct REAL,
-      weighted_score REAL,
+      target_value DOUBLE PRECISION NOT NULL,
+      actual_value DOUBLE PRECISION,
+      achievement_pct DOUBLE PRECISION,
+      weighted_score DOUBLE PRECISION,
       status_color TEXT DEFAULT 'UNREPORTED',
       problem_identification TEXT DEFAULT '',
       corrective_action TEXT DEFAULT '',
@@ -156,9 +179,8 @@ function initSchema() {
       is_draft INTEGER DEFAULT 0,
       is_locked INTEGER DEFAULT 0,
       updated_by TEXT DEFAULT 'System Seed',
-      updated_at TEXT DEFAULT CURRENT_TIMESTAMP,
-      UNIQUE(kpi_id, period_year, period_month),
-      FOREIGN KEY (kpi_id) REFERENCES kpi_dictionary(id) ON DELETE CASCADE
+      updated_at TEXT DEFAULT CURRENT_TIMESTAMP::TEXT,
+      UNIQUE(kpi_id, period_year, period_month)
     );
 
     CREATE INDEX IF NOT EXISTS idx_records_period ON kpi_monthly_records(period_year, period_month);
@@ -166,9 +188,22 @@ function initSchema() {
   `);
 }
 
-function seedInitialDataIfEmpty() {
-  const countRow = db.prepare('SELECT COUNT(*) as cnt FROM departments').get();
-  if (countRow && countRow.cnt > 0) return;
+async function ensureUserPasswordColumn() {
+  await pool.query(`ALTER TABLE users ADD COLUMN IF NOT EXISTS password_hash TEXT;`);
+  const usersWithoutPwd = await db.all(
+    `SELECT id FROM users WHERE password_hash IS NULL OR password_hash = ''`
+  );
+  if (usersWithoutPwd.length > 0) {
+    const defaultHash = hashPassword('rahma2026');
+    for (const u of usersWithoutPwd) {
+      await db.run(`UPDATE users SET password_hash = $1 WHERE id = $2`, defaultHash, u.id);
+    }
+  }
+}
+
+async function seedInitialDataIfEmpty() {
+  const countRow = await db.get(`SELECT COUNT(*) as cnt FROM departments`);
+  if (countRow && Number(countRow.cnt) > 0) return;
 
   const departments = [
     {
@@ -208,14 +243,20 @@ function seedInitialDataIfEmpty() {
     }
   ];
 
-  const insertDept = db.prepare(`
-    INSERT INTO departments (id, code, name, leader_name, description)
-    VALUES (?, ?, ?, ?, ?)
-  `);
   for (const d of departments) {
-    insertDept.run(d.id, d.code, d.name, d.leader_name, d.description);
+    await db.run(
+      `INSERT INTO departments (id, code, name, leader_name, description)
+       VALUES ($1, $2, $3, $4, $5)
+       ON CONFLICT (id) DO NOTHING`,
+      d.id,
+      d.code,
+      d.name,
+      d.leader_name,
+      d.description
+    );
   }
 
+  const defaultHash = hashPassword('rahma2026');
   const users = [
     {
       id: 'usr-cpmd',
@@ -275,15 +316,21 @@ function seedInitialDataIfEmpty() {
     }
   ];
 
-  const insertUser = db.prepare(`
-    INSERT INTO users (id, department_id, name, email, role, title)
-    VALUES (?, ?, ?, ?, ?, ?)
-  `);
   for (const u of users) {
-    insertUser.run(u.id, u.department_id, u.name, u.email, u.role, u.title);
+    await db.run(
+      `INSERT INTO users (id, department_id, name, email, role, title, password_hash)
+       VALUES ($1, $2, $3, $4, $5, $6, $7)
+       ON CONFLICT (id) DO NOTHING`,
+      u.id,
+      u.department_id,
+      u.name,
+      u.email,
+      u.role,
+      u.title,
+      defaultHash
+    );
   }
 
-  // Seed HEX Color-Coded KPI Attributes (Multi-Attribute capable + Mitigation Quick-Tags)
   const attributes = [
     {
       id: 'attr-fin',
@@ -327,7 +374,6 @@ function seedInitialDataIfEmpty() {
       hex_color: '#4F46E5',
       description: 'Indikator operasional rutin bulanan berfrekuensi tinggi.'
     },
-    // Mitigation Quick-Tag Attributes (also HEX color-coded & CRUD-manageable!)
     {
       id: 'attr-tag-vendor',
       attribute_group: 'MITIGATION_TAG',
@@ -358,17 +404,20 @@ function seedInitialDataIfEmpty() {
     }
   ];
 
-  const insertAttr = db.prepare(`
-    INSERT INTO kpi_attributes (id, attribute_group, name, hex_color, description)
-    VALUES (?, ?, ?, ?, ?)
-  `);
   for (const a of attributes) {
-    insertAttr.run(a.id, a.attribute_group, a.name, a.hex_color, a.description);
+    await db.run(
+      `INSERT INTO kpi_attributes (id, attribute_group, name, hex_color, description)
+       VALUES ($1, $2, $3, $4, $5)
+       ON CONFLICT (id) DO NOTHING`,
+      a.id,
+      a.attribute_group,
+      a.name,
+      a.hex_color,
+      a.description
+    );
   }
 
-  // KPI Dictionary (Total Weight = 100% per department)
   const kpis = [
-    // OPS (3 KPIs = 40 + 35 + 25 = 100%)
     {
       id: 'kpi-ops-1',
       department_id: 'dept-ops',
@@ -426,8 +475,6 @@ function seedInitialDataIfEmpty() {
       monthlyTargets: [120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120],
       monthlyActuals: [122, 118, 121, 120, 124, 119, 121, 120, 118, 122, 121, null]
     },
-
-    // COM (3 KPIs = 45 + 30 + 25 = 100%)
     {
       id: 'kpi-com-1',
       department_id: 'dept-com',
@@ -485,8 +532,6 @@ function seedInitialDataIfEmpty() {
       monthlyTargets: [95, 95, 95, 95, 95, 95, 95, 95, 95, 95, 95, 95],
       monthlyActuals: [96, 96, 95, 95, 95, 96, 96, 95, 95, 96, 96, null]
     },
-
-    // FIN (3 KPIs = 40 + 35 + 25 = 100%)
     {
       id: 'kpi-fin-1',
       department_id: 'dept-fin',
@@ -544,8 +589,6 @@ function seedInitialDataIfEmpty() {
       monthlyTargets: [100, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100],
       monthlyActuals: [100, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100, null]
     },
-
-    // HCGA (2 KPIs = 55 + 45 = 100%)
     {
       id: 'kpi-hc-1',
       department_id: 'dept-hc',
@@ -586,8 +629,6 @@ function seedInitialDataIfEmpty() {
       monthlyTargets: [98, 98, 98, 98, 98, 98, 98, 98, 98, 98, 98, 98],
       monthlyActuals: [98.5, 99.0, 98.2, 98.8, 99.1, 98.4, 98.0, 98.6, 99.2, 98.9, 99.0, null]
     },
-
-    // ITDT (2 KPIs = 50 + 50 = 100%) - note: November is kept as DRAFT/UNSUBMITTED for ITDT so CPMD Submission Tracker demonstrates realistic follow-up!
     {
       id: 'kpi-it-1',
       department_id: 'dept-it',
@@ -626,29 +667,13 @@ function seedInitialDataIfEmpty() {
     }
   ];
 
-  const insertKpi = db.prepare(`
-    INSERT INTO kpi_dictionary (
-      id, department_id, code, title, unit, weight, polarity, ytd_method,
-      red_threshold, yellow_threshold, cap_score, baseline_target, fiscal_year
-    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 2026)
-  `);
-
-  const insertAssign = db.prepare(`
-    INSERT INTO kpi_attribute_assignments (kpi_id, attribute_id)
-    VALUES (?, ?)
-  `);
-
-  const insertRecord = db.prepare(`
-    INSERT INTO kpi_monthly_records (
-      id, kpi_id, period_year, period_month, target_value, actual_value,
-      achievement_pct, weighted_score, status_color,
-      problem_identification, corrective_action, need_support, mitigation_tags,
-      is_draft, is_locked
-    ) VALUES (?, ?, 2026, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-  `);
-
   for (const k of kpis) {
-    insertKpi.run(
+    await db.run(
+      `INSERT INTO kpi_dictionary (
+         id, department_id, code, title, unit, weight, polarity, ytd_method,
+         red_threshold, yellow_threshold, cap_score, baseline_target, fiscal_year
+       ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, 2026)
+       ON CONFLICT (id) DO NOTHING`,
       k.id,
       k.department_id,
       k.code,
@@ -664,7 +689,13 @@ function seedInitialDataIfEmpty() {
     );
 
     for (const attrId of k.attrs) {
-      insertAssign.run(k.id, attrId);
+      await db.run(
+        `INSERT INTO kpi_attribute_assignments (kpi_id, attribute_id)
+         VALUES ($1, $2)
+         ON CONFLICT (kpi_id, attribute_id) DO NOTHING`,
+        k.id,
+        attrId
+      );
     }
 
     for (let m = 1; m <= 12; m++) {
@@ -698,7 +729,14 @@ function seedInitialDataIfEmpty() {
       const isDraft = m === 11 && k.novDraft ? 1 : 0;
       const isLocked = m < 11 ? 1 : 0;
 
-      insertRecord.run(
+      await db.run(
+        `INSERT INTO kpi_monthly_records (
+           id, kpi_id, period_year, period_month, target_value, actual_value,
+           achievement_pct, weighted_score, status_color,
+           problem_identification, corrective_action, need_support, mitigation_tags,
+           is_draft, is_locked
+         ) VALUES ($1, $2, 2026, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14)
+         ON CONFLICT (id) DO NOTHING`,
         `rec-${k.id}-2026-${m}`,
         k.id,
         m,
@@ -718,55 +756,77 @@ function seedInitialDataIfEmpty() {
   }
 }
 
-initSchema();
-seedInitialDataIfEmpty();
-ensureUserPasswordColumn();
+let initPromise = null;
+async function initDatabase() {
+  if (!initPromise) {
+    initPromise = (async () => {
+      await ensureDatabaseExists();
+      await initSchema();
+      await seedInitialDataIfEmpty();
+      await ensureUserPasswordColumn();
+    })();
+  }
+  return initPromise;
+}
 
-/**
- * Helper to fetch all KPI attributes enriched with computed HEX contrast metadata
- */
-function getAllAttributes() {
-  const rows = db
-    .prepare(
-      `SELECT a.*,
-        (SELECT COUNT(*) FROM kpi_attribute_assignments ka WHERE ka.attribute_id = a.id) as usage_count
-       FROM kpi_attributes a
-       ORDER BY a.attribute_group ASC, a.name ASC`
-    )
-    .all();
+async function authenticateUser(email, password) {
+  if (!email || !password) return null;
+  const user = await db.get(
+    `SELECT u.id, u.department_id, u.name, u.email, u.role, u.title, u.password_hash,
+            d.code as department_code, d.name as department_name
+     FROM users u
+     LEFT JOIN departments d ON d.id = u.department_id
+     WHERE LOWER(u.email) = LOWER($1)`,
+    email.trim()
+  );
+  if (!user || !verifyPassword(password, user.password_hash)) {
+    return null;
+  }
+  const { password_hash, ...safeUser } = user;
+  return safeUser;
+}
+
+async function getAllAttributes() {
+  const rows = await db.all(
+    `SELECT a.*,
+      (SELECT COUNT(*) FROM kpi_attribute_assignments ka WHERE ka.attribute_id = a.id) as usage_count
+     FROM kpi_attributes a
+     ORDER BY a.attribute_group ASC, a.name ASC`
+  );
 
   return rows.map((r) => ({
     ...r,
+    usage_count: Number(r.usage_count || 0),
     is_active: Boolean(r.is_active),
     accent: computeHexAccentMeta(r.hex_color)
   }));
 }
 
-/**
- * Fetch enriched KPIs with their multi-attributes, monthly records, YTD metrics, MoM delta, and 6-month sparkline
- */
-function getEnrichedKpis({ departmentId = null, year = 2026, month = 11 } = {}) {
-  const allAttrs = getAllAttributes();
+async function getEnrichedKpis({ departmentId = null, year = 2026, month = 11 } = {}) {
+  const allAttrs = await getAllAttributes();
   const attrMap = new Map(allAttrs.map((a) => [a.id, a]));
 
   let sql = `
     SELECT k.*, d.code as department_code, d.name as department_name, d.leader_name
     FROM kpi_dictionary k
     JOIN departments d ON d.id = k.department_id
-    WHERE k.fiscal_year = ? AND k.is_active = 1
+    WHERE k.fiscal_year = $1 AND k.is_active = 1
   `;
-  const params = [year];
+  const params = [Number(year)];
   if (departmentId && departmentId !== 'ALL') {
-    sql += ` AND k.department_id = ?`;
+    sql += ` AND k.department_id = $2`;
     params.push(departmentId);
   }
   sql += ` ORDER BY d.code ASC, k.code ASC`;
 
-  const kpis = db.prepare(sql).all(...params);
-  const assignRows = db.prepare(`SELECT kpi_id, attribute_id FROM kpi_attribute_assignments`).all();
-  const recordRows = db
-    .prepare(`SELECT * FROM kpi_monthly_records WHERE period_year = ? ORDER BY period_month ASC`)
-    .all(year);
+  const [kpis, assignRows, recordRows] = await Promise.all([
+    db.all(sql, params),
+    db.all(`SELECT kpi_id, attribute_id FROM kpi_attribute_assignments`),
+    db.all(
+      `SELECT * FROM kpi_monthly_records WHERE period_year = $1 ORDER BY period_month ASC`,
+      Number(year)
+    )
+  ]);
 
   const assignByKpi = new Map();
   for (const row of assignRows) {
@@ -786,7 +846,7 @@ function getEnrichedKpis({ departmentId = null, year = 2026, month = 11 } = {}) 
     const primaryAccent = attributes[0]?.accent || computeHexAccentMeta('#2563EB');
     const monthlyRecords = recordsByKpi.get(kpi.id) || [];
 
-    const currentRecord = monthlyRecords.find((r) => r.period_month === Number(month)) || {
+    const currentRecord = monthlyRecords.find((r) => Number(r.period_month) === Number(month)) || {
       kpi_id: kpi.id,
       period_year: Number(year),
       period_month: Number(month),
@@ -805,18 +865,16 @@ function getEnrichedKpis({ departmentId = null, year = 2026, month = 11 } = {}) 
 
     const prevRecord =
       Number(month) > 1
-        ? monthlyRecords.find((r) => r.period_month === Number(month) - 1)
+        ? monthlyRecords.find((r) => Number(r.period_month) === Number(month) - 1)
         : null;
 
-    // Calculate YTD up to selected month
     const seriesForYtd = monthlyRecords.map((r) => ({
-      month: r.period_month,
+      month: Number(r.period_month),
       target: r.target_value,
       actual: r.actual_value
     }));
     const ytd = calculateYtdMetrics(seriesForYtd, Number(month), kpi);
 
-    // Month-over-Month (MoM) Delta in percentage points
     let momDeltaPct = null;
     if (
       currentRecord.achievement_pct !== null &&
@@ -830,11 +888,10 @@ function getEnrichedKpis({ departmentId = null, year = 2026, month = 11 } = {}) 
       );
     }
 
-    // 6-Month Sparkline up to selected month
     const startSpark = Math.max(1, Number(month) - 5);
     const sparkline = [];
     for (let m = startSpark; m <= Number(month); m++) {
-      const r = monthlyRecords.find((item) => item.period_month === m);
+      const r = monthlyRecords.find((item) => Number(item.period_month) === m);
       sparkline.push({
         month: m,
         achievement_pct: r && r.achievement_pct !== null ? Number(r.achievement_pct) : null,
@@ -867,7 +924,7 @@ function getEnrichedKpis({ departmentId = null, year = 2026, month = 11 } = {}) 
       momDeltaPct,
       sparkline,
       monthlyHistory: monthlyRecords.map((r) => ({
-        month: r.period_month,
+        month: Number(r.period_month),
         target_value: r.target_value,
         actual_value: r.actual_value,
         achievement_pct: r.achievement_pct,
@@ -879,12 +936,11 @@ function getEnrichedKpis({ departmentId = null, year = 2026, month = 11 } = {}) 
   });
 }
 
-/**
- * Build full Executive Dashboard & CPMD Compliance summary
- */
-function getDashboardSummary({ year = 2026, month = 11, mode = 'MONTHLY' } = {}) {
-  const departments = db.prepare(`SELECT * FROM departments WHERE is_active = 1 ORDER BY code ASC`).all();
-  const kpis = getEnrichedKpis({ year, month });
+async function getDashboardSummary({ year = 2026, month = 11, mode = 'MONTHLY' } = {}) {
+  const [departments, kpis] = await Promise.all([
+    db.all(`SELECT * FROM departments WHERE is_active = 1 ORDER BY code ASC`),
+    getEnrichedKpis({ year, month })
+  ]);
 
   const departmentSummaries = departments.map((dept) => {
     const deptKpis = kpis.filter((k) => k.department_id === dept.id);
@@ -925,7 +981,6 @@ function getDashboardSummary({ year = 2026, month = 11, mode = 'MONTHLY' } = {})
     const activeScore = mode === 'YTD' ? ytdScore : monthlyScore;
     const statusColor = classifyStatusColor(activeScore, 85, 100);
 
-    // Submission status for CPMD Submission Tracker
     let submissionStatus = 'NOT_STARTED';
     if (deptKpis.length > 0 && submittedFinalCount === deptKpis.length) {
       submissionStatus = 'SUBMITTED';
@@ -933,7 +988,6 @@ function getDashboardSummary({ year = 2026, month = 11, mode = 'MONTHLY' } = {})
       submissionStatus = 'DRAFT';
     }
 
-    // Monthly heatmap row (Jan..12)
     const monthlyHeatmap = [];
     for (let m = 1; m <= 12; m++) {
       let mScore = 0;
@@ -994,13 +1048,11 @@ function getDashboardSummary({ year = 2026, month = 11, mode = 'MONTHLY' } = {})
       : 0;
   const corporateActiveScore = mode === 'YTD' ? corporateYtdScore : corporateMonthlyScore;
 
-  // Red KPIs & Mandatory Mitigation Escalations
   const redEscalations = kpis.filter((k) => {
     const st = mode === 'YTD' ? k.ytd.ytdStatusColor : k.current.status_color;
     return st === 'RED' || k.current.status_color === 'RED';
   });
 
-  // CPMD Submission Tracker Summary
   const submittedDepts = departmentSummaries.filter((d) => d.submissionStatus === 'SUBMITTED');
   const pendingDepts = departmentSummaries.filter((d) => d.submissionStatus !== 'SUBMITTED');
 
@@ -1050,6 +1102,8 @@ function getDashboardSummary({ year = 2026, month = 11, mode = 'MONTHLY' } = {})
 
 module.exports = {
   db,
+  pool,
+  initDatabase,
   getAllAttributes,
   getEnrichedKpis,
   getDashboardSummary,
