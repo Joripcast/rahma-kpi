@@ -64,7 +64,9 @@ const PHOSPHOR_OUTLINE_ICONS = {
   minus: `<line x1="40" y1="128" x2="216" y2="128"/>`,
   'arrows-clockwise': `<polyline points="176 104 224 104 224 56"/><path d="M188.4,188.4A88,88,0,0,1,65.77,188.4"/><polyline points="80 152 32 152 32 200"/><path d="M67.6,67.6A88,88,0,0,1,190.23,67.6L224,104"/><line x1="32" y1="152" x2="67.6" y2="188.4"/>`,
   'download-simple': `<line x1="128" y1="144" x2="128" y2="32"/><polyline points="216 144 216 208 40 208 40 144"/><polyline points="168 104 128 144 88 104"/>`,
-  printer: `<polyline points="64 80 64 40 192 40 192 80"/><rect x="64" y="152" width="128" height="68"/><path d="M64,176H28a8,8,0,0,1-8-8V96c0-8.84,7.76-16,17.33-16H218.67C228.24,80,236,87.16,236,96v72a8,8,0,0,1-8,8H192"/><circle cx="188" cy="116" r="10"/>`
+  printer: `<polyline points="64 80 64 40 192 40 192 80"/><rect x="64" y="152" width="128" height="68"/><path d="M64,176H28a8,8,0,0,1-8-8V96c0-8.84,7.76-16,17.33-16H218.67C228.24,80,236,87.16,236,96v72a8,8,0,0,1-8,8H192"/><circle cx="188" cy="116" r="10"/>`,
+  moon: `<path d="M216.7,152.6A91.9,91.9,0,0,1,103.4,39.3a92,92,0,1,0,113.3,113.3Z"/>`,
+  sun: `<circle cx="128" cy="128" r="56"/><line x1="128" y1="24" x2="128" y2="48"/><line x1="128" y1="208" x2="128" y2="232"/><line x1="54.46" y1="54.46" x2="71.43" y2="71.43"/><line x1="184.57" y1="184.57" x2="201.54" y2="201.54"/><line x1="24" y1="128" x2="48" y2="128"/><line x1="208" y1="128" x2="232" y2="128"/><line x1="54.46" y1="201.54" x2="71.43" y2="184.57"/><line x1="184.57" y1="71.43" x2="201.54" y2="54.46"/>`
 };
 
 function phIcon(name, extraClass = '') {
@@ -1815,10 +1817,74 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
+  initThemeController();
   initWallpaperStudio();
   initAccountSettingsModal();
   checkAuthAndBoot();
 });
+
+// ============================================================================
+// NIGHT-COMFORT DARK MODE CONTROLLER (SYNCED VIA LOCALSTORAGE: rahma_theme)
+// ============================================================================
+let refreshGlassDensityForTheme = () => {};
+
+function applyThemeMode(theme) {
+  const isDark = theme === 'dark';
+  if (isDark) {
+    document.documentElement.setAttribute('data-theme', 'dark');
+  } else {
+    document.documentElement.removeAttribute('data-theme');
+  }
+  try {
+    localStorage.setItem('rahma_theme', isDark ? 'dark' : 'light');
+  } catch (_e) {}
+
+  const toggleBtn = document.getElementById('btnThemeToggle');
+  if (toggleBtn) {
+    toggleBtn.innerHTML = isDark
+      ? `${phIcon('sun', 'ph-icon-sm')} <span id="themeToggleLabel">Mode Terang</span>`
+      : `${phIcon('moon', 'ph-icon-sm')} <span id="themeToggleLabel">Mode Malam</span>`;
+    toggleBtn.setAttribute('aria-pressed', String(isDark));
+  }
+
+  const prefThemeSelect = document.getElementById('prefThemeMode');
+  if (prefThemeSelect) {
+    prefThemeSelect.value = isDark ? 'dark' : 'light';
+  }
+
+  refreshGlassDensityForTheme();
+}
+
+function initThemeController() {
+  const savedTheme = localStorage.getItem('rahma_theme') === 'dark' ? 'dark' : 'light';
+  applyThemeMode(savedTheme);
+
+  const toggleBtn = document.getElementById('btnThemeToggle');
+  if (toggleBtn) {
+    toggleBtn.addEventListener('click', () => {
+      const nextTheme =
+        document.documentElement.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+      applyThemeMode(nextTheme);
+      showToast(
+        nextTheme === 'dark'
+          ? 'Mode Malam (Dark Mode) diaktifkan untuk kenyamanan mata.'
+          : 'Mode Terang (Light Mode) diaktifkan.'
+      );
+    });
+  }
+
+  const prefThemeSelect = document.getElementById('prefThemeMode');
+  if (prefThemeSelect) {
+    prefThemeSelect.addEventListener('change', () => {
+      applyThemeMode(prefThemeSelect.value);
+      showToast(
+        prefThemeSelect.value === 'dark'
+          ? 'Mode Malam (Dark Mode) diaktifkan.'
+          : 'Mode Terang (Light Mode) diaktifkan.'
+      );
+    });
+  }
+}
 
 // ============================================================================
 // REAL AUTHENTICATION & STRICT RBAC UI ENFORCEMENT
@@ -2302,25 +2368,32 @@ function initWallpaperStudio() {
   function applyGlassDensity(density) {
     const prefix = getWallpaperStoragePrefix();
     const root = document.documentElement;
+    const isDark = root.getAttribute('data-theme') === 'dark';
     if (density === 'clear') {
-      root.style.setProperty('--glass-bg', 'rgba(255, 255, 255, 0.34)');
-      root.style.setProperty('--glass-bg-strong', 'rgba(255, 255, 255, 0.44)');
-      root.style.setProperty('--glass-sidebar', 'rgba(248, 250, 252, 0.40)');
+      root.style.setProperty('--glass-bg', isDark ? 'rgba(15, 23, 42, 0.54)' : 'rgba(255, 255, 255, 0.34)');
+      root.style.setProperty('--glass-bg-strong', isDark ? 'rgba(15, 23, 42, 0.66)' : 'rgba(255, 255, 255, 0.44)');
+      root.style.setProperty('--glass-sidebar', isDark ? 'rgba(15, 23, 42, 0.64)' : 'rgba(248, 250, 252, 0.40)');
       root.style.setProperty('--glass-blur', 'blur(20px) saturate(175%)');
     } else if (density === 'solid') {
-      root.style.setProperty('--glass-bg', 'rgba(255, 255, 255, 0.74)');
-      root.style.setProperty('--glass-bg-strong', 'rgba(255, 255, 255, 0.84)');
-      root.style.setProperty('--glass-sidebar', 'rgba(248, 250, 252, 0.78)');
+      root.style.setProperty('--glass-bg', isDark ? 'rgba(15, 23, 42, 0.88)' : 'rgba(255, 255, 255, 0.74)');
+      root.style.setProperty('--glass-bg-strong', isDark ? 'rgba(15, 23, 42, 0.94)' : 'rgba(255, 255, 255, 0.84)');
+      root.style.setProperty('--glass-sidebar', isDark ? 'rgba(15, 23, 42, 0.92)' : 'rgba(248, 250, 252, 0.78)');
       root.style.setProperty('--glass-blur', 'blur(34px) saturate(200%)');
     } else {
-      root.style.setProperty('--glass-bg', 'rgba(255, 255, 255, 0.48)');
-      root.style.setProperty('--glass-bg-strong', 'rgba(255, 255, 255, 0.56)');
-      root.style.setProperty('--glass-sidebar', 'rgba(248, 250, 252, 0.54)');
+      root.style.setProperty('--glass-bg', isDark ? 'rgba(15, 23, 42, 0.70)' : 'rgba(255, 255, 255, 0.48)');
+      root.style.setProperty('--glass-bg-strong', isDark ? 'rgba(15, 23, 42, 0.82)' : 'rgba(255, 255, 255, 0.56)');
+      root.style.setProperty('--glass-sidebar', isDark ? 'rgba(15, 23, 42, 0.80)' : 'rgba(248, 250, 252, 0.54)');
       root.style.setProperty('--glass-blur', 'blur(28px) saturate(190%)');
     }
     densityBtns.forEach((b) => b.classList.toggle('active', b.dataset.density === density));
     localStorage.setItem(`${prefix}glass_density`, density);
   }
+
+  refreshGlassDensityForTheme = () => {
+    const prefix = getWallpaperStoragePrefix();
+    const savedDensity = localStorage.getItem(`${prefix}glass_density`) || 'balanced';
+    applyGlassDensity(savedDensity);
+  };
 
   function refreshSavedPcCard() {
     const prefix = getWallpaperStoragePrefix();
