@@ -59,7 +59,7 @@
       --p-bg: #eef4ff;
       --p-surface: rgba(255, 255, 255, 0.84);
       --p-ink: #0f172a;
-      --p-muted: #475569;
+      --p-muted: #334155;
       --p-accent: #007BC8;
       --p-accent-ink: #ffffff;
       --p-action: #007BC8;
@@ -1277,7 +1277,7 @@
       --p-bg: #020617;
       --p-surface: rgba(15, 23, 42, 0.80);
       --p-ink: #f8fafc;
-      --p-muted: #94a3b8;
+      --p-muted: #cbd5e1;
       --p-accent: #38bdf8;
       --p-accent-ink: #0f172a;
       --p-action: #007BC8;
@@ -1285,7 +1285,7 @@
       --bg: #020617;
       --surface: rgba(15, 23, 42, 0.80);
       --ink: #f8fafc;
-      --muted: #94a3b8;
+      --muted: #cbd5e1;
       --card: rgba(15, 23, 42, 0.78);
       --line: rgba(148, 163, 184, 0.20);
       --line-strong: rgba(148, 163, 184, 0.34);
@@ -1621,7 +1621,7 @@
 
             <div class="ly-collage__set" aria-hidden="true">
               <div class="ly-piece rk-hex-card" style="left: 3%; top: 6%; width: 52%">
-                <small style="color:#64748b;font-weight:600;font-family:var(--font-mono)">ATRIBUT WARNA HEX &middot;
+                <small style="color:var(--p-muted);font-weight:600;font-family:var(--font-mono)">ATRIBUT WARNA HEX &middot;
                   WCAG</small>
                 <strong style="font-size:clamp(13.5px,1.85cqw,16.5px)">Tag Strategis Terstandarisasi</strong>
                 <div class="rk-swatch-row">
@@ -1632,7 +1632,7 @@
               </div>
 
               <div class="ly-piece rk-scorecard" style="left: 58%; top: 8%; width: 39%">
-                <small style="color:#64748b;font-weight:600;font-family:var(--font-mono)">MESIN AGREGASI YTD</small>
+                <small style="color:var(--p-muted);font-weight:600;font-family:var(--font-mono)">MESIN AGREGASI YTD</small>
                 <div class="rk-dept-row"><b>Mode SUM</b><span class="rk-pill rk-pill--green">Akumulatif</span></div>
                 <div class="rk-dept-row"><b>Mode AVG</b><span class="rk-pill rk-pill--yellow">Rata-rata</span></div>
                 <div class="rk-dept-row"><b>Cap Skor</b><span class="rk-pill rk-pill--green">Maks 120%</span></div>
@@ -1692,11 +1692,11 @@
                   <path d="M 160 36 A 83 83 0 0 1 188 100" fill="none" stroke="#86efac" stroke-width="14"
                     stroke-linecap="round" />
                   <g class="rk-gauge-needle" id="demoGaugeNeedle">
-                    <line x1="105" y1="100" x2="105" y2="32" stroke="#0f172a" stroke-width="3.5"
+                    <line x1="105" y1="100" x2="105" y2="32" stroke="var(--p-ink)" stroke-width="3.5"
                       stroke-linecap="round" />
-                    <circle cx="105" cy="100" r="6" fill="#0f172a" />
+                    <circle cx="105" cy="100" r="6" fill="var(--p-ink)" />
                   </g>
-                  <text x="105" y="76" text-anchor="middle" font-size="22" font-weight="700" fill="#0f172a"
+                  <text x="105" y="76" text-anchor="middle" font-size="22" font-weight="700" fill="var(--p-ink)"
                     id="demoGaugeScore">81.5%</text>
                 </svg>
                 <span class="rk-pill rk-pill--red" id="demoGaugePill">Critical &bull; 81.47%</span>
@@ -1724,8 +1724,8 @@
             <div class="rk-demo-box">
               <div class="rk-demo-top">
                 <div>
-                  <div style="font-size:11px;font-weight:600;color:#64748b">KPI-COM-01 &bull; Target: 12.5 M</div>
-                  <strong style="font-size:14px;color:#0f172a">Actual: <span id="demoActualLabel">8.9</span> M (<span
+                  <div style="font-size:11px;font-weight:600;color:var(--p-muted)">KPI-COM-01 &bull; Target: 12.5 M</div>
+                  <strong style="font-size:14px;color:var(--p-ink)">Actual: <span id="demoActualLabel">8.9</span> M (<span
                       id="demoAchLabel">71.2%</span>)</strong>
                 </div>
                 <span class="rk-pill rk-pill--red" id="demoGateStatusPill">RED</span>

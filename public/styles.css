@@ -30,7 +30,7 @@
   /* Penpot Design System - UI Kit Color Palette */
   --primary: #007BC8;
   --primary-hover: #0065A8;
-  --secondary: #475569;
+  --secondary: #334155;
 
   --success: #16a34a;
   --success-bg: #ecfdf5;
@@ -56,10 +56,11 @@
   --bg-subtle: #f8fafc;
   --bg-sidebar: #f8fafc;
 
+  /* Standardized 2-Tier Text Color Hierarchy (Crisp in Light & Dark Mode) */
   --text-h1: #0f172a;
-  --text-h2: #1e293b;
-  --text-body: #334155;
-  --text-caption: #64748b;
+  --text-h2: #0f172a;
+  --text-body: #1e293b;
+  --text-caption: #334155;
 
   --border-color: #e2e8f0;
   --input-border: #cbd5e1;
@@ -3892,7 +3893,7 @@ html[data-theme="dark"] {
   color-scheme: dark;
   --primary: #38bdf8;
   --primary-hover: #0ea5e9;
-  --secondary: #94a3b8;
+  --secondary: #cbd5e1;
 
   --success: #22c55e;
   --success-bg: rgba(6, 78, 59, 0.45);
@@ -3918,10 +3919,11 @@ html[data-theme="dark"] {
   --bg-subtle: rgba(15, 23, 42, 0.72);
   --bg-sidebar: rgba(15, 23, 42, 0.82);
 
+  /* Standardized 2-Tier High-Contrast Dark Mode Text Hierarchy */
   --text-h1: #f8fafc;
-  --text-h2: #e2e8f0;
-  --text-body: #cbd5e1;
-  --text-caption: #94a3b8;
+  --text-h2: #f8fafc;
+  --text-body: #e2e8f0;
+  --text-caption: #cbd5e1;
 
   --border-color: rgba(148, 163, 184, 0.20);
   --input-border: rgba(148, 163, 184, 0.28);
@@ -3956,6 +3958,43 @@ html[data-theme="dark"] .wallpaper-backdrop::after {
 
 html[data-theme="dark"] .sidebar {
   box-shadow: inset -1px 0 0 rgba(255, 255, 255, 0.08), 4px 0 28px rgba(2, 6, 23, 0.45);
+}
+
+html[data-theme="dark"] .nav-btn:not(.active) {
+  background: rgba(30, 41, 59, 0.74);
+  border-color: rgba(148, 163, 184, 0.24);
+  color: var(--text-h1);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.08), 0 4px 12px rgba(2, 6, 23, 0.35);
+}
+
+html[data-theme="dark"] .nav-btn:not(.active):hover {
+  background: rgba(51, 65, 85, 0.88);
+  border-color: rgba(56, 189, 248, 0.45);
+  color: var(--primary);
+}
+
+html[data-theme="dark"] .nav-btn:not(.active) .nav-desc {
+  color: var(--text-caption);
+}
+
+html[data-theme="dark"] .nav-btn:not(.active) .nav-icon-box {
+  background: rgba(56, 189, 248, 0.14);
+  border-color: rgba(56, 189, 248, 0.32);
+  color: var(--primary);
+}
+
+html[data-theme="dark"] .pill-badge.neutral,
+html[data-theme="dark"] .micro-badge {
+  background: rgba(30, 41, 59, 0.85);
+  color: var(--text-h1);
+  border-color: rgba(148, 163, 184, 0.28);
+}
+
+html[data-theme="dark"] .tech-spec-item,
+html[data-theme="dark"] .multi-attr-picker,
+html[data-theme="dark"] .hex-preview-box {
+  background: rgba(15, 23, 42, 0.72);
+  border-color: rgba(148, 163, 184, 0.24);
 }
 
 html[data-theme="dark"] .topbar {

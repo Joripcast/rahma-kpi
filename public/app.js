@@ -114,12 +114,12 @@ function computeClientHexAccent(hexInput) {
 
 function renderHexBadgesHtml(attributes = []) {
   if (!attributes || attributes.length === 0) {
-    return `<span class="hex-badge" style="background:rgba(241,245,249,0.55);color:#64748b;border-color:rgba(255,255,255,0.7)">Tanpa Atribut</span>`;
+    return `<span class="hex-badge" style="background:var(--bg-subtle);color:var(--text-caption);border-color:var(--border-color)">Tanpa Atribut</span>`;
   }
   return `<div class="attr-badges-wrap">${attributes
     .map((attr) => {
       const acc = attr.accent || computeClientHexAccent(attr.hex_color);
-      return `<span class="hex-badge" style="background:${acc.softBg};color:#0f172a;border-color:${acc.borderRgba};box-shadow:0 4px 14px ${acc.hex}2e, inset 0 1px 0 rgba(255,255,255,0.78)" title="${escapeHtml(attr.attribute_group)}: ${escapeHtml(attr.name)} (${acc.hex})">
+      return `<span class="hex-badge" style="background:${acc.softBg};color:var(--text-h1);border-color:${acc.borderRgba};box-shadow:0 4px 14px ${acc.hex}2e" title="${escapeHtml(attr.attribute_group)}: ${escapeHtml(attr.name)} (${acc.hex})">
         <span class="hex-dot" style="background:${acc.hex};box-shadow:0 0 8px ${acc.hex}99"></span>
         ${escapeHtml(attr.name)}
       </span>`;
@@ -168,7 +168,7 @@ function renderProblemIdentificationHtml(
               const acc = matchedAttr
                 ? matchedAttr.accent || computeClientHexAccent(matchedAttr.hex_color)
                 : computeClientHexAccent('#DC2626');
-              return `<span class="prob-quick-tag-pill" style="background:${acc.softBg};border-color:${acc.borderRgba};color:#0f172a">
+              return `<span class="prob-quick-tag-pill" style="background:${acc.softBg};border-color:${acc.borderRgba};color:var(--text-h1)">
                 <span class="prob-tag-dot" style="background:${acc.hex}"></span>
                 ${escapeHtml(tagName)}
               </span>`;
@@ -186,7 +186,7 @@ function renderProblemIdentificationHtml(
 function renderSparklineSvg(sparkline = []) {
   const validPts = sparkline.filter((p) => p.achievement_pct !== null);
   if (validPts.length < 2) {
-    return `<span style="font-size:11px;color:#94a3b8">Histori &lt;2 bln</span>`;
+    return `<span style="font-size:11px;color:var(--text-caption)">Histori &lt;2 bln</span>`;
   }
   const width = 94;
   const height = 28;
@@ -247,9 +247,9 @@ function renderSpeedometerSvg(score = 0) {
       <rect x="212" y="6" width="44" height="10" rx="5" fill="#fde68a" />
       <rect x="260" y="6" width="40" height="10" rx="5" fill="#86efac" />
       <rect class="speedometer-marker" x="${barMarkerX - 4}" y="2" width="8" height="18" rx="4" fill="#0F172A" />
-      <text x="20" y="34" font-size="11" font-weight="600" fill="#DC2626">0% (&lt;85%)</text>
-      <text x="196" y="34" font-size="11" font-weight="600" fill="#92400E">85%</text>
-      <text x="252" y="34" font-size="11" font-weight="600" fill="#065F46">100–120%</text>
+      <text x="20" y="34" font-size="11" font-weight="600" fill="var(--danger-text)">0% (&lt;85%)</text>
+      <text x="196" y="34" font-size="11" font-weight="600" fill="var(--warning-text)">85%</text>
+      <text x="252" y="34" font-size="11" font-weight="600" fill="var(--success-text)">100–120%</text>
     </svg>
   `;
 }
@@ -438,7 +438,7 @@ function renderExecutiveDashboard() {
       return `
         <div class="mini-dept-card">
           <div class="mini-dept-top">
-            <span style="color:${color}">Divisi ${escapeHtml(dept.code)} — ${dept.activeScore}%</span>
+            <span style="color:var(--text-h1)">Divisi ${escapeHtml(dept.code)} — ${dept.activeScore}%</span>
             <span class="status-pill status-${dept.statusColor}" style="min-height:24px;padding:2px 8px;font-size:10.5px">
               ${badgeLabel}
             </span>
@@ -446,7 +446,7 @@ function renderExecutiveDashboard() {
           <div class="mini-progress-track">
             <div class="mini-progress-fill" style="width:${pctWidth}%;background:${color}"></div>
           </div>
-          <div style="font-size:11px;font-weight:600;color:#475569">
+          <div style="font-size:11px;font-weight:600;color:var(--text-body)">
             Monthly: ${dept.monthlyScore}% | YTD: ${dept.ytdScore}%
           </div>
         </div>
@@ -494,7 +494,7 @@ function renderExecutiveDashboard() {
           ${SHORT_MONTHS.map(
             (mName, idx) =>
               `<th style="text-align:center;${
-                idx + 1 === state.month ? 'background:#dbeafe;color:#1e40af' : ''
+                idx + 1 === state.month ? 'background:rgba(0,123,200,0.22);color:var(--text-h1)' : ''
               }">${mName}</th>`
           ).join('')}
           <th style="text-align:center">YTD</th>
@@ -536,7 +536,7 @@ function renderExecutiveDashboard() {
     `${d.redEscalations.length} Indikator Kritis (Merah)`;
 
   if (d.redEscalations.length === 0) {
-    escBoard.innerHTML = `<div style="padding:16px;background:#ecfdf5;color:#065f46;border-radius:15px;font-weight:700;display:flex;align-items:center;gap:8px">
+    escBoard.innerHTML = `<div style="padding:16px;background:var(--success-bg);color:var(--success-text);border-radius:15px;font-weight:700;display:flex;align-items:center;gap:8px">
       ${phIcon('check-circle')} Seluruh KPI Pada Periode Ini Berada Di Atas Ambang Batas Merah. Tidak Ada Eskalasi Kritis.
     </div>`;
   } else {
@@ -549,10 +549,10 @@ function renderExecutiveDashboard() {
             <div class="kpi-left-accent-bar" style="background:#DC2626"></div>
             <div class="esc-header">
               <div>
-                <span style="font-size:12px;font-weight:700;color:#64748b">${escapeHtml(
+                <span style="font-size:12px;font-weight:700;color:var(--text-caption)">${escapeHtml(
                   k.department_code
                 )} • ${escapeHtml(k.code)}</span>
-                <h4 style="font-size:15px;font-weight:700;color:#0f172a;margin:2px 0">${escapeHtml(
+                <h4 style="font-size:15px;font-weight:700;color:var(--text-h1);margin:2px 0">${escapeHtml(
                   k.title
                 )}</h4>
                 ${renderHexBadgesHtml(k.attributes)}
@@ -648,15 +648,15 @@ function renderExecutiveDashboard() {
                 ${renderHexBadgesHtml(k.attributes)}
               </div>
 
-              <div style="font-size:13px;font-weight:700;color:#334155">
+              <div style="font-size:13px;font-weight:700;color:var(--text-body)">
                 Divisi: ${escapeHtml(k.department_code)}
               </div>
 
               <div>
-                <strong style="font-size:16px;font-weight:700;color:${isRedCard ? '#991B1B' : '#0F172A'}">
+                <strong style="font-size:16px;font-weight:700;color:${isRedCard ? 'var(--danger-text)' : 'var(--text-h1)'}">
                   ${activeAchPct !== null ? `${activeAchPct}%` : '-'}
                 </strong>
-                <span style="font-size:13px;font-weight:600;color:#475569">
+                <span style="font-size:13px;font-weight:600;color:var(--text-body)">
                   (Skor Bobot: ${activeWeighted ?? '-'})
                 </span>
               </div>
@@ -667,7 +667,7 @@ function renderExecutiveDashboard() {
                 <span class="status-pill status-${activeStatus}">
                   ${statusText}
                 </span>
-                ${k.current.is_draft ? `<div style="font-size:11px;color:#F68400;font-weight:700;margin-top:4px;text-align:center">Draft</div>` : ''}
+                ${k.current.is_draft ? `<div style="font-size:11px;color:var(--warning-text);font-weight:700;margin-top:4px;text-align:center">Draft</div>` : ''}
               </div>
 
               <div style="text-align:right">
@@ -726,10 +726,10 @@ function renderSpreadsheetInputView() {
           <div class="kpi-row-main">
             <!-- Col 1: KPI Identity & Multi-Badges (Clean Summary) -->
             <div>
-              <div style="font-size:12px;font-weight:700;color:#64748b">
+              <div style="font-size:12px;font-weight:700;color:var(--text-caption)">
                 ${escapeHtml(k.department_code)} • ${escapeHtml(k.code)}
               </div>
-              <div style="font-size:15px;font-weight:700;color:#0f172a;margin:2px 0">
+              <div style="font-size:15px;font-weight:700;color:var(--text-h1);margin:2px 0">
                 ${escapeHtml(k.title)}
               </div>
               ${renderHexBadgesHtml(k.attributes)}
@@ -766,10 +766,10 @@ function renderSpreadsheetInputView() {
             <!-- Col 4: Live Achievement & Weighted Score -->
             <div id="live-calc-${k.id}">
               <span class="micro-label">Capaian &amp; Skor Bobot</span>
-              <div style="font-size:18px;font-weight:700;color:#0f172a" class="live-ach-text">
+              <div style="font-size:18px;font-weight:700;color:var(--text-h1)" class="live-ach-text">
                 ${k.current.achievement_pct !== null ? `${k.current.achievement_pct}%` : '-'}
               </div>
-              <div style="font-size:12px;color:#475569" class="live-weight-text">
+              <div style="font-size:12px;color:var(--text-body)" class="live-weight-text">
                 Skor Terbobot: <strong>${k.current.weighted_score ?? '-'}</strong>
               </div>
             </div>
@@ -781,7 +781,7 @@ function renderSpreadsheetInputView() {
                 <span class="status-pill status-${k.current.status_color}" id="live-status-${k.id}">
                   ${k.current.status_color}
                 </span>
-                ${k.current.is_draft ? `<span style="font-size:11px;color:#F68400;font-weight:700;margin-left:4px">Draft</span>` : ''}
+                ${k.current.is_draft ? `<span style="font-size:11px;color:var(--warning-text);font-weight:700;margin-left:4px">Draft</span>` : ''}
               </div>
               <button type="button" class="btn-outline" data-detail-kpi="${k.id}">
                 ${phIcon('magnifying-glass')} Lihat Rincian
@@ -820,14 +820,14 @@ function renderSpreadsheetInputView() {
               <div class="gate-warning-title">
                 ${phIcon('shield-warning')} Gerbang Logika Mitigasi Wajib Isi (Capaian &lt; Ambang Batas Merah ${k.red_threshold}%)
               </div>
-              <span style="font-size:12px;color:#991b1b;font-weight:600">
+              <span style="font-size:12px;color:var(--danger-text);font-weight:600">
                 Tombol Simpan Data Akan Menolak Penyimpanan Jika Ke-3 Kolom Di Bawah Ini Kosong!
               </span>
             </div>
 
             <!-- Quick-Tag Mitigation Chips (HEX Color-Coded) -->
             <div class="quick-tags-bar" data-kpi-id="${k.id}">
-              <span style="font-size:12px;font-weight:700;color:#7f1d1d;display:inline-flex;align-items:center;gap:6px">${phIcon('tag', 'ph-icon-sm')} Quick-Tag Akar Masalah (Klik Untuk Sisipkan):</span>
+              <span style="font-size:12px;font-weight:700;color:var(--danger-text);display:inline-flex;align-items:center;gap:6px">${phIcon('tag', 'ph-icon-sm')} Quick-Tag Akar Masalah (Klik Untuk Sisipkan):</span>
               ${mitigationQuickTags
                 .map((tag) => {
                   const isSel =
@@ -1119,9 +1119,9 @@ function renderCpmdHubView() {
             <strong>${escapeHtml(dept.code)}</strong>
             <span class="status-pill status-${stColor}">${stText}</span>
           </div>
-          <div style="font-size:12.5px;font-weight:700;color:#0f172a">${escapeHtml(dept.name)}</div>
-          <div style="font-size:11px;color:#64748b;margin:4px 0">${escapeHtml(dept.leader_name)}</div>
-          <div style="font-size:11.5px;font-weight:800;color:#1e293b">
+          <div style="font-size:12.5px;font-weight:700;color:var(--text-h1)">${escapeHtml(dept.name)}</div>
+          <div style="font-size:11px;color:var(--text-caption);margin:4px 0">${escapeHtml(dept.leader_name)}</div>
+          <div style="font-size:11.5px;font-weight:800;color:var(--text-h2)">
             Kelengkapan: ${dept.submittedFinalCount}/${dept.kpiCount} KPI Final
           </div>
         </div>
@@ -1152,7 +1152,7 @@ function renderCpmdHubView() {
               <td><code>${escapeHtml(dept.code)}</code></td>
               <td>
                 <strong>${escapeHtml(dept.name)}</strong>
-                <div style="font-size:11.5px;color:#64748b">${escapeHtml(dept.description || '-')}</div>
+                <div style="font-size:11.5px;color:var(--text-caption)">${escapeHtml(dept.description || '-')}</div>
               </td>
               <td>${escapeHtml(dept.leader_name)}</td>
               <td><strong>${dept.kpiCount} KPI</strong></td>
@@ -1161,7 +1161,7 @@ function renderCpmdHubView() {
                   <button type="button" class="btn-ghost btn-edit-dept" data-dept-id="${dept.id}" style="min-height:36px;height:auto;padding:6px 14px;font-size:12px" ${isReadOnlyRole ? 'disabled' : ''}>
                     ${phIcon('pencil-simple', 'ph-icon-sm')} Ubah
                   </button>
-                  <button type="button" class="btn-ghost btn-delete-dept" data-dept-id="${dept.id}" style="min-height:36px;height:auto;padding:6px 14px;font-size:12px;color:#dc2626" ${isReadOnlyRole ? 'disabled' : ''}>
+                  <button type="button" class="btn-ghost btn-delete-dept" data-dept-id="${dept.id}" style="min-height:36px;height:auto;padding:6px 14px;font-size:12px;color:var(--danger-text)" ${isReadOnlyRole ? 'disabled' : ''}>
                     ${phIcon('trash', 'ph-icon-sm')} Hapus
                   </button>
                 </div>
@@ -1228,7 +1228,7 @@ function renderCpmdHubView() {
               <div style="display:flex;gap:8px;align-items:center">
                 <button type="button" class="btn-detail-trigger" data-detail-kpi="${k.id}" style="min-height:36px;height:auto;padding:6px 14px;font-size:12px">${phIcon('magnifying-glass', 'ph-icon-sm')} Rincian</button>
                 <button type="button" class="btn-ghost btn-edit-kpi" data-kpi-id="${k.id}" style="min-height:36px;height:auto;padding:6px 14px;font-size:12px">${phIcon('pencil-simple', 'ph-icon-sm')} Edit</button>
-                <button type="button" class="btn-ghost btn-delete-kpi" data-kpi-id="${k.id}" style="min-height:36px;height:auto;padding:6px 14px;font-size:12px;color:#dc2626">${phIcon('trash', 'ph-icon-sm')} Hapus</button>
+                <button type="button" class="btn-ghost btn-delete-kpi" data-kpi-id="${k.id}" style="min-height:36px;height:auto;padding:6px 14px;font-size:12px;color:var(--danger-text)">${phIcon('trash', 'ph-icon-sm')} Hapus</button>
               </div>
             </td>
           </tr>
@@ -1265,7 +1265,7 @@ function renderKpiFormAttributePicker(selectedIds = []) {
     .map((a) => {
       const checked = selectedIds.includes(a.id) ? 'checked' : '';
       return `
-        <label class="attr-check-pill" style="background:${a.accent.softBg};border:1px solid ${a.accent.borderRgba};color:#0f172a">
+        <label class="attr-check-pill" style="background:${a.accent.softBg};border:1px solid ${a.accent.borderRgba};color:var(--text-h1)">
           <input type="checkbox" name="kpiAttrCheckbox" value="${a.id}" ${checked} />
           <span class="hex-dot" style="background:${a.hex_color}"></span>
           <span>${escapeHtml(a.name)}</span>
@@ -1324,10 +1324,10 @@ function renderAttributesStudioView() {
         <div class="attr-catalog-card" style="border-left:6px solid ${acc.hex}">
           <div>
             <div style="display:flex;justify-content:space-between;align-items:center;gap:6px">
-              <span style="font-size:10px;font-weight:800;color:#64748b;text-transform:uppercase">${escapeHtml(
+              <span style="font-size:10.5px;font-weight:800;color:var(--text-caption);text-transform:uppercase">${escapeHtml(
                 a.attribute_group
               )}</span>
-              <code style="font-weight:800;font-size:11.5px;background:#f1f5f9;padding:2px 6px;border-radius:4px">${
+              <code style="font-weight:800;font-size:11.5px;padding:2px 7px;border-radius:6px">${
                 acc.hex
               }</code>
             </div>
@@ -1336,26 +1336,26 @@ function renderAttributesStudioView() {
               <span class="attr-badge-solid" style="background:${acc.hex};color:${acc.textOnSolid}">
                 ${escapeHtml(a.name)}
               </span>
-              <span class="hex-badge" style="background:${acc.softBg};border-color:${acc.borderRgba};color:#0f172a">
+              <span class="hex-badge" style="background:${acc.softBg};border-color:${acc.borderRgba};color:var(--text-h1)">
                 <span class="hex-dot" style="background:${acc.hex}"></span>
                 Soft Badge
               </span>
             </div>
 
-            <p style="font-size:11.5px;color:#475569">${escapeHtml(
+            <p style="font-size:12px;color:var(--text-body);line-height:1.5">${escapeHtml(
               a.description || 'Tidak ada deskripsi tambahan.'
             )}</p>
           </div>
 
-          <div style="display:flex;justify-content:space-between;align-items:center;border-top:1px solid #f1f5f9;padding-top:8px">
-            <span style="font-size:11px;color:#64748b;font-weight:600">
-              Digunakan: <strong>${a.usage_count || 0} KPI</strong>
+          <div style="display:flex;justify-content:space-between;align-items:center;border-top:1px solid var(--border-color);padding-top:8px">
+            <span style="font-size:11.5px;color:var(--text-caption);font-weight:600">
+              Digunakan: <strong style="color:var(--text-h1)">${a.usage_count || 0} KPI</strong>
             </span>
             <div style="display:flex;gap:8px;align-items:center">
               <button type="button" class="btn-ghost btn-edit-attr" data-attr-id="${a.id}" style="min-height:36px;height:auto;padding:6px 14px;font-size:12px">
                 ${phIcon('pencil-simple', 'ph-icon-sm')} Ubah Nama / HEX
               </button>
-              <button type="button" class="btn-ghost btn-delete-attr" data-attr-id="${a.id}" style="min-height:36px;height:auto;padding:6px 14px;font-size:12px;color:#dc2626">
+              <button type="button" class="btn-ghost btn-delete-attr" data-attr-id="${a.id}" style="min-height:36px;height:auto;padding:6px 14px;font-size:12px;color:var(--danger-text)">
                 ${phIcon('trash', 'ph-icon-sm')} Hapus
               </button>
             </div>
@@ -1383,13 +1383,13 @@ function updateHexLivePreview() {
   const statusEl = document.getElementById('hexValidStatus');
   if (meta.isValid) {
     statusEl.innerHTML = `${phIcon('check-circle', 'ph-icon-sm')} Valid HEX (${meta.hex})`;
-    statusEl.style.background = '#ecfdf5';
-    statusEl.style.color = '#065f46';
+    statusEl.style.background = 'var(--success-bg)';
+    statusEl.style.color = 'var(--success-text)';
     document.getElementById('attrFormColorPicker').value = meta.hex;
   } else {
     statusEl.innerHTML = `${phIcon('warning-circle', 'ph-icon-sm')} Gunakan #RRGGBB`;
-    statusEl.style.background = '#fef2f2';
-    statusEl.style.color = '#991b1b';
+    statusEl.style.background = 'var(--danger-bg)';
+    statusEl.style.color = 'var(--danger-text)';
   }
 
   const solidBadge = document.getElementById('previewSolidBadge');
@@ -1401,7 +1401,7 @@ function updateHexLivePreview() {
   tintBadge.textContent = `${nameVal} (Soft Accent)`;
   tintBadge.style.background = meta.softBg;
   tintBadge.style.border = `1px solid ${meta.borderRgba}`;
-  tintBadge.style.color = '#0f172a';
+  tintBadge.style.color = 'var(--text-h1)';
 
   const rowBar = document.getElementById('previewRowAccent');
   rowBar.style.borderLeftColor = meta.hex;
@@ -2598,8 +2598,8 @@ function render12MonthChartSvg(kpi) {
     if (pct === null) {
       return `
         <g>
-          <rect x="${xCenter - barW / 2}" y="${padTop}" width="${barW}" height="${chartH}" fill="#f8fafc" rx="4"/>
-          <text x="${xCenter}" y="${height - 10}" text-anchor="middle" font-size="11" font-weight="${isSelectedMonth ? '900' : '600'}" fill="#94a3b8">${mLabel}</text>
+          <rect x="${xCenter - barW / 2}" y="${padTop}" width="${barW}" height="${chartH}" fill="var(--bg-subtle)" rx="4"/>
+          <text x="${xCenter}" y="${height - 10}" text-anchor="middle" font-size="11" font-weight="${isSelectedMonth ? '900' : '600'}" fill="var(--text-caption)">${mLabel}</text>
         </g>
       `;
     }
@@ -2615,10 +2615,10 @@ function render12MonthChartSvg(kpi) {
 
     return `
       <g>
-        ${isSelectedMonth ? `<rect x="${xCenter - barW / 2 - 5}" y="${padTop - 6}" width="${barW + 10}" height="${chartH + 10}" fill="rgba(37,99,235,0.08)" rx="6"/>` : ''}
+        ${isSelectedMonth ? `<rect x="${xCenter - barW / 2 - 5}" y="${padTop - 6}" width="${barW + 10}" height="${chartH + 10}" fill="rgba(56,189,248,0.14)" rx="6"/>` : ''}
         <rect class="chart-bar-anim" x="${xCenter - barW / 2}" y="${barTop}" width="${barW}" height="${barH}" fill="${fill}" rx="5"/>
-        <text x="${xCenter}" y="${barTop - 6}" text-anchor="middle" font-size="10" font-weight="800" fill="#0f172a">${pct}%</text>
-        <text x="${xCenter}" y="${height - 10}" text-anchor="middle" font-size="11" font-weight="${isSelectedMonth ? '900' : '600'}" fill="${isSelectedMonth ? '#1d4ed8' : '#475569'}">${mLabel}</text>
+        <text x="${xCenter}" y="${barTop - 6}" text-anchor="middle" font-size="10" font-weight="800" fill="var(--text-h1)">${pct}%</text>
+        <text x="${xCenter}" y="${height - 10}" text-anchor="middle" font-size="11" font-weight="${isSelectedMonth ? '900' : '600'}" fill="${isSelectedMonth ? 'var(--primary)' : 'var(--text-body)'}">${mLabel}</text>
       </g>
     `;
   }).join('');
@@ -2627,14 +2627,14 @@ function render12MonthChartSvg(kpi) {
     <svg viewBox="0 0 ${width} ${height}" width="100%" height="${height}" style="display:block">
       <!-- Target 100% Dashed Line -->
       <line x1="${padLeft}" y1="${targetY}" x2="${width - padRight}" y2="${targetY}" stroke="#10b981" stroke-dasharray="4,4" stroke-width="1.5"/>
-      <text x="${padLeft - 6}" y="${targetY + 4}" text-anchor="end" font-size="9.5" font-weight="700" fill="#059669">${kpi.yellow_threshold}%</text>
+      <text x="${padLeft - 6}" y="${targetY + 4}" text-anchor="end" font-size="9.5" font-weight="700" fill="var(--success-text)">${kpi.yellow_threshold}%</text>
 
       <!-- Red Threshold Dashed Line -->
       <line x1="${padLeft}" y1="${redY}" x2="${width - padRight}" y2="${redY}" stroke="#ef4444" stroke-dasharray="4,4" stroke-width="1.5"/>
-      <text x="${padLeft - 6}" y="${redY + 4}" text-anchor="end" font-size="9.5" font-weight="700" fill="#dc2626">${kpi.red_threshold}%</text>
+      <text x="${padLeft - 6}" y="${redY + 4}" text-anchor="end" font-size="9.5" font-weight="700" fill="var(--danger-text)">${kpi.red_threshold}%</text>
 
       <!-- Baseline 0% -->
-      <line x1="${padLeft}" y1="${padTop + chartH}" x2="${width - padRight}" y2="${padTop + chartH}" stroke="#cbd5e1" stroke-width="1"/>
+      <line x1="${padLeft}" y1="${padTop + chartH}" x2="${width - padRight}" y2="${padTop + chartH}" stroke="var(--border-color)" stroke-width="1"/>
       ${barsHtml}
     </svg>
   `;
@@ -2705,7 +2705,7 @@ function openKpiDetailModal(kpiId) {
 
       <div class="detail-stat-box" style="border-top:3px solid #2563eb">
         <div class="ds-label">Skor Terbobot Bulan Ini</div>
-        <div class="ds-val">${kpi.current.weighted_score ?? '-'} <span style="font-size:13px;color:#64748b">/ ${kpi.weight}</span></div>
+        <div class="ds-val">${kpi.current.weighted_score ?? '-'} <span style="font-size:13px;color:var(--text-caption)">/ ${kpi.weight}</span></div>
         <div class="ds-sub">Bobot Indikator: <strong>${kpi.weight}%</strong> dari Divisi ${escapeHtml(kpi.department_code)}</div>
       </div>
 
@@ -2728,7 +2728,7 @@ function openKpiDetailModal(kpiId) {
     <div class="detail-section-card">
       <h4>
         <span style="display:inline-flex;align-items:center;gap:6px">${phIcon('chart-line-up')} Grafik Tren Performa 12 Bulan (Januari &ndash; Desember ${state.year})</span>
-        <span style="font-size:11px;font-weight:600;color:#64748b">Garis Hijau = Target (${kpi.yellow_threshold}%) | Garis Merah = Batas Mitigasi (${kpi.red_threshold}%)</span>
+        <span style="font-size:11px;font-weight:600;color:var(--text-caption)">Garis Hijau = Target (${kpi.yellow_threshold}%) | Garis Merah = Batas Mitigasi (${kpi.red_threshold}%)</span>
       </h4>
       ${render12MonthChartSvg(kpi)}
 
@@ -2739,7 +2739,7 @@ function openKpiDetailModal(kpiId) {
               <th>Parameter</th>
               ${SHORT_MONTHS.map(
                 (m, i) =>
-                  `<th style="text-align:center;${i + 1 === state.month ? 'background:#dbeafe;color:#1e40af' : ''}">${m}</th>`
+                  `<th style="text-align:center;${i + 1 === state.month ? 'background:rgba(0,123,200,0.22);color:var(--text-h1)' : ''}">${m}</th>`
               ).join('')}
             </tr>
           </thead>
@@ -2779,7 +2779,7 @@ function openKpiDetailModal(kpiId) {
               ${kpi.monthlyHistory
                 .map(
                   (h) =>
-                    `<td style="text-align:center;font-size:11.5px;color:#475569">${
+                    `<td style="text-align:center;font-size:11.5px;color:var(--text-body)">${
                       h.weighted_score !== null ? h.weighted_score : '-'
                     }</td>`
                 )
@@ -2863,11 +2863,11 @@ function openKpiDetailModal(kpiId) {
               (attr) => `
             <div class="attr-detail-item" style="border-left:5px solid ${attr.hex_color}">
               <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px">
-                <strong style="font-size:12.5px;color:#0f172a">${escapeHtml(attr.name)}</strong>
-                <code style="font-size:11px;font-weight:800;background:#f1f5f9;padding:2px 6px;border-radius:4px">${attr.hex_color}</code>
+                <strong style="font-size:12.5px;color:var(--text-h1)">${escapeHtml(attr.name)}</strong>
+                <code style="font-size:11px;font-weight:800;padding:2px 6px;border-radius:4px">${attr.hex_color}</code>
               </div>
-              <div style="font-size:10px;font-weight:800;color:#64748b;margin-bottom:4px">${escapeHtml(attr.attribute_group)}</div>
-              <p style="font-size:11.5px;color:#475569">${escapeHtml(attr.description || '-')}</p>
+              <div style="font-size:10px;font-weight:800;color:var(--text-caption);margin-bottom:4px">${escapeHtml(attr.attribute_group)}</div>
+              <p style="font-size:11.5px;color:var(--text-body)">${escapeHtml(attr.description || '-')}</p>
             </div>
           `
             )
@@ -3146,7 +3146,7 @@ function updateOfflineStatusUi() {
       text.textContent =
         queue.length > 0
           ? `Online • ${queue.length} Antrean Menunggu Sync`
-          : 'SQLite & Auto-Backup Offline Aktif';
+          : 'PostgreSQL & Auto-Backup Offline Aktif';
     } else {
       dot.className = 'status-dot-offline';
       text.textContent = 'Mode Offline • Cadangan Lokal Aktif';
