@@ -2501,20 +2501,22 @@ label.attr-check-pill,
 }
 
 .toast {
-  background: var(--text-h1);
+  background: #0a0a0a;
   color: #ffffff;
   padding: 14px 18px;
   border-radius: var(--radius-ui);
-  box-shadow: var(--shadow-md);
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.38);
   font-size: 13px;
   font-weight: 600;
   max-width: 440px;
-  border-left: 5px solid var(--success);
 }
 
 .toast.error {
-  border-left-color: var(--danger);
-  background: #7f1d1d;
+  background: #dc2626;
+  color: #ffffff;
+  border-color: rgba(255, 255, 255, 0.24);
+  box-shadow: 0 12px 28px rgba(220, 38, 38, 0.42);
 }
 
 /* ========================================================================= */
