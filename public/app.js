@@ -222,18 +222,22 @@ function renderSparklineSvg(sparkline = []) {
 
 function renderSpeedometerSvg(score = 0) {
   const clamped = Math.max(0, Math.min(120, Number(score || 0)));
-  // Map 0..120 to angle -90..+90 degrees (matches Login page interactive gauge)
+  // Map 0..120% linearly to angle -90..+90 deg:
+  // 0% = -90 deg (46, 132), 85% = +37.5 deg (229.4, 41.6), 100% = +60 deg (258.7, 75.0), 120% = +90 deg (274, 132)
   const angleDeg = -90 + (clamped / 120) * 180;
   const barMarkerX = Math.round(20 + (clamped / 120) * 280);
 
   return `
     <svg width="320" height="148" viewBox="0 0 320 148" style="max-width:100%;height:auto;" aria-hidden="true">
-      <!-- Red Zone Arc (0 - 85%) -->
-      <path d="M 46 132 A 114 114 0 0 1 177 19" fill="none" stroke="#fca5a5" stroke-width="18" stroke-linecap="round"/>
-      <!-- Yellow/Orange Zone Arc (85 - 100%) -->
-      <path d="M 177 19 A 114 114 0 0 1 241 51" fill="none" stroke="#fde68a" stroke-width="18" />
-      <!-- Green Zone Arc (100 - 120%) -->
-      <path d="M 241 51 A 114 114 0 0 1 274 132" fill="none" stroke="#86efac" stroke-width="18" stroke-linecap="round"/>
+      <!-- Rounded outer end-caps at 0% and 120% so internal 85% & 100% boundaries stay exact (butt-joined) -->
+      <circle cx="46" cy="132" r="9" fill="#fca5a5" />
+      <circle cx="274" cy="132" r="9" fill="#86efac" />
+      <!-- Red Zone Arc (0 - 85%: -90 deg to +37.5 deg) -->
+      <path d="M 46 132 A 114 114 0 0 1 229.4 41.6" fill="none" stroke="#fca5a5" stroke-width="18" stroke-linecap="butt"/>
+      <!-- Yellow/Orange Zone Arc (85 - 100%: +37.5 deg to +60 deg) -->
+      <path d="M 229.4 41.6 A 114 114 0 0 1 258.7 75" fill="none" stroke="#fde68a" stroke-width="18" stroke-linecap="butt"/>
+      <!-- Green Zone Arc (100 - 120%: +60 deg to +90 deg) -->
+      <path d="M 258.7 75 A 114 114 0 0 1 274 132" fill="none" stroke="#86efac" stroke-width="18" stroke-linecap="butt"/>
 
       <!-- Active Needle (Rounded Line + Pivot Hub matching Login Gauge) -->
       <g class="speedometer-needle" style="transform: rotate(${angleDeg}deg); transform-origin: 160px 132px; transition: transform 0.55s cubic-bezier(0.22, 1, 0.36, 1);">
@@ -243,13 +247,14 @@ function renderSpeedometerSvg(score = 0) {
     </svg>
     <div class="gauge-score-callout">${Number(score).toFixed(1)}%</div>
     <svg width="320" height="44" viewBox="0 0 320 44" style="max-width:100%;height:auto;" aria-hidden="true">
-      <rect x="20" y="6" width="188" height="10" rx="5" fill="#fca5a5" />
-      <rect x="212" y="6" width="44" height="10" rx="5" fill="#fde68a" />
-      <rect x="260" y="6" width="40" height="10" rx="5" fill="#86efac" />
+      <!-- Linear 0..120% across 280px (x=20..300): 85% = x:218.3, 100% = x:253.3 -->
+      <rect x="20" y="6" width="197" height="10" rx="5" fill="#fca5a5" />
+      <rect x="219" y="6" width="33" height="10" rx="4" fill="#fde68a" />
+      <rect x="254" y="6" width="46" height="10" rx="5" fill="#86efac" />
       <rect class="speedometer-marker" x="${barMarkerX - 4}" y="2" width="8" height="18" rx="4" fill="#0F172A" />
       <text x="20" y="34" font-size="11" font-weight="600" fill="var(--danger-text)">0% (&lt;85%)</text>
-      <text x="196" y="34" font-size="11" font-weight="600" fill="var(--warning-text)">85%</text>
-      <text x="252" y="34" font-size="11" font-weight="600" fill="var(--success-text)">100–120%</text>
+      <text x="218" y="34" text-anchor="middle" font-size="11" font-weight="600" fill="var(--warning-text)">85%</text>
+      <text x="300" y="34" text-anchor="end" font-size="11" font-weight="600" fill="var(--success-text)">100–120%</text>
     </svg>
   `;
 }
