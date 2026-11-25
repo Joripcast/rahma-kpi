@@ -4,13 +4,13 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-  <title>RAHMA: Platform Governance KPI &amp; Mitigasi Risiko untuk Korporasi</title>
+  <title>RAHMA: Platform Governance KPI, Mitigasi Risiko &amp; Executive Reporting Korporasi</title>
   <meta name="description"
-    content="Sistem pemantauan KPI korporasi dengan skoring polaritas otomatis, gerbang mitigasi wajib di bawah 85%, dan isolasi RBAC 3-peran. Mulai dari Rp 2,5 jt/bulan.">
+    content="Platform pemantauan KPI korporasi berbasis PostgreSQL 18 dengan skoring polaritas &amp; YTD otomatis, gerbang mitigasi wajib di bawah 85%, RBAC 3-peran + OTP, studio atribut HEX, dan Night-Comfort Dark Mode.">
   <meta property="og:type" content="website">
-  <meta property="og:title" content="RAHMA: Platform Governance KPI &amp; Mitigasi Risiko untuk Korporasi">
+  <meta property="og:title" content="RAHMA: Platform Governance KPI, Mitigasi Risiko &amp; Executive Reporting Korporasi">
   <meta property="og:description"
-    content="Skoring KPI otomatis, gerbang mitigasi wajib, dan RBAC 3-peran dalam satu sistem mandiri.">
+    content="Skoring KPI polaritas &amp; YTD otomatis, gerbang mitigasi wajib (<85%), CPMD Submission Tracker, Studio Atribut HEX, dan Mode Malam dalam satu platform PostgreSQL mandiri.">
   <meta name="twitter:card" content="summary_large_image">
   <meta name="theme-color" content="#eef4ff">
   <meta name="site-kind" content="software">
@@ -1533,14 +1533,16 @@
           <div class="nav__menu">
             <div class="wrap grid">
               <div class="menu-col span-4">
-                <p class="t-label">Pengukuran KPI</p>
-                <a href="#platform">Skoring Polaritas Otomatis<span>Maximize, Minimize, dan Cap 120%</span></a>
-                <a href="#platform">Gerbang Mitigasi Wajib<span>Blokir simpan jika kolom risiko kosong</span></a>
+                <p class="t-label">Pengukuran &amp; Visualisasi KPI</p>
+                <a href="#platform">Skoring Polaritas &amp; YTD Otomatis<span>Maximize, Minimize, SUM/AVG/LAST_VALUE &amp; Cap 120%</span></a>
+                <a href="#platform">Gerbang Mitigasi Wajib (&lt; 85%)<span>Quick-Tag akar masalah &amp; blokir simpan HTTP 422</span></a>
+                <a href="#platform">Speedometer &amp; Drawer 12 Bulan<span>Kalibrasi skala 0–85–100–120%, Heatmap &amp; MoM Delta</span></a>
               </div>
               <div class="menu-col span-4">
-                <p class="t-label">Tata Kelola CPMD</p>
-                <a href="#workflow">RBAC 3-Peran Terisolasi<span>CPMD Admin, Division Leader, dan Direksi</span></a>
-                <a href="#workflow">Studio Atribut Warna HEX<span>Label strategis tervalidasi kontras WCAG</span></a>
+                <p class="t-label">Tata Kelola CPMD &amp; Ruang Kerja</p>
+                <a href="#workflow">RBAC 3-Peran &amp; Keamanan OTP<span>CPMD Admin, Division Leader, Direksi &amp; OTP 6-Digit</span></a>
+                <a href="#workflow">CPMD Tracker &amp; Validasi Bobot 100%<span>1-Click salin pengingat WA/Email &amp; kunci periode</span></a>
+                <a href="#atmosphere">Studio Atribut HEX &amp; Mode Malam<span>Multi-badge #RRGGBB, kontras 2-tier &amp; PostgreSQL 18</span></a>
               </div>
             </div>
           </div>
@@ -1578,9 +1580,8 @@
         <div class="hero-text grid hero__grid">
           <div class="span-3">
             <img src="/images/rahma-logo.png" alt="Rahma" class="hero-brand-logo">
-            <h1 id="hero-h">Kontrol KPI dan mitigasi risiko korporasi</h1>
-            <p class="hero__lead">Skoring otomatis, gerbang mitigasi wajib di bawah 85%, dan RBAC 3-peran. Mulai dari Rp
-              2,5 jt/bulan.</p>
+            <h1 id="hero-h">Kontrol KPI, mitigasi risiko, dan pelaporan direksi real-time</h1>
+            <p class="hero__lead">Skoring polaritas &amp; YTD otomatis di atas PostgreSQL 18, gerbang mitigasi wajib di bawah 85%, CPMD Submission Tracker, Studio Atribut HEX, serta antarmuka Frosted Glass Mode Terang &amp; Malam.</p>
           </div>
 
           <div class="ly-collage span-6 start-4" role="img"
@@ -1639,9 +1640,9 @@
               </div>
 
               <div class="ly-piece rk-rbac-card" style="left: 22%; top: 63%; width: 75%; height: 33%">
-                <strong>Snapshot &amp; Lock Periode</strong>
+                <strong>PostgreSQL 18 &amp; Lock Periode</strong>
                 <div class="rk-role-line"><span>Status Periode</span><code>LOCKED BY CPMD</code></div>
-                <div class="rk-role-line"><span>Backup SQLite</span><code>EXPORT .JSON</code></div>
+                <div class="rk-role-line"><span>PostgreSQL + Offline</span><code>AUTO-BACKUP .JSON</code></div>
               </div>
             </div>
           </div>
@@ -1661,9 +1662,8 @@
     <section class="section" id="platform" aria-labelledby="platform-h">
       <div class="wrap">
         <div class="section-head">
-          <h2 id="platform-h">Satu sistem untuk kamus KPI, input realisasi, dan audit direksi</h2>
-          <p>Menggantikan spreadsheet terpisah dengan validasi server-side, skoring polaritas, dan laporan rapat
-            eksekutif siap cetak.</p>
+          <h2 id="platform-h">Satu platform terpadu untuk kamus KPI, spreadsheet realisasi, mitigasi risiko, dan audit direksi</h2>
+          <p>Menggantikan spreadsheet terpisah dan kompilasi PowerPoint manual dengan database relasional PostgreSQL 18, validasi bobot 100%, kalibrasi speedometer presisi, studio multi-atribut HEX, serta Mode Malam (Night-Comfort Dark Mode).</p>
         </div>
 
         <div class="grid" style="gap: 24px;">
@@ -1782,6 +1782,61 @@
             <p>Ubah peran (<strong>CPMD / Leader / BOD</strong>) atau status jaringan untuk melihat isolasi hak akses
               dan antrean cadangan offline.</p>
           </article>
+
+          <!-- FEATURE CARD 4: CPMD SUBMISSION TRACKER & VALIDASI BOBOT 100% -->
+          <article class="card span-4">
+            <div class="rk-demo-box" style="justify-content:space-between;">
+              <div class="rk-demo-top">
+                <span class="rk-pill rk-pill--green">4/5 Divisi Selesai</span>
+                <code style="font-size:11px;font-weight:700;color:var(--p-accent);">BOBOT: 100% VALID</code>
+              </div>
+              <div class="rk-perm-list">
+                <div class="rk-perm-item"><span>1-Click Salin Pengingat</span><span class="rk-perm-badge rk-pill--green">WA / EMAIL</span></div>
+                <div class="rk-perm-item"><span>Validasi Bobot Departemen</span><span class="rk-perm-badge rk-pill--green">WAJIB 100%</span></div>
+                <div class="rk-perm-item"><span>Kunci Periode Pelaporan</span><span class="rk-perm-badge rk-pill--yellow">FREEZE DATA</span></div>
+              </div>
+            </div>
+            <h3>CPMD Tracker &amp; Validasi Bobot 100%</h3>
+            <p>Bebaskan tim CPMD dari tagih manual dengan <strong>1-Click Salin Pengingat</strong>, penguncian periode laporan, dan penjaga bobot 100% otomatis per departemen.</p>
+          </article>
+
+          <!-- FEATURE CARD 5: DRAWER RINCIAN 12 BULAN & STUDIO MULTI-ATRIBUT HEX -->
+          <article class="card span-4">
+            <div class="rk-demo-box" style="justify-content:space-between;">
+              <div class="rk-demo-top">
+                <span class="rk-pill rk-pill--green">▲ +2.8% MoM</span>
+                <code style="font-size:11px;font-weight:700;color:var(--p-accent);">HISTORI 12 BULAN</code>
+              </div>
+              <div class="rk-swatch-row" style="margin:6px 0;">
+                <span class="rk-swatch-chip" style="background:#24C9FB;color:#0F172A;">Core SLA #24C9FB</span>
+                <span class="rk-swatch-chip" style="background:#F68400;color:#0F172A;">HSE &amp; K3 #F68400</span>
+                <span class="rk-swatch-chip" style="background:#0D9488;color:#FFFFFF;">Financial #0D9488</span>
+              </div>
+              <div class="rk-perm-list">
+                <div class="rk-perm-item"><span>Progressive Disclosure Drawer</span><span class="rk-perm-badge rk-pill--green">JAN–DES 2026</span></div>
+                <div class="rk-perm-item"><span>Studio Multi-Badge HEX</span><span class="rk-perm-badge rk-pill--green">KONTRAS 2-TIER</span></div>
+              </div>
+            </div>
+            <h3>Drawer 12 Bulan &amp; Studio Warna HEX</h3>
+            <p>Klik indikator mana pun untuk membuka grafik tren 12 bulan, MoM Delta, dan rincian mitigasi. Kustomisasi label multi-atribut hingga kode <code>#RRGGBB</code>.</p>
+          </article>
+
+          <!-- FEATURE CARD 6: NIGHT-COMFORT DARK MODE, OTP EMAIL & CETAK PDF -->
+          <article class="card span-4">
+            <div class="rk-demo-box" style="justify-content:space-between;">
+              <div class="rk-demo-top">
+                <span class="rk-pill" style="background:#0A0A0A;color:#FFFFFF;">Mode Malam &amp; Terang</span>
+                <code style="font-size:11px;font-weight:700;color:var(--p-accent);">OTP 6-DIGIT</code>
+              </div>
+              <div class="rk-perm-list">
+                <div class="rk-perm-item"><span>Night-Comfort Dark Mode</span><span class="rk-perm-badge rk-pill--green">SINKRON 4 HALAMAN</span></div>
+                <div class="rk-perm-item"><span>Keamanan Ubah Email &amp; Sandi</span><span class="rk-perm-badge rk-pill--green">VERIFIKASI OTP</span></div>
+                <div class="rk-perm-item"><span>One-Click Executive PDF</span><span class="rk-perm-badge rk-pill--green">A4 LANDSCAPE 16:9</span></div>
+              </div>
+            </div>
+            <h3>Mode Malam, OTP &amp; Executive PDF</h3>
+            <p>Antarmuka <em>Frosted Glass</em> dengan kontras teks 2-tier yang nyaman di malam hari, pengamanan akun via OTP 6-digit, serta cetak laporan direksi A4 Landscape 1-klik.</p>
+          </article>
         </div>
       </div>
     </section>
@@ -1793,9 +1848,8 @@
           <h2 id="workflow-h">Dari penyusunan kamus hingga rapat direksi</h2>
           <ol class="mo-pc__steps">
             <li class="mo-pc__step">
-              <h3>1. Susun Kamus KPI &amp; Atribut HEX</h3>
-              <p>CPMD Admin menetapkan departemen, bobot KPI, polaritas, serta label warna HEX yang kontrasnya otomatis
-                tervalidasi.</p>
+              <h3>1. Susun Kamus KPI, Bobot 100% &amp; Atribut HEX</h3>
+              <p>CPMD Admin mengelola master departemen, memvalidasi total bobot 100% per divisi, menetapkan polaritas &amp; metode YTD, serta membuat multi-badge warna HEX dengan kontras teks 2-tier otomatis.</p>
               <figure class="mo-pc__visual">
                 <div class="rk-stage-window">
                   <div class="rk-stage-photo-banner">
@@ -1807,17 +1861,16 @@
                     <div class="rk-stage-row"><span>KPI-COM-01 &middot; Kontrak Baru
                         B2B</span><code>MAX &middot; Bobot 45%</code></div>
                     <div class="rk-stage-row"><span>KPI-OPS-02 &middot; Insiden
-                        Kecelakaan</span><code>MIN &middot; Cap 100%</code></div>
-                    <div class="rk-stage-row"><span>Studio Atribut &middot; Strategic
-                        Priority</span><code>#007BC8 &middot; Kontras AA</code></div>
+                        Kecelakaan</span><code>MIN &middot; Cap 120%</code></div>
+                    <div class="rk-stage-row"><span>Studio Atribut &middot; Core Routine
+                        SLA</span><code>#24C9FB &middot;Valid 100%</code></div>
                   </div>
                 </div>
               </figure>
             </li>
             <li class="mo-pc__step">
-              <h3>2. Input Realisasi &amp; Mitigasi Wajib</h3>
-              <p>Division Leader mengisi realisasi bulanan di departemennya. Skor di bawah 85% langsung mengunci tombol
-                simpan hingga mitigasi diisi.</p>
+              <h3>2. Input Spreadsheet Cepat &amp; Gerbang Mitigasi Wajib</h3>
+              <p>Division Leader mengisi realisasi bulanan bergaya Excel (<kbd>Tab</kbd>/<kbd>Enter</kbd>). Skor di bawah 85% langsung membuka Quick-Tag akar masalah dan mengunci Submit Final hingga 3 kolom mitigasi terisi.</p>
               <figure class="mo-pc__visual">
                 <div class="rk-stage-window">
                   <div class="rk-stage-photo-banner">
@@ -1832,16 +1885,15 @@
                     </div>
                     <div class="rk-stage-row"><span>Quick-Tag: Kendala Vendor / Capex
                         BOD</span><code>3 KOLOM WAJIB</code></div>
-                    <div class="rk-stage-row"><span>Akses Departemen Lain (FIN / HC)</span><code>TERKUNCI (403)</code>
+                    <div class="rk-stage-row"><span>Auto-Save Draft &amp; Isolasi Divisi</span><code>TERKUNCI (403)</code>
                     </div>
                   </div>
                 </div>
               </figure>
             </li>
             <li class="mo-pc__step">
-              <h3>3. Kunci Periode &amp; Presentasi Direksi</h3>
-              <p>CPMD mengunci periode pelaporan agar historis tetap utuh, lalu Direksi meninjau heatmap YTD dan
-                mencetak PDF satu klik.</p>
+              <h3>3. Kunci Periode, Mode Fokus Merah &amp; Presentasi Direksi</h3>
+              <p>CPMD menyalin pengingat 1-klik dan mengunci periode pelaporan. Direksi meninjau Speedometer terkalibrasi, Heatmap 12 bulan, Drawer Rincian Individu, dan mencetak Executive PDF A4 Landscape.</p>
               <figure class="mo-pc__visual">
                 <div class="rk-stage-window">
                   <div class="rk-stage-photo-banner">
@@ -1850,10 +1902,10 @@
                   </div>
                   <div class="rk-stage-head"><span>BOARDROOM VIEW &middot; YTD</span><code>ROLE: EXECUTIVE</code></div>
                   <div class="rk-stage-rows">
-                    <div class="rk-stage-row"><span>Heatmap 12 Bulan &amp; Fokus Merah</span><code>READ-ONLY</code>
+                    <div class="rk-stage-row"><span>Speedometer, Heatmap 12 Bln &amp; Fokus Merah</span><code>LIGHT &amp; DARK MODE</code>
                     </div>
-                    <div class="rk-stage-row"><span>Kunci Periode November 2026</span><code>LOCKED</code></div>
-                    <div class="rk-stage-row"><span>One-Click Executive PDF &amp; JSON</span><code>SIAP CETAK</code>
+                    <div class="rk-stage-row"><span>Drawer Histori 12 Bulan &amp; MoM Delta</span><code>DEEP-DIVE</code></div>
+                    <div class="rk-stage-row"><span>One-Click Executive PDF &amp; Backup JSON</span><code>SIAP CETAK</code>
                     </div>
                   </div>
                 </div>
@@ -1869,8 +1921,8 @@
     <section class="section" id="atmosphere" aria-labelledby="atmosphere-h">
       <div class="wrap">
         <div class="section-head">
-          <h2 id="atmosphere-h">Atmosfer ruang kerja kaca di atas lanskap Magnifik</h2>
-          <p>Klik salah satu fotografi pemandangan resolusi tinggi di bawah untuk mengubah latar belakang live pada halaman ini, halaman Login, dan halaman Sign Up.</p>
+          <h2 id="atmosphere-h">Atmosfer ruang kerja kaca di atas lanskap Magnifik &amp; Mode Malam</h2>
+          <p>Klik salah satu fotografi pemandangan resolusi tinggi di bawah untuk mengubah latar belakang live yang tersinkronisasi di halaman ini, Login, Sign Up, dan Dashboard, lengkap dengan 3 tingkat kerapatan Frosted Glass serta Mode Malam (Dark Mode).</p>
         </div>
 
         <div class="magnifik-gallery-grid" role="group" aria-label="Galeri Pemandangan Magnifik">
@@ -1922,25 +1974,24 @@
       <div class="wrap">
         <div class="section-head">
           <h2 id="proof-h">Dirancang untuk akurasi angka dan ketahanan audit</h2>
-          <p>Seluruh kalkulasi polaritas, gerbang mitigasi, dan kontrol akses dijalankan langsung di mesin server SQLite
-            tanpa ketergantungan eksternal.</p>
+          <p>Seluruh kalkulasi polaritas, gerbang mitigasi, dan kontrol akses dijalankan langsung di atas mesin Node.js dan database relasional PostgreSQL 18 (<code>rahma_kpi</code>) dengan dukungan pencadangan offline otomatis.</p>
         </div>
         <div class="proof-grid">
           <div class="proof-stat">
             <span class="t-stat" data-count-to="3">3</span>
-            <p>Peran RBAC terisolasi dengan sesi cookie terenkripsi HMAC-SHA256</p>
+            <p>Peran RBAC terisolasi dengan sesi cookie HttpOnly HMAC-SHA256 &amp; verifikasi OTP 6-digit</p>
           </div>
           <div class="proof-stat">
             <span class="t-stat" data-count-to="120" data-suffix="%">120%</span>
-            <p>Batas Cap Skor otomatis untuk menjaga keseimbangan bobot indikator</p>
+            <p>Batas Cap Skor otomatis dengan kalibrasi presisi Speedometer &amp; Gauge Bar (0–85–100–120%)</p>
           </div>
           <div class="proof-stat">
             <span class="t-stat" data-count-to="85" data-suffix="%">85%</span>
-            <p>Ambang batas merah pemicu wajib analisis akar masalah dan eskalasi BOD</p>
+            <p>Ambang batas merah pemicu wajib Quick-Tag akar masalah, tindakan korektif, dan eskalasi BOD</p>
           </div>
           <div class="proof-stat">
             <span class="t-stat" data-count-to="10000">10000</span>
-            <p>Simulasi agregasi YTD teruji tuntas dalam 12,6 ms pada engine mandiri</p>
+            <p>Simulasi agregasi YTD teruji tuntas dalam ~10 ms pada engine kalkulasi mandiri</p>
           </div>
         </div>
       </div>
@@ -1951,7 +2002,7 @@
       <div class="wrap">
         <div class="section-head">
           <h2 id="pricing-h">Paket lisensi komersial untuk skala tim hingga korporasi</h2>
-          <p>Tersedia sebagai layanan cloud terkelola maupun instalasi on-premise mandiri di jaringan internal
+          <p>Tersedia sebagai layanan cloud terkelola maupun instalasi on-premise mandiri berbasis PostgreSQL 18 di jaringan internal
             perusahaan.</p>
         </div>
 
@@ -1963,9 +2014,9 @@
                   bulan</span></div>
               <ul class="tier-list">
                 <li>Hingga 5 departemen &amp; 50 KPI aktif</li>
-                <li>Skoring Polaritas &amp; Mode YTD</li>
-                <li>Gerbang Logika Mitigasi wajib</li>
-                <li>Ekspor Executive PDF satu klik</li>
+                <li>Skoring Polaritas, Mode YTD &amp; Speedometer</li>
+                <li>Inline Spreadsheet &amp; Gerbang Mitigasi (&lt;85%)</li>
+                <li>Night-Comfort Dark Mode &amp; Ekspor PDF 1-klik</li>
               </ul>
             </div>
             <a class="btn btn--secondary" href="/app">Mulai Uji Coba<svg class="m-arrow" viewBox="0 0 12 12"
@@ -1982,9 +2033,10 @@
                   bulan</span></div>
               <ul class="tier-list">
                 <li>Departemen &amp; indikator KPI tak terbatas</li>
-                <li>RBAC 3-peran + isolasi departemen</li>
-                <li>Studio Atribut Warna HEX (WCAG)</li>
-                <li>Kunci periode &amp; backup snapshot JSON</li>
+                <li>RBAC 3-peran, isolasi divisi &amp; keamanan OTP</li>
+                <li>CPMD Tracker, 1-Click Reminder &amp; Bobot 100%</li>
+                <li>Studio Multi-Atribut HEX &amp; Drawer 12 Bulan</li>
+                <li>Kunci periode, PostgreSQL 18 &amp; Auto-Backup JSON</li>
               </ul>
             </div>
             <a class="btn btn--primary" href="/app">Coba Demo<svg class="m-arrow" viewBox="0 0 12 12" aria-hidden="true">
@@ -1998,10 +2050,10 @@
               <p class="t-label">Dedicated On-Premise</p>
               <div class="tier-price">Penawaran Khusus</div>
               <ul class="tier-list">
-                <li>Instalasi server internal / air-gapped</li>
-                <li>Integrasi SSO korporasi &amp; audit trail</li>
-                <li>Kustomisasi template laporan direksi</li>
-                <li>Pendampingan migrasi kamus KPI</li>
+                <li>Instalasi PostgreSQL 18 internal / air-gapped</li>
+                <li>Integrasi SSO korporasi &amp; audit trail lengkap</li>
+                <li>Kustomisasi tema Frosted Glass &amp; laporan BOD</li>
+                <li>Buku Panduan Pengguna PDF &amp; migrasi kamus KPI</li>
               </ul>
             </div>
             <a class="btn btn--secondary" href="#contact">Hubungi Tim<svg class="m-arrow" viewBox="0 0 12 12"
@@ -2020,7 +2072,7 @@
         <div class="span-5">
           <div class="section-head">
             <h2 id="faq-h">Pertanyaan umum implementasi</h2>
-            <p>Ringkasan teknis mengenai keamanan akses, arsitektur database, dan proses onboarding tim CPMD. Klik pertanyaan untuk membuka atau menyembunyikan jawaban.</p>
+            <p>Ringkasan teknis mengenai keamanan akses, arsitektur database PostgreSQL 18, fitur visual terbaru, dan proses onboarding tim CPMD. Klik pertanyaan untuk membuka atau menyembunyikan jawaban.</p>
             <button type="button" class="faq-toggle-all-btn" id="btnToggleAllFaq">
               Buka Semua Jawaban
             </button>
@@ -2030,9 +2082,9 @@
           <div class="faq-stack" id="faqAccordionList">
             <div class="faq-accordion-item is-open">
               <button type="button" class="faq-accordion-trigger" aria-expanded="true">
-                <span class="faq-q-title">Apakah RAHMA dapat berjalan tanpa koneksi internet (on-premise)?</span>
+                <span class="faq-q-title">Apakah RAHMA menggunakan database PostgreSQL dan dapat berjalan on-premise?</span>
                 <span class="faq-q-right">
-                  <span class="faq-pill-tag">On-Premise</span>
+                  <span class="faq-pill-tag">PostgreSQL 18</span>
                   <span class="faq-chevron-box" aria-hidden="true">
                     <svg viewBox="0 0 256 256"><polyline points="208 96 128 176 48 96"/></svg>
                   </span>
@@ -2040,16 +2092,16 @@
               </button>
               <div class="faq-accordion-panel">
                 <div class="faq-accordion-inner">
-                  <p class="faq-answer-body">Ya. Engine Node.js dan SQLite berjalan mandiri di server lokal perusahaan tanpa ketergantungan cloud pihak ketiga.</p>
+                  <p class="faq-answer-body">Ya. RAHMA berjalan di atas Node.js dan database relasional PostgreSQL 18 (<code>rahma_kpi</code>) tanpa ketergantungan layanan eksternal, serta dilengkapi pencadangan offline otomatis (<em>Offline Auto-Backup</em>) di sisi browser.</p>
                 </div>
               </div>
             </div>
 
             <div class="faq-accordion-item">
               <button type="button" class="faq-accordion-trigger" aria-expanded="false">
-                <span class="faq-q-title">Bagaimana keamanan antar departemen dijaga?</span>
+                <span class="faq-q-title">Bagaimana keamanan antar departemen dan akun pengguna dijaga?</span>
                 <span class="faq-q-right">
-                  <span class="faq-pill-tag">RBAC Strict</span>
+                  <span class="faq-pill-tag">RBAC + OTP</span>
                   <span class="faq-chevron-box" aria-hidden="true">
                     <svg viewBox="0 0 256 256"><polyline points="208 96 128 176 48 96"/></svg>
                   </span>
@@ -2057,16 +2109,16 @@
               </button>
               <div class="faq-accordion-panel">
                 <div class="faq-accordion-inner">
-                  <p class="faq-answer-body">Server memverifikasi cookie sesi HttpOnly dan menolak akses tulis lintas departemen dengan status HTTP 403.</p>
+                  <p class="faq-answer-body">Server memverifikasi cookie sesi HttpOnly bertanda tangan HMAC-SHA256, menolak akses tulis lintas departemen dengan status HTTP 403, serta mengamankan perubahan email dan kata sandi menggunakan verifikasi kode OTP 6-digit.</p>
                 </div>
               </div>
             </div>
 
             <div class="faq-accordion-item">
               <button type="button" class="faq-accordion-trigger" aria-expanded="false">
-                <span class="faq-q-title">Bisakah bobot dan nama departemen diubah oleh tim CPMD?</span>
+                <span class="faq-q-title">Apa saja fitur kenyamanan visual dan kustomisasi yang kini tersedia?</span>
                 <span class="faq-q-right">
-                  <span class="faq-pill-tag">Dinamis</span>
+                  <span class="faq-pill-tag">Dark Mode &amp; HEX</span>
                   <span class="faq-chevron-box" aria-hidden="true">
                     <svg viewBox="0 0 256 256"><polyline points="208 96 128 176 48 96"/></svg>
                   </span>
@@ -2074,7 +2126,7 @@
               </button>
               <div class="faq-accordion-panel">
                 <div class="faq-accordion-inner">
-                  <p class="faq-answer-body">CPMD Admin dapat menambah, mengubah nama, mengganti pimpinan, serta merekalkulasi skor historis dari antarmuka hub.</p>
+                  <p class="faq-answer-body">Tersedia Mode Malam (Night-Comfort Dark Mode) yang tersinkronisasi di seluruh halaman, standar kontras teks 2-tier yang tajam, Studio Multi-Atribut Warna HEX (<code>#RRGGBB</code>), pilihan latar fotografi Magnifik atau foto PC, serta 3 tingkat kerapatan kaca buram.</p>
                 </div>
               </div>
             </div>
@@ -2091,7 +2143,7 @@
               </button>
               <div class="faq-accordion-panel">
                 <div class="faq-accordion-inner">
-                  <p class="faq-answer-body">Tersedia akun demo CPMD Admin, Division Leader OPS, dan Executive BOD di halaman login aplikasi.</p>
+                  <p class="faq-answer-body">Tersedia tombol masuk cepat 1-klik untuk akun demo CPMD Admin, Division Leader OPS, dan Executive BOD di halaman login aplikasi dengan kata sandi <code>rahma2026</code>.</p>
                 </div>
               </div>
             </div>
