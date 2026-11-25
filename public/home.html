@@ -302,71 +302,142 @@
       color: #0f172a !important;
     }
 
-    /* Triptych Hero Alignment & Frosted Glass Left Hero Card */
-    .hero--triptych .hero__grid {
+    /* Balanced 2-Column Hero Layout (Left Frosted Glass Card + Right Landscape Collage) */
+    .hero--triptych {
+      min-height: 100svh !important;
+      height: auto !important;
+      display: flex !important;
       align-items: center !important;
+      padding-top: calc(var(--nav, 76px) + clamp(28px, 3.5vw, 44px)) !important;
+      padding-bottom: clamp(32px, 4vw, 52px) !important;
     }
 
-    .hero--triptych .hero__grid > .span-3:first-child {
-      background: rgba(255, 255, 255, 0.80);
+    .hero--triptych > .wrap {
+      width: 100% !important;
+      height: auto !important;
+    }
+
+    .hero--triptych .hero__grid {
+      align-items: stretch !important;
+      display: grid !important;
+      gap: clamp(22px, 2.4vw, 32px) !important;
+    }
+
+    .hero--triptych .hero__grid > .hero-left-card {
+      background: rgba(255, 255, 255, 0.84);
       backdrop-filter: blur(28px) saturate(185%);
       -webkit-backdrop-filter: blur(28px) saturate(185%);
       border: 1.5px solid rgba(255, 255, 255, 0.94);
       border-radius: var(--radius-board);
       box-shadow: var(--glass-bevel-shadow);
-      padding: clamp(22px, 2.4vw, 30px);
+      padding: clamp(26px, 2.8vw, 36px);
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      gap: 20px;
+    }
+
+    html[data-theme="dark"] .hero--triptych .hero__grid > .hero-left-card {
+      background: rgba(15, 23, 42, 0.82);
+      border-color: rgba(148, 163, 184, 0.26);
+      box-shadow: 0 20px 50px rgba(2, 6, 23, 0.55), inset 0 1px 0 rgba(255, 255, 255, 0.10);
+    }
+
+    .hero-left-card h1 {
+      font-family: var(--font-display) !important;
+      font-size: clamp(28px, 2.45vw, 38px) !important;
+      line-height: 1.16 !important;
+      letter-spacing: -0.025em !important;
+      font-weight: 700 !important;
+      margin: 0 !important;
+      color: var(--p-ink);
+    }
+
+    .hero-left-card .hero__lead {
+      font-size: clamp(14.5px, 1.05vw, 16.5px) !important;
+      line-height: 1.58 !important;
+      color: var(--p-muted) !important;
+      margin: 0 !important;
+    }
+
+    .hero-chip-list {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .hero-chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 5px 11px;
+      border-radius: 999px;
+      font-size: 12px;
+      font-weight: 700;
+      font-family: var(--font-mono);
+      background: rgba(0, 123, 200, 0.10);
+      border: 1px solid rgba(0, 123, 200, 0.28);
+      color: var(--p-accent);
+    }
+
+    html[data-theme="dark"] .hero-chip {
+      background: rgba(56, 189, 248, 0.14);
+      border-color: rgba(56, 189, 248, 0.34);
+      color: #7dd3fc;
+    }
+
+    .hero-cta-row {
+      display: flex;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 12px;
+      padding-top: 6px;
+    }
+
+    .hero-cta-row .btn {
+      height: 50px !important;
+      padding-inline: 22px !important;
+      font-size: 15px !important;
+      display: inline-flex !important;
+      align-items: center !important;
+      justify-content: center !important;
+      white-space: nowrap !important;
+    }
+
+    .hero-cta-row .btn--primary {
+      flex: 1 1 170px;
+    }
+
+    .hero-cta-row .btn--secondary {
+      flex: 1 1 140px;
     }
 
     @media (min-width: 1024px) {
       .hero--triptych .hero__grid {
-        grid-template-columns: minmax(235px, 2.8fr) minmax(0, 7.25fr) minmax(185px, 1.95fr) !important;
-        column-gap: clamp(20px, 2vw, 28px) !important;
+        grid-template-columns: minmax(390px, 4.5fr) minmax(0, 7.5fr) !important;
       }
 
-      .hero--triptych .hero__grid > .span-3:first-child {
+      .hero--triptych .hero__grid > .hero-left-card {
         grid-column: 1 / 2 !important;
         grid-row: 1 !important;
-        align-self: center !important;
       }
 
       .hero--triptych .ly-collage {
         grid-column: 2 / 3 !important;
         grid-row: 1 !important;
         width: 100% !important;
+        min-height: 500px !important;
         height: 100% !important;
       }
-
-      .hero--triptych .start-10 {
-        grid-column: 3 / 4 !important;
-        grid-row: 1 !important;
-        width: 100% !important;
-      }
-    }
-
-    .hero--triptych .start-10 {
-      display: flex;
-      justify-content: flex-end;
-      align-items: center;
-    }
-
-    .hero--triptych .start-10 .btn--xl {
-      width: 100% !important;
-      height: clamp(60px, 1.4vw + 46px, 68px) !important;
-      padding-inline: 24px !important;
-      font-size: clamp(18px, 0.45vw + 14.5px, 22px) !important;
-      white-space: nowrap !important;
     }
 
     @media (max-width: 1023px) {
-      .hero--triptych {
-        height: auto !important;
-        min-height: 100svh;
-        padding-bottom: 56px !important;
+      .hero--triptych .hero__grid {
+        grid-template-columns: 1fr !important;
       }
 
-      .hero--triptych .start-10 {
-        justify-content: flex-start;
-        margin-top: 16px;
+      .hero--triptych .ly-collage {
+        min-height: 440px !important;
       }
     }
 
@@ -632,10 +703,10 @@
       background: rgba(255, 255, 255, 0.90) !important;
       color: #0f172a;
       border: 1.5px solid rgba(255, 255, 255, 0.96);
-      padding: 2.3cqw 7cqw 2.3cqw 2.8cqw;
+      padding: 2.2cqw 2.8cqw;
       display: grid;
-      gap: 1cqw;
-      font: 600 clamp(12px, 1.55cqw, 14.5px)/1.3 var(--font-text);
+      gap: 0.95cqw;
+      font: 600 clamp(12px, 1.5cqw, 14px)/1.3 var(--font-text);
     }
 
     .rk-rbac-card .rk-role-line {
@@ -724,7 +795,10 @@
       box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.96), 0 6px 18px rgba(15, 23, 42, 0.05);
     }
 
-    .rk-demo-top {
+    .rk-demo-box--compact {
+      min-height: 210px;
+      justify-content: space-between;
+    }
       display: flex;
       align-items: center;
       justify-content: space-between;
@@ -1574,20 +1648,43 @@
   </header>
 
   <main id="top">
-    <!-- HERO: TRIPTYCH -->
+    <!-- HERO: BALANCED 2-COLUMN SPLIT -->
     <section class="hero hero--triptych" data-enter aria-labelledby="hero-h">
       <div class="wrap">
         <div class="hero-text grid hero__grid">
-          <div class="span-3">
-            <img src="/images/rahma-logo.png" alt="Rahma" class="hero-brand-logo">
-            <h1 id="hero-h">Kontrol KPI, mitigasi risiko, dan pelaporan direksi real-time</h1>
-            <p class="hero__lead">Skoring polaritas &amp; YTD otomatis di atas PostgreSQL 18, gerbang mitigasi wajib di bawah 85%, CPMD Submission Tracker, Studio Atribut HEX, serta antarmuka Frosted Glass Mode Terang &amp; Malam.</p>
+          <div class="hero-left-card">
+            <div style="display:flex;flex-direction:column;gap:16px;">
+              <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;">
+                <img src="/images/rahma-logo.png" alt="Rahma" class="hero-brand-logo" style="margin-bottom:0;height:42px;">
+                <span class="hero-chip">PostgreSQL 18 &bull; v1.0</span>
+              </div>
+              <h1 id="hero-h">Kontrol KPI, mitigasi risiko, dan pelaporan direksi real-time</h1>
+              <p class="hero__lead">Skoring polaritas &amp; YTD otomatis di atas PostgreSQL 18, gerbang mitigasi wajib di bawah 85%, CPMD Submission Tracker, Studio Atribut HEX, serta antarmuka Frosted Glass Mode Terang &amp; Malam.</p>
+            </div>
+
+            <div style="display:flex;flex-direction:column;gap:16px;">
+              <div class="hero-chip-list" aria-label="Fitur Unggulan">
+                <span class="hero-chip">Logic Gate &lt; 85%</span>
+                <span class="hero-chip">RBAC + OTP 6-Digit</span>
+                <span class="hero-chip">Multi-Badge #RRGGBB</span>
+                <span class="hero-chip">Light &amp; Dark Mode</span>
+              </div>
+
+              <div class="hero-cta-row">
+                <a class="btn btn--primary" href="/app">Coba Demo<svg class="m-arrow" viewBox="0 0 12 12"
+                    aria-hidden="true">
+                    <path class="m-arrow__stem" d="M1 6h8" />
+                    <path class="m-arrow__head" d="M4.5 2.5 8 6l-3.5 3.5" />
+                  </svg></a>
+                <a class="btn btn--secondary" href="#platform">Jelajahi Fitur</a>
+              </div>
+            </div>
           </div>
 
-          <div class="ly-collage span-6 start-4" role="img"
+          <div class="ly-collage" role="img"
             aria-label="Tampilan kartu skor KPI eksekutif, gerbang mitigasi wajib, dan isolasi peran RBAC pada sistem RAHMA">
             <div class="ly-collage__set is-on">
-              <div class="ly-piece rk-scorecard" style="left: 3%; top: 4%; width: 52%">
+              <div class="ly-piece rk-scorecard" style="left: 3.5%; top: 5%; width: 52%">
                 <div class="rk-scorecard__top">
                   <div>
                     <small>EXECUTIVE SCORECARD &middot; NOV 2026</small>
@@ -1605,14 +1702,14 @@
                     class="rk-pill rk-pill--yellow">91.0%</span></div>
               </div>
 
-              <div class="ly-piece rk-gate-card" style="left: 58%; top: 6%; width: 39%">
+              <div class="ly-piece rk-gate-card" style="left: 58%; top: 5%; width: 38.5%">
                 <span class="rk-gate-tag">LOGIC GATE &lt; 85%</span>
                 <strong>Mitigasi Wajib Aktif</strong>
                 <span>Problem Identification, Corrective Action, dan Need Support BOD wajib terisi sebelum
                   simpan.</span>
               </div>
 
-              <div class="ly-piece rk-rbac-card" style="left: 22%; top: 63%; width: 75%; height: 33%">
+              <div class="ly-piece rk-rbac-card" style="left: 3.5%; top: 64%; width: 84%">
                 <strong>Isolasi Sesi RBAC Aktif</strong>
                 <div class="rk-role-line"><span>CPMD Admin</span><code>FULL WRITE + LOCK</code></div>
                 <div class="rk-role-line"><span>Division Leader</span><code>DEPT ISOLATED</code></div>
@@ -1621,7 +1718,7 @@
             </div>
 
             <div class="ly-collage__set" aria-hidden="true">
-              <div class="ly-piece rk-hex-card" style="left: 3%; top: 6%; width: 52%">
+              <div class="ly-piece rk-hex-card" style="left: 3.5%; top: 5%; width: 52%">
                 <small style="color:var(--p-muted);font-weight:600;font-family:var(--font-mono)">ATRIBUT WARNA HEX &middot;
                   WCAG</small>
                 <strong style="font-size:clamp(13.5px,1.85cqw,16.5px)">Tag Strategis Terstandarisasi</strong>
@@ -1632,27 +1729,19 @@
                 </div>
               </div>
 
-              <div class="ly-piece rk-scorecard" style="left: 58%; top: 8%; width: 39%">
+              <div class="ly-piece rk-scorecard" style="left: 58%; top: 5%; width: 38.5%">
                 <small style="color:var(--p-muted);font-weight:600;font-family:var(--font-mono)">MESIN AGREGASI YTD</small>
                 <div class="rk-dept-row"><b>Mode SUM</b><span class="rk-pill rk-pill--green">Akumulatif</span></div>
                 <div class="rk-dept-row"><b>Mode AVG</b><span class="rk-pill rk-pill--yellow">Rata-rata</span></div>
                 <div class="rk-dept-row"><b>Cap Skor</b><span class="rk-pill rk-pill--green">Maks 120%</span></div>
               </div>
 
-              <div class="ly-piece rk-rbac-card" style="left: 22%; top: 63%; width: 75%; height: 33%">
+              <div class="ly-piece rk-rbac-card" style="left: 3.5%; top: 64%; width: 84%">
                 <strong>PostgreSQL 18 &amp; Lock Periode</strong>
                 <div class="rk-role-line"><span>Status Periode</span><code>LOCKED BY CPMD</code></div>
                 <div class="rk-role-line"><span>PostgreSQL + Offline</span><code>AUTO-BACKUP .JSON</code></div>
               </div>
             </div>
-          </div>
-
-          <div class="span-3 start-10">
-            <a class="btn btn--primary btn--xl" href="/app">Coba Demo<svg class="m-arrow" viewBox="0 0 12 12"
-                aria-hidden="true">
-                <path class="m-arrow__stem" d="M1 6h8" />
-                <path class="m-arrow__head" d="M4.5 2.5 8 6l-3.5 3.5" />
-              </svg></a>
           </div>
         </div>
       </div>
@@ -1785,7 +1874,7 @@
 
           <!-- FEATURE CARD 4: CPMD SUBMISSION TRACKER & VALIDASI BOBOT 100% -->
           <article class="card span-4">
-            <div class="rk-demo-box" style="justify-content:space-between;">
+            <div class="rk-demo-box rk-demo-box--compact">
               <div class="rk-demo-top">
                 <span class="rk-pill rk-pill--green">4/5 Divisi Selesai</span>
                 <code style="font-size:11px;font-weight:700;color:var(--p-accent);">BOBOT: 100% VALID</code>
@@ -1802,7 +1891,7 @@
 
           <!-- FEATURE CARD 5: DRAWER RINCIAN 12 BULAN & STUDIO MULTI-ATRIBUT HEX -->
           <article class="card span-4">
-            <div class="rk-demo-box" style="justify-content:space-between;">
+            <div class="rk-demo-box rk-demo-box--compact">
               <div class="rk-demo-top">
                 <span class="rk-pill rk-pill--green">▲ +2.8% MoM</span>
                 <code style="font-size:11px;font-weight:700;color:var(--p-accent);">HISTORI 12 BULAN</code>
@@ -1823,7 +1912,7 @@
 
           <!-- FEATURE CARD 6: NIGHT-COMFORT DARK MODE, OTP EMAIL & CETAK PDF -->
           <article class="card span-4">
-            <div class="rk-demo-box" style="justify-content:space-between;">
+            <div class="rk-demo-box rk-demo-box--compact">
               <div class="rk-demo-top">
                 <span class="rk-pill" style="background:#0A0A0A;color:#FFFFFF;">Mode Malam &amp; Terang</span>
                 <code style="font-size:11px;font-weight:700;color:var(--p-accent);">OTP 6-DIGIT</code>
