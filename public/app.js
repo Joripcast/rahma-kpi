@@ -91,7 +91,8 @@ function escapeHtml(str) {
     .replace(/&/g, '&amp;')
     .replace(/</g, '&lt;')
     .replace(/>/g, '&gt;')
-    .replace(/"/g, '&quot;');
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
 }
 
 function computeClientHexAccent(hexInput) {
@@ -336,7 +337,7 @@ function populateDepartmentSelects() {
   const formDept = document.getElementById('kpiFormDept');
 
   const deptOptions = state.departments
-    .map((d) => `<option value="${d.id}">${escapeHtml(d.code)} — ${escapeHtml(d.name)}</option>`)
+    .map((d) => `<option value="${escapeHtml(d.id)}">${escapeHtml(d.code)} — ${escapeHtml(d.name)}</option>`)
     .join('');
 
   dashSel.innerHTML = `<option value="ALL">Semua Departemen (${state.departments.length})</option>` + deptOptions;
@@ -357,7 +358,7 @@ function populateAttributeSelects() {
     state.attributes
       .map(
         (a) =>
-          `<option value="${a.id}">${escapeHtml(a.name)} (${a.hex_color})</option>`
+          `<option value="${escapeHtml(a.id)}">${escapeHtml(a.name)} (${escapeHtml(a.hex_color)})</option>`
       )
       .join('');
   dashAttr.value = currentVal;
@@ -2099,7 +2100,9 @@ function initAccountSettingsModal() {
         showToast(data.error || 'Gagal mengirim OTP.', true);
         return;
       }
-      emailOtpBanner.innerHTML = `${escapeHtml(data.message)}<br><strong>Kode OTP (Mode Lokal):</strong> <code>${escapeHtml(data.devOtpPreview)}</code>`;
+      emailOtpBanner.innerHTML = data.devOtpPreview
+        ? `${escapeHtml(data.message)}<br><strong>Kode OTP (Mode Lokal):</strong> <code>${escapeHtml(data.devOtpPreview)}</code>`
+        : escapeHtml(data.message);
       emailOtpBanner.style.display = 'block';
       showToast(`Kode OTP dikirim ke ${data.targetEmail}`);
     });
@@ -2144,7 +2147,9 @@ function initAccountSettingsModal() {
         showToast(data.error || 'Gagal mengirim OTP.', true);
         return;
       }
-      passOtpBanner.innerHTML = `${escapeHtml(data.message)}<br><strong>Kode OTP (Mode Lokal):</strong> <code>${escapeHtml(data.devOtpPreview)}</code>`;
+      passOtpBanner.innerHTML = data.devOtpPreview
+        ? `${escapeHtml(data.message)}<br><strong>Kode OTP (Mode Lokal):</strong> <code>${escapeHtml(data.devOtpPreview)}</code>`
+        : escapeHtml(data.message);
       passOtpBanner.style.display = 'block';
       showToast(`Kode OTP dikirim ke ${data.targetEmail}`);
     });

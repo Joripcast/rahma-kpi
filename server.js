@@ -31,11 +31,87 @@ const {
 
 const PORT = Number(process.env.PORT || 3456);
 const PUBLIC_DIR = path.join(__dirname, 'public');
-const SESSION_SECRET =
-  process.env.RAHMA_SESSION_SECRET ||
-  crypto.createHash('sha256').update(__dirname + ':rahma-gsi-2026').digest('hex');
+const DATA_DIR = path.join(__dirname, 'data');
+
+function loadOrCreateSessionSecret() {
+  if (process.env.RAHMA_SESSION_SECRET && process.env.RAHMA_SESSION_SECRET.length >= 32) {
+    return process.env.RAHMA_SESSION_SECRET;
+  }
+  try {
+    fs.mkdirSync(DATA_DIR, { recursive: true });
+    const secretFile = path.join(DATA_DIR, '.session_secret');
+    if (fs.existsSync(secretFile)) {
+      const existing = fs.readFileSync(secretFile, 'utf8').trim();
+      if (existing.length >= 64) return existing;
+    }
+    const generated = crypto.randomBytes(32).toString('hex');
+    fs.writeFileSync(secretFile, generated, { mode: 0o600 });
+    return generated;
+  } catch {
+    return crypto.randomBytes(32).toString('hex');
+  }
+}
+
+const SESSION_SECRET = loadOrCreateSessionSecret();
 const SESSION_COOKIE = 'rahma_session';
-const otpStore = new Map(); // key: `${userId}:${purpose}` -> { code, targetEmail, expiresAt }
+const otpStore = new Map(); // key: `${userId}:${purpose}` -> { code, targetEmail, expiresAt, attempts }
+const revokedSessionJtis = new Map(); // jti -> exp timestamp
+const rateLimitStore = new Map(); // key -> { count, resetAt }
+
+const ALLOWED_POLARITIES = new Set(['MAXIMIZE', 'MINIMIZE']);
+const ALLOWED_YTD_METHODS = new Set(['SUM', 'AVG', 'LAST_VALUE']);
+const ALLOWED_ATTR_GROUPS = new Set(['PERSPECTIVE', 'CATEGORY', 'PRIORITY', 'MITIGATION_TAG']);
+
+function getClientIp(req) {
+  return req.socket?.remoteAddress || '127.0.0.1';
+}
+
+function checkRateLimit(key, maxRequests, windowMs) {
+  const now = Date.now();
+  const entry = rateLimitStore.get(key);
+  if (!entry || now > entry.resetAt) {
+    rateLimitStore.set(key, { count: 1, resetAt: now + windowMs });
+    return { allowed: true, retryAfterSec: 0 };
+  }
+  if (entry.count >= maxRequests) {
+    return {
+      allowed: false,
+      retryAfterSec: Math.max(1, Math.ceil((entry.resetAt - now) / 1000))
+    };
+  }
+  entry.count += 1;
+  return { allowed: true, retryAfterSec: 0 };
+}
+
+function resetRateLimit(key) {
+  rateLimitStore.delete(key);
+}
+
+function verifyOtpTimingSafe(inputOtp, expectedOtp) {
+  const a = Buffer.from(String(inputOtp || ''));
+  const b = Buffer.from(String(expectedOtp || ''));
+  if (a.length !== b.length || a.length === 0) return false;
+  return crypto.timingSafeEqual(a, b);
+}
+
+function computePasswordFingerprint(passwordHash) {
+  return crypto
+    .createHmac('sha256', SESSION_SECRET)
+    .update(String(passwordHash || ''))
+    .digest('hex')
+    .slice(0, 16);
+}
+
+function applySecurityHeaders(res) {
+  res.setHeader('X-Content-Type-Options', 'nosniff');
+  res.setHeader('X-Frame-Options', 'SAMEORIGIN');
+  res.setHeader('Referrer-Policy', 'strict-origin-when-cross-origin');
+  res.setHeader('Permissions-Policy', 'camera=(), microphone=(), geolocation=()');
+  res.setHeader(
+    'Content-Security-Policy',
+    "default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com data:; img-src 'self' data: blob:; connect-src 'self'; object-src 'none'; base-uri 'self'; frame-ancestors 'self'"
+  );
+}
 
 function parseCookies(req) {
   const header = req.headers.cookie || '';
@@ -45,23 +121,44 @@ function parseCookies(req) {
     if (idx > -1) {
       const k = part.slice(0, idx).trim();
       const v = part.slice(idx + 1).trim();
-      map[k] = decodeURIComponent(v);
+      try {
+        map[k] = decodeURIComponent(v);
+      } catch {
+        map[k] = v;
+      }
     }
   }
   return map;
 }
 
-function createSessionToken(user) {
+function createSessionToken(user, passwordHash = '') {
   const payload = Buffer.from(
     JSON.stringify({
+      jti: crypto.randomUUID(),
       id: user.id,
       role: user.role,
       department_id: user.department_id,
+      pwdSig: passwordHash ? computePasswordFingerprint(passwordHash) : undefined,
       exp: Date.now() + 8 * 60 * 60 * 1000 // 8 hours
     })
   ).toString('base64url');
   const sig = crypto.createHmac('sha256', SESSION_SECRET).update(payload).digest('base64url');
   return `${payload}.${sig}`;
+}
+
+function revokeSessionTokenFromReq(req) {
+  const cookies = parseCookies(req);
+  const token = cookies[SESSION_COOKIE];
+  if (!token || !token.includes('.')) return;
+  try {
+    const [payloadB64] = token.split('.');
+    const parsed = JSON.parse(Buffer.from(payloadB64, 'base64url').toString('utf8'));
+    if (parsed && parsed.jti && parsed.exp) {
+      revokedSessionJtis.set(parsed.jti, Number(parsed.exp));
+    }
+  } catch {
+    // Ignore malformed token on logout
+  }
 }
 
 async function getAuthenticatedUser(req) {
@@ -79,21 +176,33 @@ async function getAuthenticatedUser(req) {
   try {
     const parsed = JSON.parse(Buffer.from(payloadB64, 'base64url').toString('utf8'));
     if (!parsed.id || Date.now() > Number(parsed.exp)) return null;
+    if (parsed.jti && revokedSessionJtis.has(parsed.jti)) return null;
+
     const dbUser = await db.get(
-      `SELECT u.id, u.department_id, u.name, u.email, u.role, u.title,
+      `SELECT u.id, u.department_id, u.name, u.email, u.role, u.title, u.password_hash,
               d.code as department_code, d.name as department_name
        FROM users u
        LEFT JOIN departments d ON d.id = u.department_id
        WHERE u.id = ?`,
       parsed.id
     );
-    return dbUser || null;
+    if (!dbUser) return null;
+
+    // Invalidate token immediately if password has been changed since token issuance
+    if (parsed.pwdSig && dbUser.password_hash) {
+      const currentPwdSig = computePasswordFingerprint(dbUser.password_hash);
+      if (parsed.pwdSig !== currentPwdSig) return null;
+    }
+
+    const { password_hash: _omitted, ...safeUser } = dbUser;
+    return safeUser;
   } catch {
     return null;
   }
 }
 
 function sendJson(res, statusCode, payload, extraHeaders = {}) {
+  applySecurityHeaders(res);
   const body = JSON.stringify(payload);
   res.writeHead(statusCode, {
     'Content-Type': 'application/json; charset=utf-8',
@@ -149,17 +258,63 @@ const server = http.createServer(async (req, res) => {
     const method = req.method.toUpperCase();
 
     // =========================================================================
+    // CSRF & CONTENT-TYPE GUARD FOR STATE-MUTATING API REQUESTS
+    // =========================================================================
+    if (pathname.startsWith('/api/') && ['POST', 'PUT', 'DELETE'].includes(method)) {
+      const origin = req.headers.origin;
+      const host = req.headers.host;
+      if (origin && host) {
+        try {
+          const originHost = new URL(origin).host;
+          if (originHost !== host) {
+            return sendJson(res, 403, {
+              error: 'Akses ditolak (CSRF Guard): Origin permintaan tidak cocok dengan host server.'
+            });
+          }
+        } catch {
+          return sendJson(res, 403, { error: 'Akses ditolak: Header Origin tidak valid.' });
+        }
+      }
+
+      if ((method === 'POST' || method === 'PUT') && pathname !== '/api/auth/logout') {
+        const ct = String(req.headers['content-type'] || '').toLowerCase();
+        if (!ct.includes('application/json')) {
+          return sendJson(res, 415, {
+            error: 'Content-Type wajib menggunakan application/json.'
+          });
+        }
+      }
+    }
+
+    // =========================================================================
     // 0. REAL AUTHENTICATION & SESSION ENDPOINTS (/api/auth/*)
     // =========================================================================
     if (pathname === '/api/auth/login' && method === 'POST') {
       const body = await parseJsonBody(req);
+      const clientIp = getClientIp(req);
+      const emailKey = String(body.email || '').trim().toLowerCase();
+      const limitKey = `login:${clientIp}:${emailKey}`;
+      const rl = checkRateLimit(limitKey, 10, 15 * 60 * 1000);
+      if (!rl.allowed) {
+        return sendJson(
+          res,
+          429,
+          {
+            error: `Terlalu banyak percobaan login gagal. Silakan coba kembali dalam ${rl.retryAfterSec} detik.`
+          },
+          { 'Retry-After': String(rl.retryAfterSec) }
+        );
+      }
+
       const user = await authenticateUser(body.email, body.password);
       if (!user) {
         return sendJson(res, 401, {
           error: 'Email atau kata sandi tidak valid. Silakan periksa kembali kredensial Anda.'
         });
       }
-      const token = createSessionToken(user);
+      resetRateLimit(limitKey);
+      const pwdRow = await db.get(`SELECT password_hash FROM users WHERE id = ?`, user.id);
+      const token = createSessionToken(user, pwdRow ? pwdRow.password_hash : '');
       return sendJson(
         res,
         200,
@@ -173,6 +328,7 @@ const server = http.createServer(async (req, res) => {
     }
 
     if (pathname === '/api/auth/logout' && method === 'POST') {
+      revokeSessionTokenFromReq(req);
       return sendJson(
         res,
         200,
@@ -199,6 +355,15 @@ const server = http.createServer(async (req, res) => {
     }
 
     if (pathname === '/api/auth/signup' && method === 'POST') {
+      const rl = checkRateLimit(`signup:${getClientIp(req)}`, 10, 15 * 60 * 1000);
+      if (!rl.allowed) {
+        return sendJson(
+          res,
+          429,
+          { error: `Terlalu banyak permintaan pendaftaran. Coba lagi dalam ${rl.retryAfterSec} detik.` },
+          { 'Retry-After': String(rl.retryAfterSec) }
+        );
+      }
       const body = await parseJsonBody(req);
       const name = String(body.name || '').trim();
       const email = String(body.email || '').trim().toLowerCase();
@@ -207,14 +372,14 @@ const server = http.createServer(async (req, res) => {
       const role = body.role === 'EXECUTIVE' ? 'EXECUTIVE' : 'DIV_LEADER';
       const departmentId = role === 'DIV_LEADER' ? String(body.departmentId || '').trim() : null;
 
-      if (name.length < 2) {
-        return sendJson(res, 400, { error: 'Nama lengkap minimal 2 karakter.' });
+      if (name.length < 2 || name.length > 120) {
+        return sendJson(res, 400, { error: 'Nama lengkap harus 2 hingga 120 karakter.' });
       }
-      if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email) || email.length > 160) {
         return sendJson(res, 400, { error: 'Format email korporasi tidak valid.' });
       }
-      if (password.length < 6) {
-        return sendJson(res, 400, { error: 'Kata sandi minimal 6 karakter.' });
+      if (password.length < 6 || password.length > 128) {
+        return sendJson(res, 400, { error: 'Kata sandi harus antara 6 hingga 128 karakter.' });
       }
       if (role === 'DIV_LEADER') {
         const dept = await db.get(
@@ -235,6 +400,7 @@ const server = http.createServer(async (req, res) => {
       }
 
       const userId = `user-${Date.now()}`;
+      const pwdHash = hashPassword(password);
       await db.run(
         `INSERT INTO users (id, department_id, name, email, role, title, password_hash)
          VALUES (?, ?, ?, ?, ?, ?, ?)`,
@@ -244,7 +410,7 @@ const server = http.createServer(async (req, res) => {
         email,
         role,
         title || (role === 'EXECUTIVE' ? 'Executive / BOD' : 'Division Leader'),
-        hashPassword(password)
+        pwdHash
       );
 
       const newUser = await db.get(
@@ -255,7 +421,7 @@ const server = http.createServer(async (req, res) => {
          WHERE u.id = ?`,
         userId
       );
-      const token = createSessionToken(newUser);
+      const token = createSessionToken(newUser, pwdHash);
 
       return sendJson(
         res,
@@ -320,6 +486,16 @@ const server = http.createServer(async (req, res) => {
     }
 
     if (pathname === '/api/auth/otp/request' && method === 'POST') {
+      const rl = checkRateLimit(`otp:${authUser.id}:${getClientIp(req)}`, 5, 10 * 60 * 1000);
+      if (!rl.allowed) {
+        return sendJson(
+          res,
+          429,
+          { error: `Terlalu banyak permintaan OTP. Silakan tunggu ${rl.retryAfterSec} detik.` },
+          { 'Retry-After': String(rl.retryAfterSec) }
+        );
+      }
+
       const body = await parseJsonBody(req);
       const purpose = body.purpose === 'email' ? 'email' : 'password';
       const targetEmail =
@@ -348,15 +524,17 @@ const server = http.createServer(async (req, res) => {
       otpStore.set(`${authUser.id}:${purpose}`, {
         code,
         targetEmail,
-        expiresAt: Date.now() + 5 * 60 * 1000
+        expiresAt: Date.now() + 5 * 60 * 1000,
+        attempts: 0
       });
 
       console.log(`[RAHMA Email OTP] To: ${targetEmail} | Purpose: ${purpose} | Code: ${code}`);
+      const isProd = process.env.NODE_ENV === 'production';
       return sendJson(res, 200, {
         message: `Kode OTP 6-digit telah dikirim ke ${targetEmail} (berlaku 5 menit).`,
         targetEmail,
         expiresInSeconds: 300,
-        devOtpPreview: code
+        ...(isProd ? {} : { devOtpPreview: code })
       });
     }
 
@@ -370,17 +548,27 @@ const server = http.createServer(async (req, res) => {
         return sendJson(res, 400, { error: 'Format email baru tidak valid.' });
       }
 
+      const recordKey = `${authUser.id}:email`;
+      const record = otpStore.get(recordKey);
+      if (!record || Date.now() > record.expiresAt) {
+        otpStore.delete(recordKey);
+        return sendJson(res, 400, { error: 'Kode OTP tidak ditemukan atau sudah kedaluwarsa.' });
+      }
+
+      if (!verifyOtpTimingSafe(otpCode, record.code) || record.targetEmail !== newEmail) {
+        record.attempts = (record.attempts || 0) + 1;
+        if (record.attempts >= 5) {
+          otpStore.delete(recordKey);
+          return sendJson(res, 429, {
+            error: 'Kode OTP telah dibatalkan karena terlalu banyak percobaan salah (maks 5x). Silakan minta OTP baru.'
+          });
+        }
+        return sendJson(res, 400, { error: 'Kode OTP tidak cocok dengan email baru.' });
+      }
+
       const dbRow = await db.get(`SELECT password_hash FROM users WHERE id = ?`, authUser.id);
       if (!dbRow || !verifyPassword(currentPassword, dbRow.password_hash)) {
         return sendJson(res, 401, { error: 'Kata sandi saat ini salah.' });
-      }
-
-      const record = otpStore.get(`${authUser.id}:email`);
-      if (!record || Date.now() > record.expiresAt) {
-        return sendJson(res, 400, { error: 'Kode OTP tidak ditemukan atau sudah kedaluwarsa.' });
-      }
-      if (record.code !== otpCode || record.targetEmail !== newEmail) {
-        return sendJson(res, 400, { error: 'Kode OTP tidak cocok dengan email baru.' });
       }
 
       const conflict = await db.get(
@@ -393,7 +581,7 @@ const server = http.createServer(async (req, res) => {
       }
 
       await db.run(`UPDATE users SET email = ? WHERE id = ?`, newEmail, authUser.id);
-      otpStore.delete(`${authUser.id}:email`);
+      otpStore.delete(recordKey);
       const updatedUser = await getAuthenticatedUser(req);
       return sendJson(res, 200, {
         message: `Email akun berhasil diubah menjadi ${newEmail}.`,
@@ -407,32 +595,54 @@ const server = http.createServer(async (req, res) => {
       const newPassword = String(body.newPassword || '');
       const otpCode = String(body.otpCode || '').trim();
 
+      const recordKey = `${authUser.id}:password`;
+      const record = otpStore.get(recordKey);
+      if (!record || Date.now() > record.expiresAt) {
+        otpStore.delete(recordKey);
+        return sendJson(res, 400, { error: 'Kode OTP tidak ditemukan atau sudah kedaluwarsa.' });
+      }
+
+      if (!verifyOtpTimingSafe(otpCode, record.code)) {
+        record.attempts = (record.attempts || 0) + 1;
+        if (record.attempts >= 5) {
+          otpStore.delete(recordKey);
+          return sendJson(res, 429, {
+            error: 'Kode OTP telah dibatalkan karena terlalu banyak percobaan salah (maks 5x). Silakan minta OTP baru.'
+          });
+        }
+        return sendJson(res, 400, { error: 'Kode OTP salah.' });
+      }
+
       const dbRow = await db.get(`SELECT password_hash FROM users WHERE id = ?`, authUser.id);
       if (!dbRow || !verifyPassword(currentPassword, dbRow.password_hash)) {
         return sendJson(res, 401, { error: 'Kata sandi saat ini tidak sesuai.' });
       }
 
-      if (newPassword.length < 6) {
-        return sendJson(res, 400, { error: 'Kata sandi baru minimal 6 karakter.' });
+      if (newPassword.length < 6 || newPassword.length > 128) {
+        return sendJson(res, 400, { error: 'Kata sandi baru harus antara 6 hingga 128 karakter.' });
       }
 
-      const record = otpStore.get(`${authUser.id}:password`);
-      if (!record || Date.now() > record.expiresAt) {
-        return sendJson(res, 400, { error: 'Kode OTP tidak ditemukan atau sudah kedaluwarsa.' });
-      }
-      if (record.code !== otpCode) {
-        return sendJson(res, 400, { error: 'Kode OTP salah.' });
-      }
-
+      const nextHash = hashPassword(newPassword);
       await db.run(
         `UPDATE users SET password_hash = ? WHERE id = ?`,
-        hashPassword(newPassword),
+        nextHash,
         authUser.id
       );
-      otpStore.delete(`${authUser.id}:password`);
-      return sendJson(res, 200, {
-        message: 'Kata sandi berhasil diperbarui. Gunakan kata sandi baru pada login berikutnya.'
-      });
+      otpStore.delete(recordKey);
+      revokeSessionTokenFromReq(req);
+      const refreshedToken = createSessionToken(authUser, nextHash);
+      return sendJson(
+        res,
+        200,
+        {
+          message: 'Kata sandi berhasil diperbarui. Seluruh sesi lama telah dicabut secara otomatis.'
+        },
+        {
+          'Set-Cookie': `${SESSION_COOKIE}=${encodeURIComponent(
+            refreshedToken
+          )}; HttpOnly; Path=/; SameSite=Lax; Max-Age=28800`
+        }
+      );
     }
 
     // =========================================================================
@@ -526,6 +736,12 @@ const server = http.createServer(async (req, res) => {
         });
       }
 
+      const numYear = Number(year);
+      const numMonth = Number(month);
+      if (!Number.isInteger(numYear) || numYear < 2020 || numYear > 2100 || !Number.isInteger(numMonth) || numMonth < 1 || numMonth > 12) {
+        return sendJson(res, 400, { error: 'Periode tahun atau bulan tidak valid.' });
+      }
+
       const effectiveTarget =
         targetValue !== undefined && targetValue !== null && targetValue !== ''
           ? Number(targetValue)
@@ -533,9 +749,16 @@ const server = http.createServer(async (req, res) => {
             ? Number(existing.target_value)
             : Number(kpi.baseline_target);
 
+      if (!Number.isFinite(effectiveTarget)) {
+        return sendJson(res, 400, { error: 'Nilai Target KPI harus berupa angka yang valid.' });
+      }
+
       const hasActual =
         actualValue !== undefined && actualValue !== null && actualValue !== '';
       const numericActual = hasActual ? Number(actualValue) : null;
+      if (hasActual && !Number.isFinite(numericActual)) {
+        return sendJson(res, 400, { error: 'Nilai Actual KPI harus berupa angka yang valid.' });
+      }
 
       const achievementPct = hasActual
         ? calculateAchievementPct(
@@ -692,6 +915,9 @@ const server = http.createServer(async (req, res) => {
       if (!name || !name.trim()) {
         return sendJson(res, 400, { error: 'Nama atribut KPI wajib diisi.' });
       }
+      if (!ALLOWED_ATTR_GROUPS.has(attribute_group)) {
+        return sendJson(res, 400, { error: 'Kelompok atribut KPI tidak valid.' });
+      }
 
       const validHex = normalizeHexColor(hex_color);
       if (!validHex) {
@@ -779,7 +1005,16 @@ const server = http.createServer(async (req, res) => {
         return sendJson(res, 404, { error: 'Atribut KPI tidak ditemukan.' });
       }
 
-      await db.run(`DELETE FROM kpi_attribute_assignments WHERE attribute_id = ?`, attrId);
+      const usedRow = await db.get(
+        `SELECT COUNT(*) as cnt FROM kpi_attribute_assignments WHERE attribute_id = ?`,
+        attrId
+      );
+      if (usedRow && Number(usedRow.cnt) > 0) {
+        return sendJson(res, 409, {
+          error: `Atribut "${existing.name}" sedang digunakan oleh ${usedRow.cnt} KPI aktif. Lepaskan atribut dari KPI terkait terlebih dahulu sebelum menghapus.`
+        });
+      }
+
       await db.run(`DELETE FROM kpi_attributes WHERE id = ?`, attrId);
 
       return sendJson(res, 200, {
@@ -938,6 +1173,16 @@ const server = http.createServer(async (req, res) => {
       if (!department_id || !code || !title) {
         return sendJson(res, 400, {
           error: 'Departemen, Kode KPI, dan Nama KPI wajib diisi.'
+        });
+      }
+      if (!ALLOWED_POLARITIES.has(polarity) || !ALLOWED_YTD_METHODS.has(ytd_method)) {
+        return sendJson(res, 400, {
+          error: 'Nilai Polaritas atau Metode YTD tidak valid.'
+        });
+      }
+      if (!Number.isFinite(Number(weight)) || Number(weight) <= 0 || Number(weight) > 100) {
+        return sendJson(res, 400, {
+          error: 'Bobot KPI harus berupa angka antara 0.5% hingga 100%.'
         });
       }
 
@@ -1131,15 +1376,25 @@ const server = http.createServer(async (req, res) => {
     if (fs.existsSync(resolvedPath) && fs.statSync(resolvedPath).isFile()) {
       const ext = path.extname(resolvedPath).toLowerCase();
       const contentType = MIME_TYPES[ext] || 'application/octet-stream';
+      applySecurityHeaders(res);
       res.writeHead(200, { 'Content-Type': contentType, 'Cache-Control': 'no-cache' });
       return fs.createReadStream(resolvedPath).pipe(res);
     }
 
+    applySecurityHeaders(res);
     res.writeHead(404, { 'Content-Type': 'text/plain; charset=utf-8' });
     res.end('Not Found');
   } catch (err) {
+    if (err && err.message === 'Payload too large') {
+      return sendJson(res, 413, { error: 'Ukuran payload melebihi batas maksimum (2 MB).' });
+    }
+    if (err && err.message === 'Invalid JSON payload') {
+      return sendJson(res, 400, { error: 'Format payload JSON tidak valid.' });
+    }
     console.error('[RAHMA Server Error]', err);
-    sendJson(res, 500, { error: err.message || 'Internal Server Error' });
+    sendJson(res, 500, {
+      error: 'Terjadi kesalahan internal pada server. Silakan coba beberapa saat lagi.'
+    });
   }
 });
 

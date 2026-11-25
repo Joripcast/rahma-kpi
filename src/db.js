@@ -88,6 +88,10 @@ function verifyPassword(plainPassword, storedHash) {
 
 async function ensureDatabaseExists() {
   if (process.env.DATABASE_URL) return;
+  const dbName = String(PG_CONFIG.database || 'rahma_kpi');
+  if (!/^[a-zA-Z0-9_]{1,63}$/.test(dbName)) {
+    throw new Error('Invalid PostgreSQL database identifier.');
+  }
   const adminClient = new Client({
     ...PG_CONFIG,
     database: 'postgres'
@@ -96,10 +100,10 @@ async function ensureDatabaseExists() {
     await adminClient.connect();
     const res = await adminClient.query(
       `SELECT 1 FROM pg_database WHERE datname = $1`,
-      [PG_CONFIG.database]
+      [dbName]
     );
     if (res.rowCount === 0) {
-      await adminClient.query(`CREATE DATABASE "${PG_CONFIG.database}"`);
+      await adminClient.query(`CREATE DATABASE "${dbName}"`);
     }
   } finally {
     await adminClient.end().catch(() => {});
