@@ -1,0 +1,1252 @@
+<!DOCTYPE html>
+<html lang="id" data-type="software" data-radius="soft" data-buttons="solid">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="page-type" content="software" />
+  <meta name="site-kind" content="software" />
+  <title>Buku Panduan Pengguna (User Manual) — RAHMA KPI Monitoring System | PT Global Service Indonesia</title>
+  <style>
+    @font-face {
+      font-family: 'Commissioner';
+      src: url('../public/fonts/Commissioner-VariableFont.ttf') format('truetype');
+      font-weight: 100 900;
+      font-style: normal;
+    }
+    @font-face {
+      font-family: 'Sarabun';
+      src: url('../public/fonts/Sarabun/Sarabun-Regular.ttf') format('truetype');
+      font-weight: 400;
+      font-style: normal;
+    }
+    @font-face {
+      font-family: 'Sarabun';
+      src: url('../public/fonts/Sarabun/Sarabun-Medium.ttf') format('truetype');
+      font-weight: 500;
+      font-style: normal;
+    }
+    @font-face {
+      font-family: 'Sarabun';
+      src: url('../public/fonts/Sarabun/Sarabun-SemiBold.ttf') format('truetype');
+      font-weight: 600;
+      font-style: normal;
+    }
+    @font-face {
+      font-family: 'Sarabun';
+      src: url('../public/fonts/Sarabun/Sarabun-Bold.ttf') format('truetype');
+      font-weight: 700;
+      font-style: normal;
+    }
+
+    :root {
+      --font-title: 'Commissioner', 'Segoe UI', -apple-system, BlinkMacSystemFont, sans-serif;
+      --font-sans: 'Sarabun', 'Segoe UI', -apple-system, BlinkMacSystemFont, sans-serif;
+      --font-code: 'IBM Plex Mono', 'Consolas', 'SFMono-Regular', ui-monospace, monospace;
+
+      /* RAHMA Design Language Tokens (No Violet/Slop Gradients) */
+      --ink-1: #0F172A;
+      --ink-2: #1E293B;
+      --ink-3: #334155;
+      --surface: #FFFFFF;
+      --surface-subtle: #F8FAFC;
+      --surface-muted: #F1F5F9;
+      --border: #CBD5E1;
+      --border-soft: #E2E8F0;
+
+      --primary: #007BC8;
+      --primary-soft: #EFF6FF;
+      --primary-border: #BFDBFE;
+
+      --success: #16A34A;
+      --success-soft: #ECFDF5;
+      --success-border: #A7F3D0;
+      --success-ink: #065F46;
+
+      --warning: #F68400;
+      --warning-soft: #FFFBEB;
+      --warning-border: #FDE68A;
+      --warning-ink: #92400E;
+
+      --danger: #DC2626;
+      --danger-soft: #FEF2F2;
+      --danger-border: #FECACA;
+      --danger-ink: #991B1B;
+
+      --radius-board: 16px;
+      --radius-ui: 12px;
+      --radius-pill: 8px;
+    }
+
+    @page {
+      size: A4 portrait;
+      margin: 20mm 15mm 20mm 15mm;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      -webkit-print-color-adjust: exact !important;
+      print-color-adjust: exact !important;
+    }
+
+    body {
+      font-family: var(--font-sans);
+      color: var(--ink-2);
+      background: var(--surface);
+      font-size: 10.5pt;
+      line-height: 1.55;
+    }
+
+    .manual-wrap {
+      max-width: 820px;
+      margin: 0 auto;
+    }
+
+    /* Typography Hierarchy */
+    h1, h2, h3, h4 {
+      font-family: var(--font-title);
+      color: var(--ink-1);
+      letter-spacing: -0.015em;
+      line-height: 1.25;
+      page-break-after: avoid;
+      break-after: avoid;
+    }
+
+    p {
+      margin-bottom: 8px;
+      color: var(--ink-2);
+    }
+
+    code, kbd {
+      font-family: var(--font-code);
+      font-size: 8.8pt;
+      font-weight: 600;
+      background: var(--surface-muted);
+      color: var(--ink-1);
+      padding: 1.5px 6px;
+      border-radius: 5px;
+      border: 1px solid var(--border);
+    }
+
+    kbd {
+      border-bottom-width: 2px;
+      background: var(--surface);
+    }
+
+    pre {
+      font-family: var(--font-code);
+      font-size: 8.8pt;
+      line-height: 1.5;
+      background: var(--ink-1);
+      color: #F8FAFC;
+      padding: 12px 16px;
+      border-radius: var(--radius-ui);
+      border: 1px solid var(--ink-3);
+      overflow-x: auto;
+      margin: 8px 0 12px;
+      page-break-inside: avoid;
+      break-inside: avoid;
+    }
+
+    pre code {
+      background: transparent;
+      border: none;
+      color: inherit;
+      padding: 0;
+      font-size: inherit;
+    }
+
+    /* Editorial Cover Header */
+    .cover-sheet {
+      border: 1.5px solid var(--border);
+      border-top: 8px solid var(--primary);
+      border-radius: var(--radius-board);
+      background: var(--surface-subtle);
+      padding: 28px 30px;
+      margin-bottom: 22px;
+      page-break-inside: avoid;
+      break-inside: avoid;
+    }
+
+    .cover-brand-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      padding-bottom: 18px;
+      margin-bottom: 18px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .cover-logos {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+
+    .cover-logos img {
+      height: 34px;
+      width: auto;
+      object-fit: contain;
+    }
+
+    .cover-logo-sep {
+      width: 1px;
+      height: 26px;
+      background: var(--border);
+    }
+
+    .doc-tag {
+      font-family: var(--font-code);
+      font-size: 8.5pt;
+      font-weight: 700;
+      color: var(--primary);
+      background: var(--primary-soft);
+      border: 1px solid var(--primary-border);
+      padding: 4px 10px;
+      border-radius: var(--radius-pill);
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+
+    .cover-title {
+      font-size: 23pt;
+      font-weight: 800;
+      color: var(--ink-1);
+      margin-bottom: 8px;
+    }
+
+    .cover-subtitle {
+      font-size: 11.5pt;
+      font-weight: 500;
+      color: var(--ink-3);
+      margin-bottom: 20px;
+    }
+
+    .cover-meta-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 10px;
+    }
+
+    .meta-cell {
+      background: var(--surface);
+      border: 1px solid var(--border-soft);
+      border-radius: var(--radius-ui);
+      padding: 10px 12px;
+    }
+
+    .meta-cell span {
+      display: block;
+      font-size: 8pt;
+      font-weight: 700;
+      text-transform: uppercase;
+      color: var(--ink-3);
+      margin-bottom: 2px;
+    }
+
+    .meta-cell strong {
+      font-family: var(--font-title);
+      font-size: 9.8pt;
+      color: var(--ink-1);
+    }
+
+    /* Table of Contents */
+    .toc-box {
+      border: 1px solid var(--border);
+      border-radius: var(--radius-board);
+      background: var(--surface);
+      padding: 20px 24px;
+      margin-bottom: 24px;
+      page-break-inside: avoid;
+      break-inside: avoid;
+    }
+
+    .toc-title {
+      font-size: 13pt;
+      font-weight: 700;
+      margin-bottom: 12px;
+      padding-bottom: 8px;
+      border-bottom: 1px solid var(--border-soft);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .toc-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px 20px;
+    }
+
+    .toc-item {
+      display: flex;
+      align-items: baseline;
+      gap: 10px;
+      font-size: 9.8pt;
+      padding: 4px 0;
+      border-bottom: 1px dashed var(--border-soft);
+    }
+
+    .toc-num {
+      font-family: var(--font-code);
+      font-size: 8.5pt;
+      font-weight: 700;
+      color: var(--primary);
+      background: var(--primary-soft);
+      border: 1px solid var(--primary-border);
+      padding: 1px 6px;
+      border-radius: 5px;
+      flex-shrink: 0;
+    }
+
+    .toc-label {
+      font-weight: 600;
+      color: var(--ink-1);
+    }
+
+    /* Chapter Section */
+    .chapter {
+      margin-bottom: 26px;
+    }
+
+    .chapter-break {
+      page-break-before: always;
+      break-before: page;
+    }
+
+    .chapter-header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding-bottom: 10px;
+      margin-bottom: 14px;
+      border-bottom: 2px solid var(--ink-1);
+      page-break-after: avoid;
+      break-after: avoid;
+    }
+
+    .chapter-badge {
+      font-family: var(--font-code);
+      font-size: 10pt;
+      font-weight: 700;
+      background: var(--primary);
+      color: #FFFFFF;
+      padding: 4px 11px;
+      border-radius: var(--radius-pill);
+      flex-shrink: 0;
+    }
+
+    .chapter-title {
+      font-size: 16pt;
+      font-weight: 800;
+      color: var(--ink-1);
+    }
+
+    /* Numbered Step Block (page-break-inside: avoid) */
+    .step-list {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      margin: 12px 0;
+    }
+
+    .step-block {
+      display: grid;
+      grid-template-columns: 38px 1fr;
+      gap: 12px;
+      align-items: start;
+      background: var(--surface-subtle);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-ui);
+      padding: 12px 16px;
+      page-break-inside: avoid;
+      break-inside: avoid;
+    }
+
+    .step-num-badge {
+      width: 32px;
+      height: 32px;
+      border-radius: 9px;
+      background: var(--ink-1);
+      color: #FFFFFF;
+      font-family: var(--font-code);
+      font-size: 9.5pt;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+
+    .step-num-badge.primary {
+      background: var(--primary);
+    }
+
+    .step-content h4 {
+      font-size: 11pt;
+      font-weight: 700;
+      color: var(--ink-1);
+      margin-bottom: 3px;
+    }
+
+    .step-content p {
+      font-size: 9.8pt;
+      margin-bottom: 0;
+      color: var(--ink-2);
+    }
+
+    /* Callout / Alert Boxes (page-break-inside: avoid) */
+    .callout {
+      border-radius: var(--radius-ui);
+      padding: 12px 16px;
+      margin: 12px 0;
+      border: 1px solid var(--border);
+      border-left-width: 5px;
+      page-break-inside: avoid;
+      break-inside: avoid;
+    }
+
+    .callout-head {
+      font-family: var(--font-title);
+      font-size: 10pt;
+      font-weight: 700;
+      margin-bottom: 4px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .callout p {
+      font-size: 9.5pt;
+      margin-bottom: 0;
+    }
+
+    .callout-note {
+      background: var(--primary-soft);
+      border-color: var(--primary-border);
+      border-left-color: var(--primary);
+    }
+    .callout-note .callout-head { color: #005A94; }
+
+    .callout-warning {
+      background: var(--warning-soft);
+      border-color: var(--warning-border);
+      border-left-color: var(--warning);
+    }
+    .callout-warning .callout-head { color: var(--warning-ink); }
+
+    .callout-danger {
+      background: var(--danger-soft);
+      border-color: var(--danger-border);
+      border-left-color: var(--danger);
+    }
+    .callout-danger .callout-head { color: var(--danger-ink); }
+
+    .callout-tip {
+      background: var(--success-soft);
+      border-color: var(--success-border);
+      border-left-color: var(--success);
+    }
+    .callout-tip .callout-head { color: var(--success-ink); }
+
+    /* Screenshot Frame (No caption under image per taste-skill rule 1; header bar on top of app frame) */
+    .manual-figure {
+      border: 1.5px solid var(--border);
+      border-radius: var(--radius-ui);
+      background: var(--surface-subtle);
+      overflow: hidden;
+      margin: 14px 0;
+      page-break-inside: avoid;
+      break-inside: avoid;
+    }
+
+    .figure-bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 7px 14px;
+      background: var(--surface-muted);
+      border-bottom: 1px solid var(--border);
+      font-family: var(--font-code);
+      font-size: 8.2pt;
+      font-weight: 700;
+      color: var(--ink-3);
+    }
+
+    .figure-dots {
+      display: inline-flex;
+      gap: 5px;
+      align-items: center;
+    }
+
+    .figure-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--border);
+    }
+
+    .manual-figure img {
+      display: block;
+      width: 100%;
+      height: auto;
+      max-height: 360px;
+      object-fit: cover;
+      object-position: top center;
+    }
+
+    /* Specification Tables */
+    table.spec-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 10px 0 14px;
+      font-size: 9.4pt;
+      page-break-inside: avoid;
+      break-inside: avoid;
+    }
+
+    table.spec-table th {
+      background: var(--surface-muted);
+      color: var(--ink-1);
+      font-family: var(--font-title);
+      font-weight: 700;
+      text-align: left;
+      padding: 8px 12px;
+      border: 1px solid var(--border);
+    }
+
+    table.spec-table td {
+      padding: 8px 12px;
+      border: 1px solid var(--border-soft);
+      color: var(--ink-2);
+      vertical-align: top;
+    }
+
+    table.spec-table tr {
+      page-break-inside: avoid;
+      break-inside: avoid;
+    }
+
+    /* Status & Role Pills */
+    .pill {
+      display: inline-block;
+      font-family: var(--font-code);
+      font-size: 8pt;
+      font-weight: 700;
+      padding: 2px 8px;
+      border-radius: 6px;
+      white-space: nowrap;
+    }
+
+    .pill-green { background: #DCFCE7; color: #065F46; border: 1px solid #86EFAC; }
+    .pill-yellow { background: #FEF3C7; color: #92400E; border: 1px solid #FDE68A; }
+    .pill-red { background: #FEE2E2; color: #991B1B; border: 1px solid #FECACA; }
+    .pill-blue { background: #EFF6FF; color: #007BC8; border: 1px solid #BFDBFE; }
+    .pill-dark { background: #0A0A0A; color: #FFFFFF; border: 1px solid #334155; }
+
+    /* Feature Grid 2-Col */
+    .feature-grid-2 {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      margin: 12px 0;
+      page-break-inside: avoid;
+      break-inside: avoid;
+    }
+
+    .feature-card {
+      border: 1px solid var(--border);
+      border-radius: var(--radius-ui);
+      background: var(--surface-subtle);
+      padding: 12px 14px;
+      page-break-inside: avoid;
+      break-inside: avoid;
+    }
+
+    .feature-card h4 {
+      font-size: 10.5pt;
+      font-weight: 700;
+      color: var(--ink-1);
+      margin-bottom: 4px;
+    }
+
+    .feature-card p {
+      font-size: 9.4pt;
+      margin-bottom: 0;
+    }
+
+    .manual-footer-credit {
+      margin-top: 24px;
+      padding-top: 12px;
+      border-top: 1px solid var(--border);
+      font-size: 8.5pt;
+      color: var(--ink-3);
+      display: flex;
+      justify-content: space-between;
+      page-break-inside: avoid;
+      break-inside: avoid;
+    }
+  </style>
+</head>
+<body>
+  <main class="manual-wrap">
+    <!-- COVER SHEET -->
+    <header class="cover-sheet">
+      <div class="cover-brand-row">
+        <div class="cover-logos">
+          <img src="../public/images/rahma-logo.png" alt="Logo RAHMA" />
+          <span class="cover-logo-sep" aria-hidden="true"></span>
+          <img src="../public/images/gsi-logo.png" alt="Logo PT Global Service Indonesia" />
+        </div>
+        <span class="doc-tag">DOKUMEN OPERASIONAL RESMI &bull; EDISI RILIS DESEMBER 2026</span>
+      </div>
+
+      <h1 class="cover-title">Buku Panduan Pengguna (User Manual) Sistem Pemantauan KPI RAHMA</h1>
+      <p class="cover-subtitle">
+        Real-time Analytical Hub for Management &amp; Accountability &mdash; Platform Mandiri Pelacakan KPI Departemen,
+        Gerbang Logika Mitigasi Risiko, dan Pelaporan Eksekutif PT Global Service Indonesia (GSI).
+      </p>
+
+      <div class="cover-meta-grid">
+        <div class="meta-cell">
+          <span>Versi Sistem</span>
+          <strong>v1.0.0 (PostgreSQL 18)</strong>
+        </div>
+        <div class="meta-cell">
+          <span>Pemilik Proses</span>
+          <strong>Divisi CPMD PT GSI</strong>
+        </div>
+        <div class="meta-cell">
+          <span>Basis Data Utama</span>
+          <strong>PostgreSQL (rahma_kpi)</strong>
+        </div>
+        <div class="meta-cell">
+          <span>URL Operasional</span>
+          <strong>http://localhost:3456</strong>
+        </div>
+      </div>
+    </header>
+
+    <!-- TABLE OF CONTENTS -->
+    <section class="toc-box" aria-label="Daftar Isi Panduan">
+      <div class="toc-title">
+        <span>Daftar Isi &amp; Peta Alur Operasional</span>
+        <span class="pill pill-blue">7 Bab Lengkap</span>
+      </div>
+      <div class="toc-grid">
+        <div class="toc-item">
+          <span class="toc-num">BAB 01</span>
+          <span class="toc-label">Arsitektur, Instalasi &amp; Rute Sistem (PostgreSQL)</span>
+        </div>
+        <div class="toc-item">
+          <span class="toc-num">BAB 02</span>
+          <span class="toc-label">Halaman Utama, Registrasi &amp; Login RBAC</span>
+        </div>
+        <div class="toc-item">
+          <span class="toc-num">BAB 03</span>
+          <span class="toc-label">Menu 1: Executive Dashboard &amp; Mode Malam</span>
+        </div>
+        <div class="toc-item">
+          <span class="toc-num">BAB 04</span>
+          <span class="toc-label">Menu 2: Input KPI Spreadsheet &amp; Gerbang Mitigasi</span>
+        </div>
+        <div class="toc-item">
+          <span class="toc-num">BAB 05</span>
+          <span class="toc-label">Menu 3: CPMD Hub, Tracker &amp; Kamus KPI (Bobot 100%)</span>
+        </div>
+        <div class="toc-item">
+          <span class="toc-num">BAB 06</span>
+          <span class="toc-label">Menu 4: Katalog Atribut KPI &amp; Studio Warna HEX</span>
+        </div>
+        <div class="toc-item">
+          <span class="toc-num">BAB 07</span>
+          <span class="toc-label">Pengaturan Akun, Keamanan OTP, Kaca &amp; Backup JSON</span>
+        </div>
+        <div class="toc-item">
+          <span class="toc-num">LAMPIRAN</span>
+          <span class="toc-label">Standar Popup Notifikasi &amp; Pintasan Keyboard</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- =================================================================== -->
+    <!-- BAB 01: ARSITEKTUR, INSTALASI & RUTE SISTEM                         -->
+    <!-- =================================================================== -->
+    <section class="chapter">
+      <div class="chapter-header">
+        <span class="chapter-badge">BAB 01</span>
+        <h2 class="chapter-title">Arsitektur, Instalasi &amp; Peta Rute Sistem</h2>
+      </div>
+
+      <p>
+        <strong>RAHMA</strong> beroperasi sebagai aplikasi web mandiri (<em>standalone</em>) dengan mesin kalkulasi
+        KPI real-time di atas Node.js dan basis data relasional <strong>PostgreSQL 18 (`rahma_kpi`)</strong>. Seluruh
+        proses bisnis dari pengisian realisasi bulanan hingga pembuatan laporan PDF Direksi berjalan tanpa ketergantungan
+        pada layanan pihak ketiga.
+      </p>
+
+      <div class="step-list">
+        <div class="step-block">
+          <div class="step-num-badge primary">01</div>
+          <div class="step-content">
+            <h4>Persiapan Layanan PostgreSQL &amp; Basis Data `rahma_kpi`</h4>
+            <p>
+              Pastikan layanan PostgreSQL aktif di port <code>5432</code> dengan akun <code>postgres</code> dan database
+              <code>rahma_kpi</code> telah tersedia. Konfigurasi koneksi diatur otomatis di <code>src/db.js</code>
+              (mendukung variabel lingkungan <code>PGHOST</code>, <code>PGPORT</code>, <code>PGUSER</code>,
+              <code>PGPASSWORD</code>, dan <code>PGDATABASE</code>).
+            </p>
+          </div>
+        </div>
+
+        <div class="step-block">
+          <div class="step-num-badge primary">02</div>
+          <div class="step-content">
+            <h4>Instalasi Dependensi &amp; Migrasi Data (Opsional)</h4>
+            <p>
+              Buka terminal pada direktori proyek <code>c:\Users\Legion\rahma-kpi</code>, jalankan
+              <code>npm install</code>. Jika Anda ingin memigrasikan data dari berkas SQLite lama ke PostgreSQL,
+              jalankan <code>npm run migrate:pg</code>.
+            </p>
+          </div>
+        </div>
+
+        <div class="step-block">
+          <div class="step-num-badge primary">03</div>
+          <div class="step-content">
+            <h4>Menjalankan Server Produksi &amp; Verifikasi Unit Test</h4>
+            <p>
+              Jalankan <code>npm test</code> untuk memverifikasi mesin kalkulasi polaritas, agregasi YTD, dan gerbang
+              mitigasi, lalu nyalakan server dengan perintah <code>npm start</code> (atau <code>node server.js</code>).
+              Akses aplikasi melalui browser di <code>http://localhost:3456</code>.
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <pre><code># 1. Verifikasi unit test &amp; stress test (10.000 agregasi YTD)
+npm test
+
+# 2. Jalankan server produksi RAHMA (PostgreSQL 127.0.0.1:5432/rahma_kpi)
+node server.js
+# -> URL Aplikasi : http://localhost:3456</code></pre>
+
+      <table class="spec-table">
+        <thead>
+          <tr>
+            <th style="width:22%">Rute URL</th>
+            <th style="width:26%">Berkas Frontend</th>
+            <th>Fungsi &amp; Hak Akses</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><code>/</code> atau <code>/home</code></td>
+            <td><code>public/home.html</code></td>
+            <td><strong>Landing Page Produk RAHMA</strong>: Ringkasan arsitektur, simulasi gauge 5 divisi, dan pintasan masuk.</td>
+          </tr>
+          <tr>
+            <td><code>/login</code></td>
+            <td><code>public/login.html</code></td>
+            <td><strong>Gerbang Masuk RBAC</strong>: Autentikasi email korporasi, tombol masuk cepat akun demo, dan pratinjau peran.</td>
+          </tr>
+          <tr>
+            <td><code>/signup</code></td>
+            <td><code>public/signup.html</code></td>
+            <td><strong>Pendaftaran Akun Baru</strong>: Registrasi mandiri untuk peran <em>Division Leader</em> atau <em>Executive / BOD</em>.</td>
+          </tr>
+          <tr>
+            <td><code>/app</code> atau <code>/dashboard</code></td>
+            <td><code>public/index.html</code></td>
+            <td><strong>Workspace Utama (4 Menu)</strong>: Executive Dashboard, Input KPI &amp; Mitigasi, CPMD Hub, dan Atribut HEX.</td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+
+    <!-- =================================================================== -->
+    <!-- BAB 02: LANDING PAGE, REGISTRASI & LOGIN RBAC                       -->
+    <!-- =================================================================== -->
+    <section class="chapter chapter-break">
+      <div class="chapter-header">
+        <span class="chapter-badge">BAB 02</span>
+        <h2 class="chapter-title">Halaman Utama, Registrasi &amp; Autentikasi RBAC</h2>
+      </div>
+
+      <p>
+        Saat pengguna mengakses alamat akar <code>http://localhost:3456/</code>, sistem menampilkan halaman utama
+        (<em>Landing Page</em>) yang memperkenalkan disiplin tata kelola KPI PT Global Service Indonesia beserta
+        simulator interaktif pencapaian 5 departemen (<code>OPS</code>, <code>COM</code>, <code>FAT</code>,
+        <code>HCGA</code>, dan <code>DS</code>).
+      </p>
+
+      <div class="manual-figure">
+        <div class="figure-bar">
+          <span class="figure-dots"><span class="figure-dot"></span><span class="figure-dot"></span><span class="figure-dot"></span></span>
+          <span>http://localhost:3456/ &mdash; Landing Page Produk RAHMA</span>
+        </div>
+        <img src="screenshots/01-landing-home.png" alt="Tampilan Landing Page Produk RAHMA" />
+      </div>
+
+      <div class="step-list">
+        <div class="step-block">
+          <div class="step-num-badge primary">01</div>
+          <div class="step-content">
+            <h4>Masuk Melalui Halaman Login RBAC (`/login`)</h4>
+            <p>
+              Klik tombol <strong>Buka Dashboard</strong> atau akses <code>http://localhost:3456/login</code>. Masukkan
+              email korporasi dan kata sandi, atau klik salah satu tombol <strong>Masuk Cepat Akun Demo</strong>
+              (kata sandi standar: <code>rahma2026</code>) untuk langsung masuk sesuai peran.
+            </p>
+          </div>
+        </div>
+
+        <div class="step-block">
+          <div class="step-num-badge primary">02</div>
+          <div class="step-content">
+            <h4>Mendaftarkan Akun Baru (`/signup`)</h4>
+            <p>
+              Bagi <em>Division Leader</em> atau anggota Direksi baru, klik tautan <strong>Daftar Akun Baru (Sign Up)</strong>,
+              isi nama lengkap, email korporasi <code>@gsi.co.id</code>, jabatan, pilih peran (<em>Division Leader</em>
+              wajib memilih departemen pemilik), dan buat kata sandi minimal 6 karakter.
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <div class="manual-figure">
+        <div class="figure-bar">
+          <span class="figure-dots"><span class="figure-dot"></span><span class="figure-dot"></span><span class="figure-dot"></span></span>
+          <span>http://localhost:3456/login &mdash; Autentikasi Sesi HttpOnly &amp; Simulator Peran</span>
+        </div>
+        <img src="screenshots/02-login-rbac.png" alt="Halaman Login RBAC RAHMA" />
+      </div>
+
+      <table class="spec-table">
+        <thead>
+          <tr>
+            <th>Peran (Role RBAC)</th>
+            <th>Akun Demo Siap Pakai</th>
+            <th>Cakupan Wewenang di Dalam Sistem</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><span class="pill pill-blue">CPMD_ADMIN</span></td>
+            <td><code>nadia.cpmd@gsi.co.id</code><br />Sandi: <code>rahma2026</code></td>
+            <td>Akses penuh ke seluruh 4 menu: CRUD Departemen, CRUD Kamus KPI, CRUD Atribut HEX, Kunci Periode, Input semua divisi, dan Backup JSON.</td>
+          </tr>
+          <tr>
+            <td><span class="pill pill-yellow">DIV_LEADER</span></td>
+            <td><code>budi.ops@gsi.co.id</code><br />Sandi: <code>rahma2026</code></td>
+            <td>Fokus pada pengisian angka realisasi (<em>Actual</em>) dan dokumen mitigasi risiko untuk departemen yang dipimpinnya.</td>
+          </tr>
+          <tr>
+            <td><span class="pill pill-green">EXECUTIVE</span></td>
+            <td><code>darmawan.bod@gsi.co.id</code><br />Sandi: <code>rahma2026</code></td>
+            <td>Tampilan rapat direksi (<em>Boardroom View</em>): memantau Executive Dashboard, Fokus Indikator Merah, Papan Eskalasi, dan Ekspor PDF.</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <div class="manual-figure">
+        <div class="figure-bar">
+          <span class="figure-dots"><span class="figure-dot"></span><span class="figure-dot"></span><span class="figure-dot"></span></span>
+          <span>http://localhost:3456/signup &mdash; Formulir Registrasi Mandiri</span>
+        </div>
+        <img src="screenshots/03-signup-account.png" alt="Halaman Pendaftaran Akun Baru RAHMA" />
+      </div>
+    </section>
+
+    <!-- =================================================================== -->
+    <!-- BAB 03: MENU 1 — EXECUTIVE PERFORMANCE DASHBOARD & DARK MODE        -->
+    <!-- =================================================================== -->
+    <section class="chapter chapter-break">
+      <div class="chapter-header">
+        <span class="chapter-badge">BAB 03</span>
+        <h2 class="chapter-title">Menu 1: Executive Performance Dashboard &amp; Mode Malam</h2>
+      </div>
+
+      <p>
+        Setelah berhasil masuk ke <code>/app</code>, pengguna langsung diarahkan ke <strong>Executive Performance
+        Dashboard</strong>. Halaman ini dirancang berstandar <em>PPT-Ready</em> untuk menggantikan kompilasi slide
+        manual dalam rapat evaluasi bulanan maupun kuartalan bersama Direksi (BOD).
+      </p>
+
+      <div class="manual-figure">
+        <div class="figure-bar">
+          <span class="figure-dots"><span class="figure-dot"></span><span class="figure-dot"></span><span class="figure-dot"></span></span>
+          <span>http://localhost:3456/app &mdash; Executive Performance Dashboard (Mode Terang)</span>
+        </div>
+        <img src="screenshots/04-executive-dashboard-light.png" alt="Executive Performance Dashboard Light Mode" />
+      </div>
+
+      <div class="feature-grid-2">
+        <div class="feature-card">
+          <h4>1. Speedometer &amp; Gauge Bar Terkalibrasi</h4>
+          <p>
+            Busur setengah lingkaran (<code>-90&deg;</code> s/d <code>+90&deg;</code>) dan pita horizontal di bawahnya
+            memetakan rentang <code>0%&ndash;120%</code> secara presisi: <span class="pill pill-red">Merah &lt;85%</span>,
+            <span class="pill pill-yellow">Kuning 85&ndash;99.9%</span>, dan <span class="pill pill-green">Hijau 100&ndash;120%</span>.
+          </p>
+        </div>
+        <div class="feature-card">
+          <h4>2. Sakelar Bulan Ini vs Akumulasi YTD</h4>
+          <p>
+            Gunakan tombol <strong>Bulan Ini</strong> dan <strong>YTD</strong> pada bilah kontrol atas untuk mengalihkan
+            seluruh perhitungan skor dari periode tunggal ke akumulasi Januari s/d bulan terpilih (<code>SUM</code>,
+            <code>AVG</code>, atau <code>LAST_VALUE</code>).
+          </p>
+        </div>
+        <div class="feature-card">
+          <h4>3. Tombol Fokus Merah (Red-Only Spotlight)</h4>
+          <p>
+            Saat rapat direksi berlangsung, klik <strong>Fokus Merah</strong> di bilah atas untuk menyembunyikan seluruh
+            KPI berstatus aman dan hanya menyorot indikator kritis yang memerlukan keputusan manajemen.
+          </p>
+        </div>
+        <div class="feature-card">
+          <h4>4. One-Click Executive PDF (A4 Landscape)</h4>
+          <p>
+            Klik tombol biru <strong>One-Click Executive PDF</strong> untuk mencetak atau menyimpan ringkasan dashboard
+            dan tabel eskalasi ke dalam dokumen PDF berorientasi <em>A4 Landscape (16:9)</em>.
+          </p>
+        </div>
+      </div>
+
+      <div class="callout callout-note">
+        <div class="callout-head">Mode Malam (Night-Comfort Dark Mode) &amp; Standar Kontras Teks 2-Tier</div>
+        <p>
+          Klik tombol <strong>Mode Malam</strong> / <strong>Mode Terang</strong> di pojok kanan atas untuk mengganti tema
+          antarmuka secara instan di seluruh halaman. Seluruh teks menggunakan standar kontras 2-tier (Putih bersih
+          <code>#F8FAFC</code> untuk judul/angka utama dan Abu terang <code>#E2E8F0</code>/<code>#CBD5E1</code> untuk
+          teks isi) sehingga nyaman dibaca pada malam hari tanpa teks yang redup.
+        </p>
+      </div>
+
+      <div class="manual-figure">
+        <div class="figure-bar">
+          <span class="figure-dots"><span class="figure-dot"></span><span class="figure-dot"></span><span class="figure-dot"></span></span>
+          <span>http://localhost:3456/app &mdash; Executive Performance Dashboard (Night-Comfort Dark Mode)</span>
+        </div>
+        <img src="screenshots/05-executive-dashboard-dark.png" alt="Executive Performance Dashboard Dark Mode" />
+      </div>
+
+      <div class="step-list">
+        <div class="step-block">
+          <div class="step-num-badge primary">01</div>
+          <div class="step-content">
+            <h4>Membuka Drawer Perincian Individu Indikator KPI (Histori 12 Bulan)</h4>
+            <p>
+              Tabel utama menerapkan prinsip <em>Progressive Disclosure</em> agar layar tidak penuh oleh parameter
+              teknis. Klik baris KPI mana pun atau tekan tombol <strong>Lihat Rincian</strong> untuk membuka panel
+              investigasi yang memuat grafik batang 12 bulan (Januari&ndash;Desember 2026), perubahan <em>Month-over-Month
+              (MoM)</em>, dokumen lengkap mitigasi, serta rumus polaritas dan plafon skor.
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <div class="manual-figure">
+        <div class="figure-bar">
+          <span class="figure-dots"><span class="figure-dot"></span><span class="figure-dot"></span><span class="figure-dot"></span></span>
+          <span>Modal Perincian Individu Indikator KPI &mdash; Grafik Tren 12 Bulan &amp; Parameter Teknis</span>
+        </div>
+        <img src="screenshots/06-kpi-detail-modal.png" alt="Modal Perincian Individu Indikator KPI" />
+      </div>
+    </section>
+
+    <!-- =================================================================== -->
+    <!-- BAB 04: MENU 2 — INPUT KPI SPREADSHEET & GERBANG LOGIKA MITIGASI    -->
+    <!-- =================================================================== -->
+    <section class="chapter chapter-break">
+      <div class="chapter-header">
+        <span class="chapter-badge">BAB 04</span>
+        <h2 class="chapter-title">Menu 2: Input KPI Bulanan &amp; Gerbang Logika Mitigasi</h2>
+      </div>
+
+      <p>
+        Menu <strong>Input KPI &amp; Mitigasi</strong> memungkinkan <em>Division Leader</em> dan <em>CPMD Admin</em>
+        memasukkan angka realisasi bulanan dengan kecepatan setara lembar kerja Excel tanpa perlu membuka modal satu
+        per satu, sekaligus menegakkan disiplin pengisian mitigasi risiko.
+      </p>
+
+      <div class="step-list">
+        <div class="step-block">
+          <div class="step-num-badge primary">01</div>
+          <div class="step-content">
+            <h4>Filter Departemen &amp; Pengisian Angka Realisasi (`Actual`)</h4>
+            <p>
+              Pilih periode bulan pada bilah atas dan departemen pada dropdown <strong>Filter Departemen Input</strong>.
+              Ketik angka pada kolom <strong>ACTUAL</strong>, lalu tekan <kbd>Tab</kbd> atau <kbd>Enter</kbd> untuk
+              melompat ke baris KPI berikutnya. Persentase capaian, skor terbobot, dan status warna otomatis dihitung
+              seketika saat Anda mengetik.
+            </p>
+          </div>
+        </div>
+
+        <div class="step-block">
+          <div class="step-num-badge primary">02</div>
+          <div class="step-content">
+            <h4>Aktivasi Otomatis Gerbang Logika Mitigasi (Indikator Merah &lt; 85%)</h4>
+            <p>
+              Apabila angka <em>Actual</em> menghasilkan capaian di bawah ambang batas merah (default <code>&lt; 85%</code>),
+              kartu baris otomatis berubah menjadi merah dan membuka panel <strong>Gerbang Logika Mitigasi Wajib Isi</strong>.
+            </p>
+          </div>
+        </div>
+
+        <div class="step-block">
+          <div class="step-num-badge primary">03</div>
+          <div class="step-content">
+            <h4>Memilih Quick-Tag Chips &amp; Melengkapi 3 Kolom Wajib</h4>
+            <p>
+              Klik salah satu atau beberapa <strong>Quick-Tag Chips</strong> (misal: <code>Kendala Vendor / Sparepart</code>,
+              <code>Keterbatasan Man-Power</code>, <code>Butuh Keputusan / Capex BOD</code>) untuk menempelkan tag
+              terstandar, lalu lengkapi ketiga kolom wajib: <strong>Problem Identification</strong>,
+              <strong>Corrective Action</strong>, dan <strong>Need Support (Eskalasi BOD)</strong>.
+            </p>
+          </div>
+        </div>
+
+        <div class="step-block">
+          <div class="step-num-badge primary">04</div>
+          <div class="step-content">
+            <h4>Menyimpan Draft vs Submit Final</h4>
+            <p>
+              Gunakan tombol <strong>Simpan Draft</strong> jika Anda masih mengumpulkan data pendukung (draf juga
+              tersimpan otomatis di browser). Klik <strong>Submit Final</strong> setelah seluruh data valid agar
+              tercatat di Executive Dashboard dan Papan Eskalasi BOD.
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <div class="callout callout-danger">
+        <div class="callout-head">Aturan Hard-Validation Gerbang Logika Mitigasi (Server &amp; Client Gate)</div>
+        <p>
+          Untuk indikator berstatus <strong>MERAH</strong>, sistem memblokir tombol <strong>Submit Final</strong>
+          (mengembalikan status HTTP <code>422 Unprocessable Entity</code> dan menampilkan popup peringatan merah)
+          apabila salah satu dari <em>Problem Identification</em>, <em>Corrective Action</em>, atau <em>Need Support</em>
+          berisi kurang dari <strong>10 karakter</strong>.
+        </p>
+      </div>
+
+      <div class="manual-figure">
+        <div class="figure-bar">
+          <span class="figure-dots"><span class="figure-dot"></span><span class="figure-dot"></span><span class="figure-dot"></span></span>
+          <span>Menu 2: Input KPI &amp; Mitigasi &mdash; Inline Spreadsheet &amp; Gerbang Logika Mitigasi Aktif</span>
+        </div>
+        <img src="screenshots/07-input-kpi-mitigation.png" alt="Menu Input KPI Bulanan dan Gerbang Logika Mitigasi" />
+      </div>
+    </section>
+
+    <!-- =================================================================== -->
+    <!-- BAB 05: MENU 3 — CPMD HUB, SUBMISSION TRACKER & KAMUS KPI           -->
+    <!-- =================================================================== -->
+    <section class="chapter chapter-break">
+      <div class="chapter-header">
+        <span class="chapter-badge">BAB 05</span>
+        <h2 class="chapter-title">Menu 3: CPMD Hub, Submission Tracker &amp; Kamus KPI</h2>
+      </div>
+
+      <p>
+        Menu <strong>CPMD Hub &amp; Kamus KPI</strong> dirancang khusus untuk membebaskan divisi Corporate Planning
+        &amp; Management Development (CPMD) dari pekerjaan klerikal menagih laporan manual dan memastikan bobot KPI
+        setiap departemen selalu terkalibrasi tepat <strong>100%</strong>.
+      </p>
+
+      <div class="manual-figure">
+        <div class="figure-bar">
+          <span class="figure-dots"><span class="figure-dot"></span><span class="figure-dot"></span><span class="figure-dot"></span></span>
+          <span>Menu 3: CPMD Hub &mdash; Submission Tracker, Master Departemen &amp; Kamus KPI</span>
+        </div>
+        <img src="screenshots/08-cpmd-hub-kamus.png" alt="Menu CPMD Hub dan Kamus KPI" />
+      </div>
+
+      <div class="step-list">
+        <div class="step-block">
+          <div class="step-num-badge primary">01</div>
+          <div class="step-content">
+            <h4>1-Click Salin Pengingat Pelaporan (WhatsApp / Email)</h4>
+            <p>
+              Pada kartu <strong>CPMD Submission Tracker</strong>, pantau jumlah KPI yang sudah disubmit oleh masing-masing
+              departemen. Klik tombol <strong>1-Click Salin Pengingat (WhatsApp/Email)</strong> untuk menyalin naskah
+              pengingat resmi yang otomatis mencantumkan nama <em>Division Leader</em> dan daftar kode KPI yang masih
+              berstatus <em>Draft</em> atau belum dilaporkan.
+            </p>
+          </div>
+        </div>
+
+        <div class="step-block">
+          <div class="step-num-badge primary">02</div>
+          <div class="step-content">
+            <h4>Mengunci &amp; Membuka Kunci Periode Pelaporan</h4>
+            <p>
+              Setelah seluruh departemen merampungkan laporan bulanan, klik tombol <strong>Kunci Periode Pelaporan</strong>
+              untuk membekukan seluruh kolom input pada bulan tersebut agar angka tidak berubah selama rapat evaluasi
+              Direksi berlangsung.
+            </p>
+          </div>
+        </div>
+
+        <div class="step-block">
+          <div class="step-num-badge primary">03</div>
+          <div class="step-content">
+            <h4>Mengelola Master Departemen &amp; Kamus KPI (Validasi Bobot 100%)</h4>
+            <p>
+              Klik <strong>Tambah Departemen</strong> untuk mendaftarkan unit organisasi baru, atau klik
+              <strong>Tambah KPI</strong> untuk menyusun indikator baru beserta satuan, bobot (%), target default,
+              polaritas (<code>MAXIMIZE</code> / <code>MINIMIZE</code>), metode YTD (<code>SUM</code> / <code>AVG</code> /
+              <code>LAST_VALUE</code>), ambang merah, dan pilihan multi-atribut warna HEX.
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <div class="callout callout-warning">
+        <div class="callout-head">Indikator Validasi Total Bobot 100% Per Departemen</div>
+        <p>
+          Perhatikan pita status bobot di atas tabel Kamus KPI. Setiap departemen wajib memiliki total bobot tepat
+          <strong>100%</strong> (<span class="pill pill-green">Valid 100%</span>). Apabila penambahan atau perubahan
+          KPI membuat total bobot menyimpang dari 100%, sistem langsung menandai departemen tersebut dengan status
+          peringatan agar CPMD Admin menyesuaikan distribusi bobotnya.
+        </p>
+      </div>
+    </section>
+
+    <!-- =================================================================== -->
+    <!-- BAB 06: MENU 4 — KATALOG ATRIBUT KPI & STUDIO WARNA HEX             -->
+    <!-- =================================================================== -->
+    <section class="chapter chapter-break">
+      <div class="chapter-header">
+        <span class="chapter-badge">BAB 06</span>
+        <h2 class="chapter-title">Menu 4: Katalog Atribut KPI &amp; Studio Warna HEX (#RRGGBB)</h2>
+      </div>
+
+      <p>
+        Menu <strong>Atribut &amp; Warna HEX</strong> menyediakan studio kustomisasi visual bagi CPMD Admin untuk
+        mengelompokkan KPI menggunakan lencana multi-atribut berwarna aksen hingga tingkat kode heksadesimal 6-digit
+        (<code>#RRGGBB</code>).
+      </p>
+
+      <div class="manual-figure">
+        <div class="figure-bar">
+          <span class="figure-dots"><span class="figure-dot"></span><span class="figure-dot"></span><span class="figure-dot"></span></span>
+          <span>Menu 4: Katalog Atribut KPI &amp; Modal Studio CRUD Warna Aksen HEX (#RRGGBB)</span>
+        </div>
+        <img src="screenshots/09-attributes-hex-studio.png" alt="Menu Katalog Atribut KPI dan Studio Warna HEX" />
+      </div>
+
+      <div class="step-list">
+        <div class="step-block">
+          <div class="step-num-badge primary">01</div>
+          <div class="step-content">
+            <h4>Menambah atau Mengubah Atribut Warna HEX</h4>
+            <p>
+              Klik tombol <strong>Tambah Atribut HEX</strong> (atau tombol <strong>Ubah Nama / HEX</strong> pada kartu
+              atribut). Masukkan nama atribut dan pilih salah satu dari 4 kelompok: <code>PERSPECTIVE</code> (Balanced
+              Scorecard), <code>CATEGORY</code> (Kategori Tugas), <code>PRIORITY</code> (Prioritas Direksi), atau
+              <code>MITIGATION_TAG</code> (Quick-Tag Gerbang Merah).
+            </p>
+          </div>
+        </div>
+
+        <div class="step-block">
+          <div class="step-num-badge primary">02</div>
+          <div class="step-content">
+            <h4>Sinkronisasi Color Picker, Input Kode `#RRGGBB` &amp; Live Preview Kontras</h4>
+            <p>
+              Pilih warna menggunakan <em>Visual Color Picker</em>, klik salah satu dari 10 tombol <strong>Preset
+              Cepat</strong>, atau ketik kode HEX 6-digit secara langsung (misalnya <code>#24C9FB</code> atau
+              <code>#F68400</code>). Kotak <strong>Live Preview</strong> otomatis menghitung luminansi relatif WCAG
+              dan memperbarui warna lencana di seluruh tabel, filter dashboard, dan kartu eskalasi.
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <div class="callout callout-tip">
+        <div class="callout-head">Proteksi Integritas Relasi Atribut Aktif</div>
+        <p>
+          Sistem melindungi integritas data Kamus KPI: atribut yang sedang terpasang pada satu atau lebih KPI aktif
+          (ditampilkan pada indikator <code>Digunakan: N KPI</code>) tidak dapat dihapus secara tidak sengaja sebelum
+          relasinya dilepas terlebih dahulu dari KPI terkait.
+        </p>
+      </div>
+    </section>
+
+    <!-- =================================================================== -->
+    <!-- BAB 07: PENGATURAN AKUN, OTP EMAIL, KACA & BACKUP MANDIRI           -->
+    <!-- =================================================================== -->
+    <section class="chapter chapter-break">
+      <div class="chapter-header">
+        <span class="chapter-badge">BAB 07</span>
+        <h2 class="chapter-title">Pengaturan Akun, Verifikasi OTP, Personalisasi &amp; Backup</h2>
+      </div>
+
+      <p>
+        Klik kartu profil pengguna di bagian atas sidebar kiri untuk membuka jendela <strong>Pengaturan Akun &amp;
+        Ruang Kerja</strong> yang memiliki 5 cabang pengaturan mandiri serta tombol <strong>Keluar / Ganti Akun</strong>.
+      </p>
+
+      <div class="manual-figure">
+        <div class="figure-bar">
+          <span class="figure-dots"><span class="figure-dot"></span><span class="figure-dot"></span><span class="figure-dot"></span></span>
+          <span>Modal Pengaturan Akun &amp; Ruang Kerja (5 Cabang Navigasi Mandiri)</span>
+        </div>
+        <img src="screenshots/10-account-settings-otp.png" alt="Modal Pengaturan Akun dan Ruang Kerja RAHMA" />
+      </div>
+
+      <table class="spec-table">
+        <thead>
+          <tr>
+            <th style="width:24%">Cabang Menu</th>
+            <th>Fitur &amp; Panduan Penggunaan</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>1. Profil &amp; Avatar</strong></td>
+            <td>Unggah foto avatar kustom dari komputer (tersimpan per akun), perbarui nama lengkap dan jabatan, serta tinjau ringkasan hak akses RBAC sesi aktif.</td>
+          </tr>
+          <tr>
+            <td><strong>2. Keamanan &amp; OTP</strong></td>
+            <td>Ubah email korporasi atau kata sandi dengan pengamanan <strong>Kode OTP 6-Digit</strong> (berlaku 5 menit). Klik <em>Kirim OTP</em>, masukkan kode 6-digit yang diterbitkan, lalu klik <em>Verifikasi</em>.</td>
+          </tr>
+          <tr>
+            <td><strong>3. Tampilan &amp; Kaca</strong></td>
+            <td>Pilih 10 tema latar belakang (5 fotografi lanskap <em>Magnifik 2400p</em> &amp; 5 gradien arsitektural), unggah wallpaper dari PC, dan atur intensitas kaca buram (<em>Jernih</em>, <em>Seimbang</em>, atau <em>Fokus Pekat</em>).</td>
+          </tr>
+          <tr>
+            <td><strong>4. Preferensi &amp; Data</strong></td>
+            <td>Atur tema default (Mode Terang / Mode Malam), mode kalkulasi awal (<code>MONTHLY</code> / <code>YTD</code>), konfirmasi perpindahan menu saat ada ketikan belum disimpan, serta sinkronisasi antrean offline.</td>
+          </tr>
+          <tr>
+            <td><strong>5. Tentang Rahma &amp; Backup JSON</strong></td>
+            <td>Melihat informasi build sistem. Untuk mencadangkan seluruh isi basis data PostgreSQL secara mandiri, klik tombol <strong>Backup Data Mandiri (.JSON)</strong> di bagian bawah sidebar kiri.</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <div class="callout callout-note">
+        <div class="callout-head">Standar Visual Popup Notifikasi (Toast) &amp; Pintasan Keyboard</div>
+        <p>
+          Seluruh notifikasi informasi sistem ditampilkan menggunakan popup berlatar <span class="pill pill-dark">Hitam
+          Pekat (#0A0A0A) Tulisan Putih</span> tanpa aksen hijau agar seragam di Mode Terang maupun Mode Malam,
+          sedangkan peringatan validasi ditampilkan dalam warna <span class="pill pill-red">Merah (#DC2626) Tulisan
+          Putih</span>. Gunakan <kbd>Tab</kbd> / <kbd>Enter</kbd> untuk navigasi baris input spreadsheet dan
+          <kbd>Esc</kbd> untuk menutup seluruh jendela modal.
+        </p>
+      </div>
+
+      <footer class="manual-footer-credit">
+        <span>RAHMA Standalone KPI System v1.0 &mdash; PT Global Service Indonesia (GSI)</span>
+        <span>Divisi Corporate Planning &amp; Management Development (CPMD) &bull; 2026</span>
+      </footer>
+    </section>
+  </main>
+</body>
+</html>
