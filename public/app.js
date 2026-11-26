@@ -265,21 +265,26 @@ function renderSpeedometerSvg(score = 0) {
 // ============================================================================
 async function loadBootstrapAndDashboard() {
   try {
-    const bootRes = await fetch('/api/bootstrap');
-    if (bootRes.status === 401) {
+    const url = `/api/dashboard?year=${state.year}&month=${state.month}&mode=${state.mode}`;
+    const [bootRes, dashRes] = await Promise.all([fetch('/api/bootstrap'), fetch(url)]);
+    if (bootRes.status === 401 || dashRes.status === 401) {
       showLoginOverlay();
       return;
     }
-    const bootData = await bootRes.json();
+    const [bootData, dashData] = await Promise.all([bootRes.json(), dashRes.json()]);
     if (bootData.currentUser) {
       setAuthenticatedUser(bootData.currentUser);
     }
-    state.departments = bootData.departments || [];
-    state.attributes = bootData.attributes || [];
+    state.dashboard = dashData;
+    state.departments = dashData.departments || bootData.departments || [];
+    state.attributes = dashData.attributes || bootData.attributes || [];
 
     populateDepartmentSelects();
     populateAttributeSelects();
-    await refreshDashboardData();
+    saveOfflineSnapshot();
+    updateOfflineStatusUi();
+    state.hasUnsavedInputChanges = false;
+    renderAllViews();
     await syncOfflineQueue(true);
   } catch (err) {
     if (!navigator.onLine || err instanceof TypeError) {
@@ -305,14 +310,17 @@ async function refreshDashboardData() {
       state.departments = state.dashboard.departments;
       populateDepartmentSelects();
     }
-
-    const attrRes = await fetch('/api/attributes');
-    if (attrRes.status === 401) {
-      showLoginOverlay();
-      return;
+    if (Array.isArray(state.dashboard.attributes)) {
+      state.attributes = state.dashboard.attributes;
+    } else {
+      const attrRes = await fetch('/api/attributes');
+      if (attrRes.status === 401) {
+        showLoginOverlay();
+        return;
+      }
+      const attrData = await attrRes.json();
+      state.attributes = attrData.attributes || [];
     }
-    const attrData = await attrRes.json();
-    state.attributes = attrData.attributes || [];
 
     populateAttributeSelects();
     saveOfflineSnapshot();
@@ -366,6 +374,17 @@ function populateAttributeSelects() {
   renderKpiFormAttributePicker();
 }
 
+const dirtyTabs = new Set(['dashboard', 'input', 'cpmd', 'attributes']);
+
+function renderTabIfDirty(tab) {
+  if (!state.dashboard || !dirtyTabs.has(tab)) return;
+  dirtyTabs.delete(tab);
+  if (tab === 'dashboard') renderExecutiveDashboard();
+  else if (tab === 'input') renderSpreadsheetInputView();
+  else if (tab === 'cpmd') renderCpmdHubView();
+  else if (tab === 'attributes') renderAttributesStudioView();
+}
+
 // ============================================================================
 // RENDER ALL VIEWS
 // ============================================================================
@@ -385,10 +404,12 @@ function renderAllViews() {
   document.getElementById('navRedBadge').textContent = `${redTotal} Merah`;
   document.getElementById('spotlightCountBadge').textContent = `(${redTotal})`;
 
-  renderExecutiveDashboard();
-  renderSpreadsheetInputView();
-  renderCpmdHubView();
-  renderAttributesStudioView();
+  dirtyTabs.add('dashboard');
+  dirtyTabs.add('input');
+  dirtyTabs.add('cpmd');
+  dirtyTabs.add('attributes');
+
+  renderTabIfDirty(state.activeTab || 'dashboard');
 }
 
 // ============================================================================
@@ -1449,6 +1470,7 @@ document.addEventListener('DOMContentLoaded', () => {
     document.querySelectorAll('.nav-btn').forEach((b) => b.classList.toggle('active', b.dataset.tab === tab));
     document.querySelectorAll('.tab-panel').forEach((p) => p.classList.remove('active'));
     state.activeTab = tab;
+    renderTabIfDirty(tab);
     const panel = document.getElementById(`tab-${tab}`);
     if (panel) panel.classList.add('active');
   }
@@ -1526,6 +1548,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // One-Click Executive PDF Report
   document.getElementById('btnExportPdf').addEventListener('click', () => {
+    renderTabIfDirty('dashboard');
     window.print();
   });
 
@@ -2314,18 +2337,6 @@ function applyRbacUiVisibility() {
 
 async function checkAuthAndBoot() {
   try {
-    const res = await fetch('/api/auth/me');
-    if (!res.ok) {
-      showLoginOverlay();
-      return;
-    }
-    const data = await res.json();
-    if (!data.user) {
-      showLoginOverlay();
-      return;
-    }
-    setAuthenticatedUser(data.user);
-    hideLoginOverlay();
     await loadBootstrapAndDashboard();
   } catch (_err) {
     showLoginOverlay('Tidak dapat memeriksa sesi aktif. Silakan masuk.');

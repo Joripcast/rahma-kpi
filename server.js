@@ -7,6 +7,7 @@ const http = require('node:http');
 const fs = require('node:fs');
 const path = require('node:path');
 const crypto = require('node:crypto');
+const zlib = require('node:zlib');
 const { URL } = require('node:url');
 
 const {
@@ -204,6 +205,18 @@ async function getAuthenticatedUser(req) {
 function sendJson(res, statusCode, payload, extraHeaders = {}) {
   applySecurityHeaders(res);
   const body = JSON.stringify(payload);
+  const reqAcceptEncoding = String(res.req?.headers?.['accept-encoding'] || '');
+  if (body.length > 1024 && reqAcceptEncoding.includes('gzip')) {
+    const gzBody = zlib.gzipSync(body);
+    res.writeHead(statusCode, {
+      'Content-Type': 'application/json; charset=utf-8',
+      'Content-Encoding': 'gzip',
+      'Vary': 'Accept-Encoding',
+      'Cache-Control': 'no-store',
+      ...extraHeaders
+    });
+    return res.end(gzBody);
+  }
   res.writeHead(statusCode, {
     'Content-Type': 'application/json; charset=utf-8',
     'Cache-Control': 'no-store',
@@ -227,6 +240,9 @@ const MIME_TYPES = {
   '.woff': 'font/woff',
   '.woff2': 'font/woff2'
 };
+
+const COMPRESSIBLE_EXTS = new Set(['.html', '.css', '.js', '.json', '.svg']);
+const IMMUTABLE_ASSET_EXTS = new Set(['.ttf', '.woff', '.woff2', '.webp', '.png', '.jpg', '.jpeg', '.ico']);
 
 function parseJsonBody(req) {
   return new Promise((resolve, reject) => {
@@ -1373,12 +1389,46 @@ const server = http.createServer(async (req, res) => {
       return res.end('Forbidden');
     }
 
-    if (fs.existsSync(resolvedPath) && fs.statSync(resolvedPath).isFile()) {
-      const ext = path.extname(resolvedPath).toLowerCase();
-      const contentType = MIME_TYPES[ext] || 'application/octet-stream';
-      applySecurityHeaders(res);
-      res.writeHead(200, { 'Content-Type': contentType, 'Cache-Control': 'no-cache' });
-      return fs.createReadStream(resolvedPath).pipe(res);
+    if (fs.existsSync(resolvedPath)) {
+      const stat = fs.statSync(resolvedPath);
+      if (stat.isFile()) {
+        const ext = path.extname(resolvedPath).toLowerCase();
+        const contentType = MIME_TYPES[ext] || 'application/octet-stream';
+        const etag = `W/"${stat.size.toString(16)}-${Math.floor(stat.mtimeMs).toString(16)}"`;
+        const cacheControl = IMMUTABLE_ASSET_EXTS.has(ext)
+          ? 'public, max-age=86400'
+          : 'public, max-age=0, must-revalidate';
+
+        applySecurityHeaders(res);
+
+        if (req.headers['if-none-match'] === etag) {
+          res.writeHead(304, { ETag: etag, 'Cache-Control': cacheControl });
+          return res.end();
+        }
+
+        const acceptEncoding = String(req.headers['accept-encoding'] || '');
+        const shouldGzip =
+          COMPRESSIBLE_EXTS.has(ext) && stat.size > 1024 && acceptEncoding.includes('gzip');
+
+        if (shouldGzip) {
+          res.writeHead(200, {
+            'Content-Type': contentType,
+            'Content-Encoding': 'gzip',
+            'Vary': 'Accept-Encoding',
+            'Cache-Control': cacheControl,
+            ETag: etag
+          });
+          return fs.createReadStream(resolvedPath).pipe(zlib.createGzip()).pipe(res);
+        }
+
+        res.writeHead(200, {
+          'Content-Type': contentType,
+          'Content-Length': stat.size,
+          'Cache-Control': cacheControl,
+          ETag: etag
+        });
+        return fs.createReadStream(resolvedPath).pipe(res);
+      }
     }
 
     applySecurityHeaders(res);

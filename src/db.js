@@ -941,8 +941,9 @@ async function getEnrichedKpis({ departmentId = null, year = 2026, month = 11 } 
 }
 
 async function getDashboardSummary({ year = 2026, month = 11, mode = 'MONTHLY' } = {}) {
-  const [departments, kpis] = await Promise.all([
+  const [departments, attributes, kpis] = await Promise.all([
     db.all(`SELECT * FROM departments WHERE is_active = 1 ORDER BY code ASC`),
+    getAllAttributes(),
     getEnrichedKpis({ year, month })
   ]);
 
@@ -1099,6 +1100,7 @@ async function getDashboardSummary({ year = 2026, month = 11, mode = 'MONTHLY' }
       }))
     },
     departments: departmentSummaries,
+    attributes,
     redEscalations,
     kpis
   };
