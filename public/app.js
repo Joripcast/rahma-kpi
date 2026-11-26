@@ -463,7 +463,7 @@ function renderExecutiveDashboard() {
           ? `${dept.counts.yellow} Warning`
           : 'Aman';
       return `
-        <div class="mini-dept-card">
+        <button type="button" class="mini-dept-card is-clickable" data-detail-dept="${escapeHtml(dept.id)}" title="Klik untuk membuka perincian, speedometer, grafik bulanan interaktif &amp; cetak laporan Divisi ${escapeHtml(dept.code)}">
           <div class="mini-dept-top">
             <span style="color:var(--text-h1)">Divisi ${escapeHtml(dept.code)} — ${dept.activeScore}%</span>
             <span class="status-pill status-${dept.statusColor}" style="min-height:24px;padding:2px 8px;font-size:10.5px">
@@ -473,10 +473,11 @@ function renderExecutiveDashboard() {
           <div class="mini-progress-track">
             <div class="mini-progress-fill" style="width:${pctWidth}%;background:${color}"></div>
           </div>
-          <div style="font-size:11px;font-weight:600;color:var(--text-body)">
-            Monthly: ${dept.monthlyScore}% | YTD: ${dept.ytdScore}%
+          <div style="display:flex;justify-content:space-between;align-items:center;gap:6px;font-size:11px;font-weight:600;color:var(--text-body)">
+            <span>Monthly: ${dept.monthlyScore}% | YTD: ${dept.ytdScore}%</span>
+            <span class="mini-dept-action-hint">${phIcon('magnifying-glass', 'ph-icon-sm')} Detail</span>
           </div>
-        </div>
+        </button>
       `;
     })
     .join('');
@@ -490,9 +491,10 @@ function renderExecutiveDashboard() {
       const mColor =
         dept.monthlyScore >= 100 ? '#16A34A' : dept.monthlyScore >= 85 ? '#F68400' : '#DC2626';
       return `
-        <div class="bar-row">
-          <div class="bar-row-label">
+        <div class="bar-row is-clickable" data-detail-dept="${escapeHtml(dept.id)}" role="button" tabindex="0" title="Klik untuk membuka perincian Divisi ${escapeHtml(dept.code)}">
+          <div class="bar-row-label" style="display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap">
             <span>${escapeHtml(dept.code)} — ${escapeHtml(dept.name)} (Bulan Ini: ${dept.monthlyScore}% | YTD: ${dept.ytdScore}%)</span>
+            <span style="font-size:11.5px;font-weight:700;color:var(--primary);display:inline-flex;align-items:center;gap:4px">${phIcon('magnifying-glass', 'ph-icon-sm')} Lihat Detail Divisi</span>
           </div>
           <div class="bar-dual-tracks">
             <div class="bar-track" title="Skor Bulan Ini: ${dept.monthlyScore}%">
@@ -531,12 +533,12 @@ function renderExecutiveDashboard() {
         ${d.departments
           .map(
             (dept) => `
-          <tr>
-            <td><strong>Divisi ${escapeHtml(dept.code)}</strong></td>
+          <tr class="kpi-clickable-row" data-detail-dept="${escapeHtml(dept.id)}" title="Klik untuk membuka perincian Divisi ${escapeHtml(dept.code)}">
+            <td><strong style="color:var(--primary);text-decoration:underline;text-underline-offset:3px">Divisi ${escapeHtml(dept.code)}</strong></td>
             ${dept.monthlyHeatmap
               .map(
                 (cell) => `
-              <td>
+              <td data-detail-dept="${escapeHtml(dept.id)}" data-detail-month="${cell.month}">
                 <div class="heat-cell heat-${cell.status_color}">
                   ${cell.score !== null ? `${cell.score}%` : '-'}
                 </div>
@@ -1141,15 +1143,16 @@ function renderCpmdHubView() {
           ? `${phIcon('note-pencil', 'ph-icon-sm')} MASIH DRAFT`
           : `${phIcon('clock', 'ph-icon-sm')} BELUM INPUT`;
       return `
-        <div class="tracker-dept-card">
+        <div class="tracker-dept-card is-clickable" data-detail-dept="${escapeHtml(dept.id)}" role="button" tabindex="0" title="Klik untuk membuka perincian Divisi ${escapeHtml(dept.code)}">
           <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
             <strong>${escapeHtml(dept.code)}</strong>
             <span class="status-pill status-${stColor}">${stText}</span>
           </div>
           <div style="font-size:12.5px;font-weight:700;color:var(--text-h1)">${escapeHtml(dept.name)}</div>
           <div style="font-size:11px;color:var(--text-caption);margin:4px 0">${escapeHtml(dept.leader_name)}</div>
-          <div style="font-size:11.5px;font-weight:800;color:var(--text-h2)">
-            Kelengkapan: ${dept.submittedFinalCount}/${dept.kpiCount} KPI Final
+          <div style="display:flex;justify-content:space-between;align-items:center;font-size:11.5px;font-weight:800;color:var(--text-h2)">
+            <span>Kelengkapan: ${dept.submittedFinalCount}/${dept.kpiCount} KPI Final</span>
+            <span style="color:var(--primary)">${phIcon('magnifying-glass', 'ph-icon-sm')}</span>
           </div>
         </div>
       `;
@@ -2577,7 +2580,7 @@ function initWallpaperStudio() {
 }
 
 // ============================================================================
-// INDIVIDUAL KPI DEEP-DIVE MODAL / DRAWER (PROGRESSIVE DISCLOSURE)
+// INDIVIDUAL KPI & DIVISION DEEP-DIVE MODAL / DRAWER (PROGRESSIVE DISCLOSURE)
 // ============================================================================
 function bindDetailTriggerButtons(rootEl = document) {
   rootEl.querySelectorAll('[data-detail-kpi]').forEach((el) => {
@@ -2587,6 +2590,562 @@ function bindDetailTriggerButtons(rootEl = document) {
       openKpiDetailModal(kpiId);
     });
   });
+
+  rootEl.querySelectorAll('[data-detail-dept]').forEach((el) => {
+    el.addEventListener('click', (e) => {
+      e.stopPropagation();
+      const deptId = el.dataset.detailDept;
+      const monthAttr = el.dataset.detailMonth ? Number(el.dataset.detailMonth) : state.month;
+      openDeptDetailModal(deptId, monthAttr);
+    });
+    el.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault();
+        e.stopPropagation();
+        const deptId = el.dataset.detailDept;
+        const monthAttr = el.dataset.detailMonth ? Number(el.dataset.detailMonth) : state.month;
+        openDeptDetailModal(deptId, monthAttr);
+      }
+    });
+  });
+}
+
+let activeDeptModalId = null;
+let activeDeptModalSelectedMonth = null;
+
+function renderDept12MonthBarChartSvg(dept, deptKpis, selectedMonth) {
+  const heatmap = dept.monthlyHeatmap || [];
+  const width = 820;
+  const height = 210;
+  const padLeft = 44;
+  const padRight = 18;
+  const padTop = 26;
+  const padBottom = 38;
+  const chartW = width - padLeft - padRight;
+  const chartH = height - padTop - padBottom;
+  const maxScale = 120;
+
+  const yForPct = (pct) =>
+    Math.round(padTop + chartH - (Math.min(maxScale, Math.max(0, pct)) / maxScale) * chartH);
+
+  const redY = yForPct(85);
+  const targetY = yForPct(100);
+
+  const barsHtml = SHORT_MONTHS.map((mLabel, idx) => {
+    const m = idx + 1;
+    const cell = heatmap.find((c) => c.month === m) || { month: m, score: null, status_color: 'UNREPORTED' };
+    const pct = cell.score !== null && cell.score !== undefined ? Number(cell.score) : null;
+    const colW = chartW / 12;
+    const xCenter = Math.round(padLeft + idx * colW + colW / 2);
+    const barW = 34;
+    const isSelected = m === Number(selectedMonth);
+
+    // Count warning & red KPIs in that month
+    let mRedCount = 0;
+    let mWarnCount = 0;
+    for (const k of deptKpis) {
+      const h = (k.monthlyHistory || []).find((item) => item.month === m);
+      if (h) {
+        if (h.status_color === 'RED') mRedCount++;
+        else if (h.status_color === 'YELLOW') mWarnCount++;
+      }
+    }
+    const alertBadgeCount = mRedCount + mWarnCount;
+
+    if (pct === null) {
+      return `
+        <g class="dept-month-bar-group ${isSelected ? 'is-selected' : ''}" data-select-dept-month="${m}" style="cursor:pointer">
+          <rect x="${xCenter - barW / 2 - 6}" y="${padTop - 8}" width="${barW + 12}" height="${chartH + 34}" fill="${isSelected ? 'rgba(0,123,200,0.16)' : 'transparent'}" rx="8"/>
+          <rect x="${xCenter - barW / 2}" y="${padTop}" width="${barW}" height="${chartH}" fill="var(--bg-subtle)" rx="5"/>
+          <text x="${xCenter}" y="${height - 14}" text-anchor="middle" font-size="11.5" font-weight="${isSelected ? '800' : '600'}" fill="${isSelected ? 'var(--primary)' : 'var(--text-caption)'}">${mLabel}</text>
+        </g>
+      `;
+    }
+
+    const barTop = yForPct(pct);
+    const barH = Math.max(6, padTop + chartH - barTop);
+    const fill =
+      cell.status_color === 'RED'
+        ? '#dc2626'
+        : cell.status_color === 'YELLOW'
+        ? '#f68400'
+        : '#16a34a';
+
+    return `
+      <g class="dept-month-bar-group ${isSelected ? 'is-selected' : ''}" data-select-dept-month="${m}" style="cursor:pointer">
+        <title>Klik untuk melihat rincian KPI Warning &amp; Merah bulan ${MONTH_NAMES[idx]} ${state.year} (Skor: ${pct}%)</title>
+        <rect class="dept-month-hit" x="${xCenter - barW / 2 - 7}" y="${padTop - 16}" width="${barW + 14}" height="${chartH + 46}" fill="${isSelected ? 'rgba(0,123,200,0.16)' : 'transparent'}" stroke="${isSelected ? 'var(--primary)' : 'transparent'}" stroke-width="1.5" rx="9"/>
+        <rect class="chart-bar-anim" x="${xCenter - barW / 2}" y="${barTop}" width="${barW}" height="${barH}" fill="${fill}" rx="6"/>
+        <text x="${xCenter}" y="${barTop - 6}" text-anchor="middle" font-size="10.5" font-weight="800" fill="var(--text-h1)">${pct}%</text>
+        ${
+          alertBadgeCount > 0
+            ? `<circle cx="${xCenter + barW / 2 - 2}" cy="${Math.max(padTop + 8, barTop + 8)}" r="8" fill="${mRedCount > 0 ? '#dc2626' : '#f68400'}" stroke="#ffffff" stroke-width="1.5"/>
+               <text x="${xCenter + barW / 2 - 2}" y="${Math.max(padTop + 8, barTop + 8) + 3.5}" text-anchor="middle" font-size="9" font-weight="800" fill="#ffffff">${alertBadgeCount}</text>`
+            : ''
+        }
+        <text x="${xCenter}" y="${height - 14}" text-anchor="middle" font-size="11.5" font-weight="${isSelected ? '800' : '600'}" fill="${isSelected ? 'var(--primary)' : 'var(--text-body)'}">${mLabel}</text>
+      </g>
+    `;
+  }).join('');
+
+  return `
+    <svg viewBox="0 0 ${width} ${height}" width="100%" height="${height}" style="display:block;user-select:none;">
+      <!-- Target 100% Dashed Line -->
+      <line x1="${padLeft}" y1="${targetY}" x2="${width - padRight}" y2="${targetY}" stroke="#16a34a" stroke-dasharray="4,4" stroke-width="1.5"/>
+      <text x="${padLeft - 6}" y="${targetY + 4}" text-anchor="end" font-size="10" font-weight="700" fill="var(--success-text)">100%</text>
+
+      <!-- Red Threshold 85% Dashed Line -->
+      <line x1="${padLeft}" y1="${redY}" x2="${width - padRight}" y2="${redY}" stroke="#dc2626" stroke-dasharray="4,4" stroke-width="1.5"/>
+      <text x="${padLeft - 6}" y="${redY + 4}" text-anchor="end" font-size="10" font-weight="700" fill="var(--danger-text)">85%</text>
+
+      <!-- Baseline 0% -->
+      <line x1="${padLeft}" y1="${padTop + chartH}" x2="${width - padRight}" y2="${padTop + chartH}" stroke="var(--border-color)" stroke-width="1"/>
+      ${barsHtml}
+    </svg>
+  `;
+}
+
+function renderDeptMonthDrilldownHtml(dept, deptKpis, selectedMonth) {
+  const mNum = Number(selectedMonth);
+  const mName = MONTH_NAMES[mNum - 1] || `Bulan ${mNum}`;
+  const heatCell = (dept.monthlyHeatmap || []).find((c) => c.month === mNum) || {
+    month: mNum,
+    score: null,
+    status_color: 'UNREPORTED'
+  };
+
+  const monthKpiItems = deptKpis.map((k) => {
+    const rec = (k.monthlyHistory || []).find((h) => h.month === mNum) || {
+      month: mNum,
+      target_value: k.baseline_target,
+      actual_value: null,
+      achievement_pct: null,
+      weighted_score: null,
+      status_color: 'UNREPORTED',
+      is_draft: false,
+      problem_identification: '',
+      corrective_action: '',
+      need_support: '',
+      mitigationTagObjects: []
+    };
+    return { kpi: k, rec };
+  });
+
+  const redItems = monthKpiItems.filter((item) => item.rec.status_color === 'RED');
+  const yellowItems = monthKpiItems.filter((item) => item.rec.status_color === 'YELLOW');
+  const greenItems = monthKpiItems.filter((item) => item.rec.status_color === 'GREEN');
+  const alertItems = [...redItems, ...yellowItems];
+
+  const alertCardsHtml =
+    alertItems.length === 0
+      ? `<div style="padding:14px 16px;background:var(--success-bg);color:var(--success-text);border:1px solid var(--success-border);border-radius:var(--radius-ui);font-weight:700;display:flex;align-items:center;gap:8px">
+          ${phIcon('check-circle')} Seluruh indikator KPI Divisi ${escapeHtml(dept.code)} pada bulan ${mName} ${state.year} berstatus Hijau (On Track) atau belum ada indikator Warning/Merah.
+        </div>`
+      : `<div style="display:flex;flex-direction:column;gap:12px">
+          ${alertItems
+            .map(({ kpi, rec }) => {
+              const isRed = rec.status_color === 'RED';
+              const pillLabel = isRed
+                ? `${phIcon('warning-octagon', 'ph-icon-sm')} Critical (Merah) • ${rec.achievement_pct ?? 0}%`
+                : `${phIcon('warning', 'ph-icon-sm')} Warning (Kuning) • ${rec.achievement_pct ?? 0}%`;
+              return `
+                <div class="dept-month-alert-card ${isRed ? 'is-red' : 'is-yellow'}" style="border-left:5px solid ${isRed ? '#dc2626' : '#f68400'}">
+                  <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:12px;flex-wrap:wrap">
+                    <div>
+                      <div style="font-size:11.5px;font-weight:700;color:var(--text-caption)">
+                        ${escapeHtml(kpi.code)} • Bobot ${kpi.weight}% • Polaritas ${kpi.polarity === 'MINIMIZE' ? 'Minimize' : 'Maximize'}
+                      </div>
+                      <div style="font-size:15px;font-weight:700;color:var(--text-h1);margin:2px 0">
+                        ${escapeHtml(kpi.title)}
+                      </div>
+                      ${renderHexBadgesHtml(kpi.attributes)}
+                    </div>
+                    <div style="display:flex;flex-direction:column;align-items:flex-end;gap:6px">
+                      <span class="status-pill status-${rec.status_color}">${pillLabel}</span>
+                      <div style="font-size:12px;font-weight:700;color:var(--text-body)">
+                        Actual: <strong>${rec.actual_value ?? '-'}</strong> / Target: <strong>${rec.target_value}</strong> ${escapeHtml(kpi.unit)} (Skor Bobot: <strong>${rec.weighted_score ?? '-'}</strong>)
+                      </div>
+                      <button type="button" class="btn-detail-trigger" data-detail-kpi="${kpi.id}" style="min-height:32px;padding:4px 12px;font-size:11.5px">
+                        ${phIcon('magnifying-glass', 'ph-icon-sm')} Buka Histori KPI Ini
+                      </button>
+                    </div>
+                  </div>
+                  ${
+                    isRed || rec.problem_identification || rec.corrective_action || rec.need_support
+                      ? `<div class="esc-boxes" style="margin-top:10px">
+                          <div class="esc-box">
+                            <strong>${phIcon('warning-circle', 'ph-icon-sm')} Problem Identification (${mName})</strong>
+                            ${renderProblemIdentificationHtml(
+                              rec.problem_identification,
+                              rec.mitigationTagObjects,
+                              isRed ? 'Wajib diisi pada menu Input KPI' : 'Tidak ada catatan kendala'
+                            )}
+                          </div>
+                          <div class="esc-box">
+                            <strong>${phIcon('check-circle', 'ph-icon-sm')} Corrective Action</strong>
+                            <div class="prob-input-text">${escapeHtml(rec.corrective_action || (isRed ? 'Belum dilengkapi' : '-'))}</div>
+                          </div>
+                          <div class="esc-box support-box">
+                            <strong>${phIcon('lifebuoy', 'ph-icon-sm')} Need Support BOD</strong>
+                            <div class="prob-input-text">${escapeHtml(rec.need_support || (isRed ? 'Belum dilengkapi' : '-'))}</div>
+                          </div>
+                        </div>`
+                      : ''
+                  }
+                </div>
+              `;
+            })
+            .join('')}
+        </div>`;
+
+  return `
+    <div class="dept-month-drilldown-box">
+      <div style="display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:12px;padding-bottom:10px;border-bottom:1px solid var(--border-color)">
+        <div>
+          <span class="micro-label" style="color:var(--primary)">Rincian Bulan Terpilih (Klik Batang Grafik Di Atas Untuk Mengganti Bulan)</span>
+          <h4 style="margin:2px 0 0;font-size:16px;color:var(--text-h1)">
+            Bulan ${mName} ${state.year} — Skor Divisi ${escapeHtml(dept.code)}: ${heatCell.score !== null ? `${heatCell.score}%` : 'Belum Input'}
+          </h4>
+        </div>
+        <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
+          <span class="status-pill status-GREEN" style="min-height:30px;padding:4px 10px;font-size:11.5px">${greenItems.length} Hijau</span>
+          <span class="status-pill status-YELLOW" style="min-height:30px;padding:4px 10px;font-size:11.5px">${yellowItems.length} Warning</span>
+          <span class="status-pill status-RED" style="min-height:30px;padding:4px 10px;font-size:11.5px">${redItems.length} Merah</span>
+        </div>
+      </div>
+      ${alertCardsHtml}
+    </div>
+  `;
+}
+
+function openDeptDetailModal(deptId, initialMonth = state.month) {
+  const d = state.dashboard;
+  if (!d) return;
+  const dept = (d.departments || []).find((item) => item.id === deptId);
+  if (!dept) return;
+
+  activeDeptModalId = dept.id;
+  activeDeptModalSelectedMonth = Number(initialMonth || state.month);
+
+  const deptKpis = (d.kpis || []).filter((k) => k.department_id === dept.id);
+  const overlay = document.getElementById('deptDetailModalOverlay');
+  const headerBar = document.getElementById('deptModalHeaderBar');
+  const statusAccent =
+    dept.statusColor === 'RED'
+      ? '#dc2626'
+      : dept.statusColor === 'YELLOW'
+      ? '#f68400'
+      : '#16a34a';
+  headerBar.style.borderTopColor = statusAccent;
+
+  document.getElementById('modalDeptEyebrow').textContent =
+    `DIVISI ${dept.code} • TOTAL BOBOT: ${dept.totalWeight}% (${dept.isWeightValid ? 'VALID 100%' : 'PERLU PENYESUAIAN'}) • ${dept.kpiCount} INDIKATOR KPI`;
+  document.getElementById('modalDeptTitle').textContent =
+    `Divisi ${dept.code} — ${dept.name}`;
+  document.getElementById('modalDeptLeader').textContent =
+    `Division Leader (PIC): ${dept.leader_name} | Status Pelaporan ${MONTH_NAMES[state.month - 1]} ${state.year}: ${dept.submittedFinalCount}/${dept.kpiCount} KPI Final (${dept.submissionStatus})`;
+
+  const statusPill = document.getElementById('modalDeptStatusPill');
+  statusPill.className = `status-pill status-${dept.statusColor}`;
+  statusPill.textContent =
+    dept.statusColor === 'GREEN'
+      ? `On Track • ${dept.activeScore}%`
+      : dept.statusColor === 'YELLOW'
+      ? `Warning • ${dept.activeScore}%`
+      : `Critical • ${dept.activeScore}%`;
+
+  // Jump to Input KPI for this division
+  const jumpBtn = document.getElementById('btnDeptJumpInput');
+  const isReadOnlyRole =
+    state.role === 'EXECUTIVE' ||
+    (state.role === 'DIV_LEADER' && state.departmentId && state.departmentId !== dept.id);
+  if (jumpBtn) {
+    jumpBtn.style.display = isReadOnlyRole ? 'none' : '';
+    jumpBtn.onclick = () => {
+      closeModalById('deptDetailModalOverlay');
+      state.inputDeptFilter = dept.id;
+      const inputSel = document.getElementById('inputDeptSelect');
+      if (inputSel) inputSel.value = dept.id;
+      document.querySelectorAll('.nav-btn').forEach((b) => b.classList.toggle('active', b.dataset.tab === 'input'));
+      document.querySelectorAll('.tab-panel').forEach((p) => p.classList.remove('active'));
+      state.activeTab = 'input';
+      dirtyTabs.add('input');
+      renderTabIfDirty('input');
+      const panel = document.getElementById('tab-input');
+      if (panel) panel.classList.add('active');
+    };
+  }
+
+  // Print Division Report button
+  const printDeptBtn = document.getElementById('btnPrintDeptReport');
+  if (printDeptBtn) {
+    printDeptBtn.onclick = () => {
+      document.body.classList.add('printing-dept-modal');
+      window.print();
+      setTimeout(() => {
+        document.body.classList.remove('printing-dept-modal');
+      }, 300);
+    };
+  }
+
+  // Filter current period Warning & Red KPIs
+  const isYtd = state.mode === 'YTD';
+  const warningRedKpis = deptKpis.filter((k) => {
+    const st = isYtd ? k.ytd.ytdStatusColor : k.current.status_color;
+    return st === 'RED' || st === 'YELLOW' || k.current.status_color === 'RED' || k.current.status_color === 'YELLOW';
+  });
+
+  const bodyEl = document.getElementById('deptModalBodyContent');
+  bodyEl.innerHTML = `
+    <!-- PRINT-ONLY DIVISION REPORT HEADER -->
+    <div class="dept-print-only-banner">
+      <div style="display:flex;align-items:center;gap:12px">
+        <img src="/images/rahma-logo.png" alt="Rahma" style="height:26px;width:auto;">
+        <span style="width:1px;height:22px;background:#cbd5e1;display:inline-block;"></span>
+        <img src="/images/gsi-logo.png" alt="PT Global Service Indonesia" style="height:26px;width:auto;">
+        <div>
+          <strong style="font-size:14px;color:#0f172a;display:block">LAPORAN EKSEKUTIF PERFORMA &amp; MITIGASI KPI DIVISI ${escapeHtml(dept.code)}</strong>
+          <span style="font-size:11px;color:#475569">${escapeHtml(dept.name)} • PIC: ${escapeHtml(dept.leader_name)}</span>
+        </div>
+      </div>
+      <div style="font-family:var(--font-code);font-size:10.5px;font-weight:700;color:#0f172a;border:1px solid #cbd5e1;padding:4px 10px;border-radius:8px">
+        Periode: ${MONTH_NAMES[state.month - 1]} ${state.year} | Mode: ${state.mode}
+      </div>
+    </div>
+
+    <!-- 1. TOP ROW: DIVISION SPEEDOMETER + GAUGE METER & TRAFFIC LIGHT SUMMARY -->
+    <div class="dept-modal-hero-grid">
+      <div class="detail-section-card" style="display:flex;flex-direction:column;align-items:center;justify-content:space-between;text-align:center">
+        <div style="width:100%;display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
+          <span class="micro-label">Speedometer &amp; Gauge Meter Divisi ${escapeHtml(dept.code)}</span>
+          <span class="pill-badge neutral" style="min-height:26px;padding:2px 10px;font-size:11px">${state.mode === 'YTD' ? 'Mode YTD' : `Bulan ${SHORT_MONTHS[state.month - 1]}`}</span>
+        </div>
+        <div class="gauge-wrapper" style="width:100%;margin-bottom:10px">
+          ${renderSpeedometerSvg(dept.activeScore)}
+        </div>
+        <div class="gauge-Compare-row" style="width:100%">
+          <div class="gauge-metric-box">
+            <div class="gm-inline-val">Bulan Ini: ${dept.monthlyScore}%</div>
+          </div>
+          <div class="gauge-metric-box">
+            <div class="gm-inline-val ytd-accent">Akumulasi YTD: ${dept.ytdScore}%</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="detail-section-card" style="display:flex;flex-direction:column;justify-content:space-between;gap:14px">
+        <div>
+          <div style="display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:10px">
+            <h4 style="margin:0">${phIcon('squares-four')} Ringkasan Distribusi &amp; Tata Kelola Divisi ${escapeHtml(dept.code)}</h4>
+            <span class="status-pill ${dept.isWeightValid ? 'status-GREEN' : 'status-RED'}" style="min-height:28px;padding:3px 10px;font-size:11.5px">
+              Total Bobot: ${dept.totalWeight}% ${dept.isWeightValid ? '(Valid 100%)' : '(Belum 100%)'}
+            </span>
+          </div>
+          <p style="font-size:13px;color:var(--text-body);margin:0 0 12px">
+            ${escapeHtml(dept.description || 'Pemantauan indikator kinerja utama dan mitigasi risiko operasional departemen.')}
+          </p>
+
+          <div class="traffic-cards-row" style="margin-bottom:0">
+            <div class="traffic-stat green">
+              <div class="ts-label">${phIcon('check-circle', 'ph-icon-sm')} On Track (Hijau)</div>
+              <div class="ts-number">${dept.counts.green} KPI</div>
+              <div class="ts-sub">Capaian &ge; 100%</div>
+            </div>
+            <div class="traffic-stat yellow">
+              <div class="ts-label">${phIcon('warning', 'ph-icon-sm')} Warning (Kuning)</div>
+              <div class="ts-number">${dept.counts.yellow} KPI</div>
+              <div class="ts-sub">Capaian 85% &ndash; 99.9%</div>
+            </div>
+            <div class="traffic-stat red">
+              <div class="ts-label">${phIcon('warning-octagon', 'ph-icon-sm')} Critical (Merah)</div>
+              <div class="ts-number">${dept.counts.red} KPI</div>
+              <div class="ts-sub">Capaian &lt; 85% (Wajib Mitigasi)</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="tech-specs-grid">
+          <div class="tech-spec-item">
+            <span>Division Leader (PIC)</span>
+            <strong>${escapeHtml(dept.leader_name)}</strong>
+          </div>
+          <div class="tech-spec-item">
+            <span>Progres Submit Final</span>
+            <strong>${dept.submittedFinalCount} dari ${dept.kpiCount} KPI (${dept.submissionStatus})</strong>
+          </div>
+          <div class="tech-spec-item">
+            <span>Perlu Perhatian (Warning/Merah)</span>
+            <strong style="color:${warningRedKpis.length > 0 ? 'var(--danger-text)' : 'var(--success-text)'}">
+              ${warningRedKpis.length} Indikator Aktif
+            </strong>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 2. INTERACTIVE 12-MONTH PROGRESS BAR CHART (CLICK MONTH TO INSPECT WARNING/RED KPIS) -->
+    <div class="detail-section-card">
+      <div style="display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:8px">
+        <h4 style="margin:0;display:inline-flex;align-items:center;gap:6px">
+          ${phIcon('chart-bar-horizontal')} Grafik Bar Progres Per Bulan (Januari &ndash; Desember ${state.year})
+        </h4>
+        <span style="font-size:12px;font-weight:700;color:var(--primary)">
+          💡 Klik batang bulan mana pun untuk melihat KPI yang Warning atau Merah pada bulan tersebut
+        </span>
+      </div>
+
+      <div id="deptInteractiveChartWrap">
+        ${renderDept12MonthBarChartSvg(dept, deptKpis, activeDeptModalSelectedMonth)}
+      </div>
+
+      <div id="deptMonthDrilldownContainer" style="margin-top:12px">
+        ${renderDeptMonthDrilldownHtml(dept, deptKpis, activeDeptModalSelectedMonth)}
+      </div>
+    </div>
+
+    <!-- 3. DAFTAR KPI WARNING ATAU MERAH (PERIODE AKTIF) -->
+    <div class="detail-section-card" style="border-left:5px solid ${warningRedKpis.some((k) => k.current.status_color === 'RED') ? '#dc2626' : warningRedKpis.length > 0 ? '#f68400' : '#16a34a'}">
+      <h4>
+        <span style="display:inline-flex;align-items:center;gap:6px">
+          ${phIcon('shield-warning')} Daftar KPI Warning &amp; Merah Divisi ${escapeHtml(dept.code)} (Periode ${MONTH_NAMES[state.month - 1]} ${state.year})
+        </span>
+        <span class="status-pill ${warningRedKpis.length > 0 ? 'status-RED' : 'status-GREEN'}">
+          ${warningRedKpis.length} Indikator Warning / Merah
+        </span>
+      </h4>
+
+      ${
+        warningRedKpis.length === 0
+          ? `<div style="padding:14px 16px;background:var(--success-bg);color:var(--success-text);border-radius:var(--radius-ui);font-weight:700;display:flex;align-items:center;gap:8px">
+              ${phIcon('check-circle')} Seluruh KPI Divisi ${escapeHtml(dept.code)} berada dalam kondisi On Track (Hijau) pada periode ini.
+            </div>`
+          : `<div style="display:flex;flex-direction:column;gap:12px">
+              ${warningRedKpis
+                .map((k) => {
+                  const activeSt = isYtd ? k.ytd.ytdStatusColor : k.current.status_color;
+                  const isRed = activeSt === 'RED' || k.current.status_color === 'RED';
+                  return `
+                    <div class="escalation-item" style="border-color:${isRed ? '#fca5a5' : '#fde68a'};background:${isRed ? '' : 'var(--warning-bg)'}">
+                      <div class="kpi-left-accent-bar" style="background:${isRed ? '#DC2626' : '#F68400'}"></div>
+                      <div class="esc-header">
+                        <div>
+                          <span style="font-size:12px;font-weight:700;color:var(--text-caption)">
+                            ${escapeHtml(k.code)} • Bobot ${k.weight}% • Target: ${k.current.target_value} ${escapeHtml(k.unit)} | Actual: ${k.current.actual_value ?? '-'} ${escapeHtml(k.unit)}
+                          </span>
+                          <h4 style="font-size:15px;font-weight:700;color:var(--text-h1);margin:2px 0">${escapeHtml(k.title)}</h4>
+                          ${renderHexBadgesHtml(k.attributes)}
+                        </div>
+                        <div style="text-align:right;display:flex;flex-direction:column;align-items:flex-end;gap:8px">
+                          <span class="status-pill status-${isRed ? 'RED' : 'YELLOW'}">
+                            ${isRed ? phIcon('warning-octagon', 'ph-icon-sm') : phIcon('warning', 'ph-icon-sm')} ${isRed ? 'Critical (Merah)' : 'Warning (Kuning)'} • Bulan: ${k.current.achievement_pct ?? 0}% | YTD: ${k.ytd.ytdAchievementPct ?? 0}%
+                          </span>
+                          <button type="button" class="btn-detail-trigger" data-detail-kpi="${k.id}">
+                            ${phIcon('magnifying-glass')} Rincian KPI 12 Bulan
+                          </button>
+                        </div>
+                      </div>
+                      <div class="esc-boxes">
+                        <div class="esc-box">
+                          <strong>${phIcon('warning-circle', 'ph-icon-sm')} Problem Identification (Akar Masalah)</strong>
+                          ${renderProblemIdentificationHtml(
+                            k.current.problem_identification,
+                            k.current.mitigationTagObjects,
+                            isRed ? 'Belum dilengkapi (Wajib diisi)' : 'Tidak ada kendala kritis tercatat'
+                          )}
+                        </div>
+                        <div class="esc-box">
+                          <strong>${phIcon('check-circle', 'ph-icon-sm')} Corrective Action (Tindakan Perbaikan)</strong>
+                          <div class="prob-input-text">${escapeHtml(k.current.corrective_action || (isRed ? 'Belum dilengkapi' : 'Pemantauan berkala oleh kepala divisi'))}</div>
+                        </div>
+                        <div class="esc-box support-box">
+                          <strong>${phIcon('lifebuoy', 'ph-icon-sm')} Need Support BOD (Keputusan Direksi)</strong>
+                          <div class="prob-input-text">${escapeHtml(k.current.need_support || (isRed ? 'Belum dilengkapi' : 'Tidak memerlukan eskalasi direksi'))}</div>
+                        </div>
+                      </div>
+                    </div>
+                  `;
+                })
+                .join('')}
+            </div>`
+      }
+    </div>
+
+    <!-- 4. SCORECARD LENGKAP SELURUH KPI DIVISI -->
+    <div class="detail-section-card">
+      <h4>
+        <span style="display:inline-flex;align-items:center;gap:6px">
+          ${phIcon('table')} Tabel Scorecard Lengkap Seluruh Indikator KPI Divisi ${escapeHtml(dept.code)} (${deptKpis.length} KPI)
+        </span>
+        <span style="font-size:12px;color:var(--text-caption)">Klik baris KPI untuk membuka detail individu</span>
+      </h4>
+      <div class="table-responsive">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>Kode &amp; Indikator KPI</th>
+              <th style="text-align:center">Bobot</th>
+              <th style="text-align:center">Target</th>
+              <th style="text-align:center">Actual</th>
+              <th style="text-align:center">Capaian (${SHORT_MONTHS[state.month - 1]})</th>
+              <th style="text-align:center">Skor Bobot</th>
+              <th style="text-align:center">Capaian YTD</th>
+              <th style="text-align:center">Tren 6 Bln</th>
+              <th style="text-align:center">Status</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${deptKpis
+              .map((k) => {
+                const st = isYtd ? k.ytd.ytdStatusColor : k.current.status_color;
+                return `
+                  <tr class="kpi-clickable-row" data-detail-kpi="${k.id}" style="border-left:4px solid ${k.primaryAccent.hex}">
+                    <td>
+                      <strong>${escapeHtml(k.code)}</strong> — ${escapeHtml(k.title)}
+                      ${renderHexBadgesHtml(k.attributes)}
+                    </td>
+                    <td style="text-align:center"><strong>${k.weight}%</strong></td>
+                    <td style="text-align:center">${k.current.target_value} ${escapeHtml(k.unit)}</td>
+                    <td style="text-align:center"><strong>${k.current.actual_value ?? '-'}</strong> ${escapeHtml(k.unit)}</td>
+                    <td style="text-align:center"><strong>${k.current.achievement_pct !== null ? `${k.current.achievement_pct}%` : '-'}</strong></td>
+                    <td style="text-align:center"><strong>${k.current.weighted_score ?? '-'}</strong></td>
+                    <td style="text-align:center"><strong>${k.ytd.ytdAchievementPct !== null ? `${k.ytd.ytdAchievementPct}%` : '-'}</strong> (${k.ytd.ytdWeightedScore ?? '-'})</td>
+                    <td style="text-align:center">${renderSparklineSvg(k.sparkline)}</td>
+                    <td style="text-align:center"><span class="status-pill status-${st}" style="min-height:28px;padding:3px 10px;font-size:11px">${st}</span></td>
+                  </tr>
+                `;
+              })
+              .join('')}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  `;
+
+  // Bind interactive month bar clicks inside the division modal
+  function bindDeptMonthBarListeners() {
+    bodyEl.querySelectorAll('[data-select-dept-month]').forEach((barEl) => {
+      barEl.addEventListener('click', () => {
+        const nextMonth = Number(barEl.dataset.selectDeptMonth);
+        activeDeptModalSelectedMonth = nextMonth;
+        const chartWrap = document.getElementById('deptInteractiveChartWrap');
+        const drillWrap = document.getElementById('deptMonthDrilldownContainer');
+        if (chartWrap) {
+          chartWrap.innerHTML = renderDept12MonthBarChartSvg(dept, deptKpis, nextMonth);
+        }
+        if (drillWrap) {
+          drillWrap.innerHTML = renderDeptMonthDrilldownHtml(dept, deptKpis, nextMonth);
+          bindDetailTriggerButtons(drillWrap);
+        }
+        bindDeptMonthBarListeners();
+      });
+    });
+  }
+
+  bindDeptMonthBarListeners();
+  bindDetailTriggerButtons(bodyEl);
+
+  overlay.classList.add('open');
+  overlay.setAttribute('aria-hidden', 'false');
 }
 
 function render12MonthChartSvg(kpi) {

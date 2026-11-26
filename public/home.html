@@ -8,7 +8,8 @@
   <meta name="description"
     content="Platform pemantauan KPI korporasi berbasis PostgreSQL 18 dengan skoring polaritas &amp; YTD otomatis, gerbang mitigasi wajib di bawah 85%, RBAC 3-peran + OTP, studio atribut HEX, dan Night-Comfort Dark Mode.">
   <meta property="og:type" content="website">
-  <meta property="og:title" content="RAHMA: Platform Governance KPI, Mitigasi Risiko &amp; Executive Reporting Korporasi">
+  <meta property="og:title"
+    content="RAHMA: Platform Governance KPI, Mitigasi Risiko &amp; Executive Reporting Korporasi">
   <meta property="og:description"
     content="Skoring KPI polaritas &amp; YTD otomatis, gerbang mitigasi wajib (<85%), CPMD Submission Tracker, Studio Atribut HEX, dan Mode Malam dalam satu platform PostgreSQL mandiri.">
   <meta name="twitter:card" content="summary_large_image">
@@ -19,7 +20,8 @@
   <link rel="preload" href="/fonts/Figtree-VariableFont_wght.ttf" as="font" type="font/ttf" crossorigin>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600;700&display=swap"
+    rel="stylesheet">
   <link rel="stylesheet" href="assets/system.css">
   <link rel="stylesheet" href="assets/ui/cards.css">
   <link rel="stylesheet" href="assets/motion/motion.css">
@@ -38,6 +40,7 @@
       font-style: normal;
       font-display: swap;
     }
+
     @font-face {
       font-family: 'Figtree';
       src: url('/fonts/Figtree-Italic-VariableFont_wght.ttf') format('truetype');
@@ -304,7 +307,7 @@
       padding-bottom: clamp(32px, 4vw, 52px) !important;
     }
 
-    .hero--triptych > .wrap {
+    .hero--triptych>.wrap {
       width: 100% !important;
       height: auto !important;
     }
@@ -315,7 +318,7 @@
       gap: clamp(22px, 2.4vw, 32px) !important;
     }
 
-    .hero--triptych .hero__grid > .hero-left-card {
+    .hero--triptych .hero__grid>.hero-left-card {
       background: rgba(255, 255, 255, 0.84);
       backdrop-filter: blur(28px) saturate(185%);
       -webkit-backdrop-filter: blur(28px) saturate(185%);
@@ -329,7 +332,7 @@
       gap: 20px;
     }
 
-    html[data-theme="dark"] .hero--triptych .hero__grid > .hero-left-card {
+    html[data-theme="dark"] .hero--triptych .hero__grid>.hero-left-card {
       background: rgba(15, 23, 42, 0.82);
       border-color: rgba(148, 163, 184, 0.26);
       box-shadow: 0 20px 50px rgba(2, 6, 23, 0.55), inset 0 1px 0 rgba(255, 255, 255, 0.10);
@@ -409,7 +412,7 @@
         grid-template-columns: minmax(390px, 4.5fr) minmax(0, 7.5fr) !important;
       }
 
-      .hero--triptych .hero__grid > .hero-left-card {
+      .hero--triptych .hero__grid>.hero-left-card {
         grid-column: 1 / 2 !important;
         grid-row: 1 !important;
       }
@@ -519,6 +522,7 @@
     }
 
     @media (max-width: 960px) {
+
       .magnifik-card--wide,
       .magnifik-card--third {
         grid-column: span 12;
@@ -1414,7 +1418,7 @@
       border-color: rgba(56, 189, 248, 0.48);
     }
 
-    html[data-theme="dark"] .hero--triptych .hero__grid > .span-3:first-child {
+    html[data-theme="dark"] .hero--triptych .hero__grid>.span-3:first-child {
       background: rgba(15, 23, 42, 0.78);
       border-color: rgba(148, 163, 184, 0.26);
     }
@@ -1575,7 +1579,7 @@
           document.documentElement.setAttribute('data-theme', 'dark');
           document.documentElement.setAttribute('data-tone', 'dark');
         }
-      } catch (_e) {}
+      } catch (_e) { }
     })();
   </script>
   <script>document.documentElement.classList.add('m-enter'); setTimeout(() => document.documentElement.classList.add('m-enter-done'), 700)</script>
@@ -1602,15 +1606,21 @@
             <div class="wrap grid">
               <div class="menu-col span-4">
                 <p class="t-label">Pengukuran &amp; Visualisasi KPI</p>
-                <a href="#platform">Skoring Polaritas &amp; YTD Otomatis<span>Maximize, Minimize, SUM/AVG/LAST_VALUE &amp; Cap 120%</span></a>
-                <a href="#platform">Gerbang Mitigasi Wajib (&lt; 85%)<span>Quick-Tag akar masalah &amp; blokir simpan HTTP 422</span></a>
-                <a href="#platform">Speedometer &amp; Drawer 12 Bulan<span>Kalibrasi skala 0–85–100–120%, Heatmap &amp; MoM Delta</span></a>
+                <a href="#platform">Skoring Polaritas &amp; YTD Otomatis<span>Maximize, Minimize, SUM/AVG/LAST_VALUE
+                    &amp; Cap 120%</span></a>
+                <a href="#platform">Gerbang Mitigasi Wajib (&lt; 85%)<span>Quick-Tag akar masalah &amp; blokir simpan
+                    HTTP 422</span></a>
+                <a href="#platform">Speedometer &amp; Drawer 12 Bulan<span>Kalibrasi skala 0–85–100–120%, Heatmap &amp;
+                    MoM Delta</span></a>
               </div>
               <div class="menu-col span-4">
                 <p class="t-label">Tata Kelola CPMD &amp; Ruang Kerja</p>
-                <a href="#workflow">RBAC 3-Peran &amp; Keamanan OTP<span>CPMD Admin, Division Leader, Direksi &amp; OTP 6-Digit</span></a>
-                <a href="#workflow">CPMD Tracker &amp; Validasi Bobot 100%<span>1-Click salin pengingat WA/Email &amp; kunci periode</span></a>
-                <a href="#atmosphere">Studio Atribut HEX &amp; Mode Malam<span>Multi-badge #RRGGBB, kontras 2-tier &amp; PostgreSQL 18</span></a>
+                <a href="#workflow">RBAC 3-Peran &amp; Keamanan OTP<span>CPMD Admin, Division Leader, Direksi &amp; OTP
+                    6-Digit</span></a>
+                <a href="#workflow">CPMD Tracker &amp; Validasi Bobot 100%<span>1-Click salin pengingat WA/Email &amp;
+                    kunci periode</span></a>
+                <a href="#atmosphere">Studio Atribut HEX &amp; Mode Malam<span>Multi-badge #RRGGBB, kontras 2-tier &amp;
+                    PostgreSQL 18</span></a>
               </div>
             </div>
           </div>
@@ -1649,11 +1659,14 @@
           <div class="hero-left-card">
             <div style="display:flex;flex-direction:column;gap:16px;">
               <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;">
-                <img src="/images/rahma-logo.png" alt="Rahma" class="hero-brand-logo" style="margin-bottom:0;height:42px;">
+                <img src="/images/rahma-logo.png" alt="Rahma" class="hero-brand-logo"
+                  style="margin-bottom:0;height:42px;">
                 <span class="hero-chip">PostgreSQL 18 &bull; v1.0</span>
               </div>
               <h1 id="hero-h">Kontrol KPI, mitigasi risiko, dan pelaporan direksi real-time</h1>
-              <p class="hero__lead">Skoring polaritas &amp; YTD otomatis di atas PostgreSQL 18, gerbang mitigasi wajib di bawah 85%, CPMD Submission Tracker, Studio Atribut HEX, serta antarmuka Frosted Glass Mode Terang &amp; Malam.</p>
+              <p class="hero__lead">Skoring polaritas &amp; YTD otomatis di atas PostgreSQL 18, gerbang mitigasi wajib
+                di bawah 85%, CPMD Submission Tracker, Studio Atribut HEX, serta antarmuka Frosted Glass Mode Terang
+                &amp; Malam.</p>
             </div>
 
             <div style="display:flex;flex-direction:column;gap:16px;">
@@ -1713,7 +1726,8 @@
 
             <div class="ly-collage__set" aria-hidden="true">
               <div class="ly-piece rk-hex-card" style="left: 3.5%; top: 5%; width: 52%">
-                <small style="color:var(--p-muted);font-weight:600;font-family:var(--font-mono)">ATRIBUT WARNA HEX &middot;
+                <small style="color:var(--p-muted);font-weight:600;font-family:var(--font-mono)">ATRIBUT WARNA HEX
+                  &middot;
                   WCAG</small>
                 <strong style="font-size:clamp(13.5px,1.85cqw,16.5px)">Tag Strategis Terstandarisasi</strong>
                 <div class="rk-swatch-row">
@@ -1724,7 +1738,8 @@
               </div>
 
               <div class="ly-piece rk-scorecard" style="left: 58%; top: 5%; width: 38.5%">
-                <small style="color:var(--p-muted);font-weight:600;font-family:var(--font-mono)">MESIN AGREGASI YTD</small>
+                <small style="color:var(--p-muted);font-weight:600;font-family:var(--font-mono)">MESIN AGREGASI
+                  YTD</small>
                 <div class="rk-dept-row"><b>Mode SUM</b><span class="rk-pill rk-pill--green">Akumulatif</span></div>
                 <div class="rk-dept-row"><b>Mode AVG</b><span class="rk-pill rk-pill--yellow">Rata-rata</span></div>
                 <div class="rk-dept-row"><b>Cap Skor</b><span class="rk-pill rk-pill--green">Maks 120%</span></div>
@@ -1745,8 +1760,11 @@
     <section class="section" id="platform" aria-labelledby="platform-h">
       <div class="wrap">
         <div class="section-head">
-          <h2 id="platform-h">Satu platform terpadu untuk kamus KPI, spreadsheet realisasi, mitigasi risiko, dan audit direksi</h2>
-          <p>Menggantikan spreadsheet terpisah dan kompilasi PowerPoint manual dengan database relasional PostgreSQL 18, validasi bobot 100%, kalibrasi speedometer presisi, studio multi-atribut HEX, serta Mode Malam (Night-Comfort Dark Mode).</p>
+          <h2 id="platform-h">Satu platform terpadu untuk kamus KPI, spreadsheet realisasi, mitigasi risiko, dan audit
+            direksi</h2>
+          <p>Menggantikan spreadsheet terpisah dan kompilasi PowerPoint manual dengan database relasional PostgreSQL 18,
+            validasi bobot 100%, kalibrasi speedometer presisi, studio multi-atribut HEX, serta Mode Malam
+            (Night-Comfort Dark Mode).</p>
         </div>
 
         <div class="grid" style="gap: 24px;">
@@ -1808,9 +1826,10 @@
             <div class="rk-demo-box">
               <div class="rk-demo-top">
                 <div>
-                  <div style="font-size:11px;font-weight:600;color:var(--p-muted)">KPI-COM-01 &bull; Target: 12.5 M</div>
-                  <strong style="font-size:14px;color:var(--p-ink)">Actual: <span id="demoActualLabel">8.9</span> M (<span
-                      id="demoAchLabel">71.2%</span>)</strong>
+                  <div style="font-size:11px;font-weight:600;color:var(--p-muted)">KPI-COM-01 &bull; Target: 12.5 M
+                  </div>
+                  <strong style="font-size:14px;color:var(--p-ink)">Actual: <span id="demoActualLabel">8.9</span> M
+                    (<span id="demoAchLabel">71.2%</span>)</strong>
                 </div>
                 <span class="rk-pill rk-pill--red" id="demoGateStatusPill">RED</span>
               </div>
@@ -1874,13 +1893,17 @@
                 <code style="font-size:11px;font-weight:700;color:var(--p-accent);">BOBOT: 100% VALID</code>
               </div>
               <div class="rk-perm-list">
-                <div class="rk-perm-item"><span>1-Click Salin Pengingat</span><span class="rk-perm-badge rk-pill--green">WA / EMAIL</span></div>
-                <div class="rk-perm-item"><span>Validasi Bobot Departemen</span><span class="rk-perm-badge rk-pill--green">WAJIB 100%</span></div>
-                <div class="rk-perm-item"><span>Kunci Periode Pelaporan</span><span class="rk-perm-badge rk-pill--yellow">FREEZE DATA</span></div>
+                <div class="rk-perm-item"><span>1-Click Salin Pengingat</span><span
+                    class="rk-perm-badge rk-pill--green">WA / EMAIL</span></div>
+                <div class="rk-perm-item"><span>Validasi Bobot Departemen</span><span
+                    class="rk-perm-badge rk-pill--green">WAJIB 100%</span></div>
+                <div class="rk-perm-item"><span>Kunci Periode Pelaporan</span><span
+                    class="rk-perm-badge rk-pill--yellow">FREEZE DATA</span></div>
               </div>
             </div>
             <h3>CPMD Tracker &amp; Validasi Bobot 100%</h3>
-            <p>Bebaskan tim CPMD dari tagih manual dengan <strong>1-Click Salin Pengingat</strong>, penguncian periode laporan, dan penjaga bobot 100% otomatis per departemen.</p>
+            <p>Bebaskan tim CPMD dari tagih manual dengan <strong>1-Click Salin Pengingat</strong>, penguncian periode
+              laporan, dan penjaga bobot 100% otomatis per departemen.</p>
           </article>
 
           <!-- FEATURE CARD 5: DRAWER RINCIAN 12 BULAN & STUDIO MULTI-ATRIBUT HEX -->
@@ -1896,12 +1919,15 @@
                 <span class="rk-swatch-chip" style="background:#0D9488;color:#FFFFFF;">Financial #0D9488</span>
               </div>
               <div class="rk-perm-list">
-                <div class="rk-perm-item"><span>Progressive Disclosure Drawer</span><span class="rk-perm-badge rk-pill--green">JAN–DES 2026</span></div>
-                <div class="rk-perm-item"><span>Studio Multi-Badge HEX</span><span class="rk-perm-badge rk-pill--green">KONTRAS 2-TIER</span></div>
+                <div class="rk-perm-item"><span>Progressive Disclosure Drawer</span><span
+                    class="rk-perm-badge rk-pill--green">JAN–DES 2026</span></div>
+                <div class="rk-perm-item"><span>Studio Multi-Badge HEX</span><span
+                    class="rk-perm-badge rk-pill--green">KONTRAS 2-TIER</span></div>
               </div>
             </div>
             <h3>Drawer 12 Bulan &amp; Studio Warna HEX</h3>
-            <p>Klik indikator mana pun untuk membuka grafik tren 12 bulan, MoM Delta, dan rincian mitigasi. Kustomisasi label multi-atribut hingga kode <code>#RRGGBB</code>.</p>
+            <p>Klik indikator mana pun untuk membuka grafik tren 12 bulan, MoM Delta, dan rincian mitigasi. Kustomisasi
+              label multi-atribut hingga kode <code>#RRGGBB</code>.</p>
           </article>
 
           <!-- FEATURE CARD 6: NIGHT-COMFORT DARK MODE, OTP EMAIL & CETAK PDF -->
@@ -1912,13 +1938,17 @@
                 <code style="font-size:11px;font-weight:700;color:var(--p-accent);">OTP 6-DIGIT</code>
               </div>
               <div class="rk-perm-list">
-                <div class="rk-perm-item"><span>Night-Comfort Dark Mode</span><span class="rk-perm-badge rk-pill--green">SINKRON 4 HALAMAN</span></div>
-                <div class="rk-perm-item"><span>Keamanan Ubah Email &amp; Sandi</span><span class="rk-perm-badge rk-pill--green">VERIFIKASI OTP</span></div>
-                <div class="rk-perm-item"><span>One-Click Executive PDF</span><span class="rk-perm-badge rk-pill--green">A4 LANDSCAPE 16:9</span></div>
+                <div class="rk-perm-item"><span>Night-Comfort Dark Mode</span><span
+                    class="rk-perm-badge rk-pill--green">SINKRON 4 HALAMAN</span></div>
+                <div class="rk-perm-item"><span>Keamanan Ubah Email &amp; Sandi</span><span
+                    class="rk-perm-badge rk-pill--green">VERIFIKASI OTP</span></div>
+                <div class="rk-perm-item"><span>One-Click Executive PDF</span><span
+                    class="rk-perm-badge rk-pill--green">A4 LANDSCAPE 16:9</span></div>
               </div>
             </div>
             <h3>Mode Malam, OTP &amp; Executive PDF</h3>
-            <p>Antarmuka <em>Frosted Glass</em> dengan kontras teks 2-tier yang nyaman di malam hari, pengamanan akun via OTP 6-digit, serta cetak laporan direksi A4 Landscape 1-klik.</p>
+            <p>Antarmuka <em>Frosted Glass</em> dengan kontras teks 2-tier yang nyaman di malam hari, pengamanan akun
+              via OTP 6-digit, serta cetak laporan direksi A4 Landscape 1-klik.</p>
           </article>
         </div>
       </div>
@@ -1932,11 +1962,13 @@
           <ol class="mo-pc__steps">
             <li class="mo-pc__step">
               <h3>1. Susun Kamus KPI, Bobot 100% &amp; Atribut HEX</h3>
-              <p>CPMD Admin mengelola master departemen, memvalidasi total bobot 100% per divisi, menetapkan polaritas &amp; metode YTD, serta membuat multi-badge warna HEX dengan kontras teks 2-tier otomatis.</p>
+              <p>CPMD Admin mengelola master departemen, memvalidasi total bobot 100% per divisi, menetapkan polaritas
+                &amp; metode YTD, serta membuat multi-badge warna HEX dengan kontras teks 2-tier otomatis.</p>
               <figure class="mo-pc__visual">
                 <div class="rk-stage-window">
                   <div class="rk-stage-photo-banner">
-                    <img src="/assets/photos/img/m44931831-1200.webp" loading="lazy" decoding="async" alt="Pemandangan Sløverfjorden di Lofoten" />
+                    <img src="/assets/photos/img/m44931831-1200.webp" loading="lazy" decoding="async"
+                      alt="Pemandangan Sløverfjorden di Lofoten" />
                     <span class="rk-stage-photo-pill">Sløverfjorden, Lofoten</span>
                   </div>
                   <div class="rk-stage-head"><span>CPMD HUB &middot; KAMUS KPI</span><code>ROLE: CPMD_ADMIN</code></div>
@@ -1953,11 +1985,14 @@
             </li>
             <li class="mo-pc__step">
               <h3>2. Input Spreadsheet Cepat &amp; Gerbang Mitigasi Wajib</h3>
-              <p>Division Leader mengisi realisasi bulanan bergaya Excel (<kbd>Tab</kbd>/<kbd>Enter</kbd>). Skor di bawah 85% langsung membuka Quick-Tag akar masalah dan mengunci Submit Final hingga 3 kolom mitigasi terisi.</p>
+              <p>Division Leader mengisi realisasi bulanan bergaya Excel (<kbd>Tab</kbd>/<kbd>Enter</kbd>). Skor di
+                bawah 85% langsung membuka Quick-Tag akar masalah dan mengunci Submit Final hingga 3 kolom mitigasi
+                terisi.</p>
               <figure class="mo-pc__visual">
                 <div class="rk-stage-window">
                   <div class="rk-stage-photo-banner">
-                    <img src="/assets/photos/img/m113462760-1200.webp" loading="lazy" decoding="async" alt="Pemandangan Viðareiði di Faroe Islands" />
+                    <img src="/assets/photos/img/m113462760-1200.webp" loading="lazy" decoding="async"
+                      alt="Pemandangan Viðareiði di Faroe Islands" />
                     <span class="rk-stage-photo-pill">Viðareiði Sunbeams, Faroe</span>
                   </div>
                   <div class="rk-stage-head"><span>INPUT SPREADSHEET &middot; OPS</span><code>ROLE: DIV_LEADER</code>
@@ -1968,7 +2003,8 @@
                     </div>
                     <div class="rk-stage-row"><span>Quick-Tag: Kendala Vendor / Capex
                         BOD</span><code>3 KOLOM WAJIB</code></div>
-                    <div class="rk-stage-row"><span>Auto-Save Draft &amp; Isolasi Divisi</span><code>TERKUNCI (403)</code>
+                    <div class="rk-stage-row"><span>Auto-Save Draft &amp; Isolasi
+                        Divisi</span><code>TERKUNCI (403)</code>
                     </div>
                   </div>
                 </div>
@@ -1976,19 +2012,24 @@
             </li>
             <li class="mo-pc__step">
               <h3>3. Kunci Periode, Mode Fokus Merah &amp; Presentasi Direksi</h3>
-              <p>CPMD menyalin pengingat 1-klik dan mengunci periode pelaporan. Direksi meninjau Speedometer terkalibrasi, Heatmap 12 bulan, Drawer Rincian Individu, dan mencetak Executive PDF A4 Landscape.</p>
+              <p>CPMD menyalin pengingat 1-klik dan mengunci periode pelaporan. Direksi meninjau Speedometer
+                terkalibrasi, Heatmap 12 bulan, Drawer Rincian Individu, dan mencetak Executive PDF A4 Landscape.</p>
               <figure class="mo-pc__visual">
                 <div class="rk-stage-window">
                   <div class="rk-stage-photo-banner">
-                    <img src="/assets/photos/img/m164989354-1200.webp" loading="lazy" decoding="async" alt="Pemandangan pegunungan salju pesisir timur Islandia" />
+                    <img src="/assets/photos/img/m164989354-1200.webp" loading="lazy" decoding="async"
+                      alt="Pemandangan pegunungan salju pesisir timur Islandia" />
                     <span class="rk-stage-photo-pill">East Coast Peaks, Iceland</span>
                   </div>
                   <div class="rk-stage-head"><span>BOARDROOM VIEW &middot; YTD</span><code>ROLE: EXECUTIVE</code></div>
                   <div class="rk-stage-rows">
-                    <div class="rk-stage-row"><span>Speedometer, Heatmap 12 Bln &amp; Fokus Merah</span><code>LIGHT &amp; DARK MODE</code>
+                    <div class="rk-stage-row"><span>Speedometer, Heatmap 12 Bln &amp; Fokus
+                        Merah</span><code>LIGHT &amp; DARK MODE</code>
                     </div>
-                    <div class="rk-stage-row"><span>Drawer Histori 12 Bulan &amp; MoM Delta</span><code>DEEP-DIVE</code></div>
-                    <div class="rk-stage-row"><span>One-Click Executive PDF &amp; Backup JSON</span><code>SIAP CETAK</code>
+                    <div class="rk-stage-row"><span>Drawer Histori 12 Bulan &amp; MoM Delta</span><code>DEEP-DIVE</code>
+                    </div>
+                    <div class="rk-stage-row"><span>One-Click Executive PDF &amp; Backup
+                        JSON</span><code>SIAP CETAK</code>
                     </div>
                   </div>
                 </div>
@@ -2005,44 +2046,56 @@
       <div class="wrap">
         <div class="section-head">
           <h2 id="atmosphere-h">Atmosfer ruang kerja kaca di atas lanskap Magnifik &amp; Mode Malam</h2>
-          <p>Klik salah satu fotografi pemandangan resolusi tinggi di bawah untuk mengubah latar belakang live yang tersinkronisasi di halaman ini, Login, Sign Up, dan Dashboard, lengkap dengan 3 tingkat kerapatan Frosted Glass serta Mode Malam (Dark Mode).</p>
+          <p>Klik salah satu fotografi pemandangan resolusi tinggi di bawah untuk mengubah latar belakang live yang
+            tersinkronisasi di halaman ini, Login, Sign Up, dan Dashboard, lengkap dengan 3 tingkat kerapatan Frosted
+            Glass serta Mode Malam (Dark Mode).</p>
         </div>
 
         <div class="magnifik-gallery-grid" role="group" aria-label="Galeri Pemandangan Magnifik">
-          <button type="button" class="magnifik-card magnifik-card--wide active" data-scene-id="lofoten" data-img-2400="/assets/photos/img/m44931831-2400.webp" data-label="Sløverfjorden, Lofoten">
-            <img src="/assets/photos/img/m44931831-1200.webp" loading="lazy" decoding="async" alt="Pemandangan air tenang Sløverfjorden memantulkan pegunungan Lofoten" />
+          <button type="button" class="magnifik-card magnifik-card--wide active" data-scene-id="lofoten"
+            data-img-2400="/assets/photos/img/m44931831-2400.webp" data-label="Sløverfjorden, Lofoten">
+            <img src="/assets/photos/img/m44931831-1200.webp" loading="lazy" decoding="async"
+              alt="Pemandangan air tenang Sløverfjorden memantulkan pegunungan Lofoten" />
             <div class="magnifik-card-overlay">
               <span class="magnifik-card-pill">Sløverfjorden, Lofoten</span>
               <span class="magnifik-card-pill magnifik-card-status">Aktif</span>
             </div>
           </button>
 
-          <button type="button" class="magnifik-card magnifik-card--wide" data-scene-id="faroe-sun" data-img-2400="/assets/photos/img/m113462760-2400.webp" data-label="Viðareiði Sunbeams, Faroe">
-            <img src="/assets/photos/img/m113462760-1200.webp" loading="lazy" decoding="async" alt="Pemandangan sinar matahari menembus awan di atas tebing Viðareiði Faroe Islands" />
+          <button type="button" class="magnifik-card magnifik-card--wide" data-scene-id="faroe-sun"
+            data-img-2400="/assets/photos/img/m113462760-2400.webp" data-label="Viðareiði Sunbeams, Faroe">
+            <img src="/assets/photos/img/m113462760-1200.webp" loading="lazy" decoding="async"
+              alt="Pemandangan sinar matahari menembus awan di atas tebing Viðareiði Faroe Islands" />
             <div class="magnifik-card-overlay">
               <span class="magnifik-card-pill">Viðareiði Sunbeams, Faroe</span>
               <span class="magnifik-card-pill magnifik-card-status">Terapkan</span>
             </div>
           </button>
 
-          <button type="button" class="magnifik-card magnifik-card--third" data-scene-id="iceland-peaks" data-img-2400="/assets/photos/img/m164989354-2400.webp" data-label="East Coast Peaks, Iceland">
-            <img src="/assets/photos/img/m164989354-1200.webp" loading="lazy" decoding="async" alt="Pemandangan jajaran gunung bersalju dan pesisir timur Islandia" />
+          <button type="button" class="magnifik-card magnifik-card--third" data-scene-id="iceland-peaks"
+            data-img-2400="/assets/photos/img/m164989354-2400.webp" data-label="East Coast Peaks, Iceland">
+            <img src="/assets/photos/img/m164989354-1200.webp" loading="lazy" decoding="async"
+              alt="Pemandangan jajaran gunung bersalju dan pesisir timur Islandia" />
             <div class="magnifik-card-overlay">
               <span class="magnifik-card-pill">East Coast Peaks, Iceland</span>
               <span class="magnifik-card-pill magnifik-card-status">Terapkan</span>
             </div>
           </button>
 
-          <button type="button" class="magnifik-card magnifik-card--third" data-scene-id="westfjords" data-img-2400="/assets/photos/img/m111881197-2400.webp" data-label="Westfjords Valley, Iceland">
-            <img src="/assets/photos/img/m111881197-1200.webp" loading="lazy" decoding="async" alt="Pemandangan lembah fjord di Westfjords Islandia" />
+          <button type="button" class="magnifik-card magnifik-card--third" data-scene-id="westfjords"
+            data-img-2400="/assets/photos/img/m111881197-2400.webp" data-label="Westfjords Valley, Iceland">
+            <img src="/assets/photos/img/m111881197-1200.webp" loading="lazy" decoding="async"
+              alt="Pemandangan lembah fjord di Westfjords Islandia" />
             <div class="magnifik-card-overlay">
               <span class="magnifik-card-pill">Westfjords Valley, Iceland</span>
               <span class="magnifik-card-pill magnifik-card-status">Terapkan</span>
             </div>
           </button>
 
-          <button type="button" class="magnifik-card magnifik-card--third" data-scene-id="funnings" data-img-2400="/assets/photos/img/m21913761-2400.webp" data-label="Funningsfjørður Cliffs, Faroe">
-            <img src="/assets/photos/img/m21913761-1200.webp" loading="lazy" decoding="async" alt="Pemandangan tebing bersalju Funningsfjørður di Faroe Islands" />
+          <button type="button" class="magnifik-card magnifik-card--third" data-scene-id="funnings"
+            data-img-2400="/assets/photos/img/m21913761-2400.webp" data-label="Funningsfjørður Cliffs, Faroe">
+            <img src="/assets/photos/img/m21913761-1200.webp" loading="lazy" decoding="async"
+              alt="Pemandangan tebing bersalju Funningsfjørður di Faroe Islands" />
             <div class="magnifik-card-overlay">
               <span class="magnifik-card-pill">Funningsfjørður Cliffs, Faroe</span>
               <span class="magnifik-card-pill magnifik-card-status">Terapkan</span>
@@ -2057,7 +2110,9 @@
       <div class="wrap">
         <div class="section-head">
           <h2 id="proof-h">Dirancang untuk akurasi angka dan ketahanan audit</h2>
-          <p>Seluruh kalkulasi polaritas, gerbang mitigasi, dan kontrol akses dijalankan langsung di atas mesin Node.js dan database relasional PostgreSQL 18 (<code>rahma_kpi</code>) dengan dukungan pencadangan offline otomatis.</p>
+          <p>Seluruh kalkulasi polaritas, gerbang mitigasi, dan kontrol akses dijalankan langsung di atas mesin Node.js
+            dan database relasional PostgreSQL 18 (<code>rahma_kpi</code>) dengan dukungan pencadangan offline otomatis.
+          </p>
         </div>
         <div class="proof-grid">
           <div class="proof-stat">
@@ -2085,7 +2140,8 @@
       <div class="wrap">
         <div class="section-head">
           <h2 id="pricing-h">Paket lisensi komersial untuk skala tim hingga korporasi</h2>
-          <p>Tersedia sebagai layanan cloud terkelola maupun instalasi on-premise mandiri berbasis PostgreSQL 18 di jaringan internal
+          <p>Tersedia sebagai layanan cloud terkelola maupun instalasi on-premise mandiri berbasis PostgreSQL 18 di
+            jaringan internal
             perusahaan.</p>
         </div>
 
@@ -2122,7 +2178,8 @@
                 <li>Kunci periode, PostgreSQL 18 &amp; Auto-Backup JSON</li>
               </ul>
             </div>
-            <a class="btn btn--primary" href="/app">Coba Demo<svg class="m-arrow" viewBox="0 0 12 12" aria-hidden="true">
+            <a class="btn btn--primary" href="/app">Coba Demo<svg class="m-arrow" viewBox="0 0 12 12"
+                aria-hidden="true">
                 <path class="m-arrow__stem" d="M1 6h8" />
                 <path class="m-arrow__head" d="M4.5 2.5 8 6l-3.5 3.5" />
               </svg></a>
@@ -2155,7 +2212,8 @@
         <div class="span-5">
           <div class="section-head">
             <h2 id="faq-h">Pertanyaan umum implementasi</h2>
-            <p>Ringkasan teknis mengenai keamanan akses, arsitektur database PostgreSQL 18, fitur visual terbaru, dan proses onboarding tim CPMD. Klik pertanyaan untuk membuka atau menyembunyikan jawaban.</p>
+            <p>Ringkasan teknis mengenai keamanan akses, arsitektur database PostgreSQL 18, fitur visual terbaru, dan
+              proses onboarding tim CPMD. Klik pertanyaan untuk membuka atau menyembunyikan jawaban.</p>
             <button type="button" class="faq-toggle-all-btn" id="btnToggleAllFaq">
               Buka Semua Jawaban
             </button>
@@ -2165,17 +2223,22 @@
           <div class="faq-stack" id="faqAccordionList">
             <div class="faq-accordion-item is-open">
               <button type="button" class="faq-accordion-trigger" aria-expanded="true">
-                <span class="faq-q-title">Apakah RAHMA menggunakan database PostgreSQL dan dapat berjalan on-premise?</span>
+                <span class="faq-q-title">Apakah RAHMA menggunakan database PostgreSQL dan dapat berjalan
+                  on-premise?</span>
                 <span class="faq-q-right">
                   <span class="faq-pill-tag">PostgreSQL 18</span>
                   <span class="faq-chevron-box" aria-hidden="true">
-                    <svg viewBox="0 0 256 256"><polyline points="208 96 128 176 48 96"/></svg>
+                    <svg viewBox="0 0 256 256">
+                      <polyline points="208 96 128 176 48 96" />
+                    </svg>
                   </span>
                 </span>
               </button>
               <div class="faq-accordion-panel">
                 <div class="faq-accordion-inner">
-                  <p class="faq-answer-body">Ya. RAHMA berjalan di atas Node.js dan database relasional PostgreSQL 18 (<code>rahma_kpi</code>) tanpa ketergantungan layanan eksternal, serta dilengkapi pencadangan offline otomatis (<em>Offline Auto-Backup</em>) di sisi browser.</p>
+                  <p class="faq-answer-body">Ya. RAHMA berjalan di atas Node.js dan database relasional PostgreSQL 18
+                    (<code>rahma_kpi</code>) tanpa ketergantungan layanan eksternal, serta dilengkapi pencadangan
+                    offline otomatis (<em>Offline Auto-Backup</em>) di sisi browser.</p>
                 </div>
               </div>
             </div>
@@ -2186,13 +2249,17 @@
                 <span class="faq-q-right">
                   <span class="faq-pill-tag">RBAC + OTP</span>
                   <span class="faq-chevron-box" aria-hidden="true">
-                    <svg viewBox="0 0 256 256"><polyline points="208 96 128 176 48 96"/></svg>
+                    <svg viewBox="0 0 256 256">
+                      <polyline points="208 96 128 176 48 96" />
+                    </svg>
                   </span>
                 </span>
               </button>
               <div class="faq-accordion-panel">
                 <div class="faq-accordion-inner">
-                  <p class="faq-answer-body">Server memverifikasi cookie sesi HttpOnly bertanda tangan HMAC-SHA256, menolak akses tulis lintas departemen dengan status HTTP 403, serta mengamankan perubahan email dan kata sandi menggunakan verifikasi kode OTP 6-digit.</p>
+                  <p class="faq-answer-body">Server memverifikasi cookie sesi HttpOnly bertanda tangan HMAC-SHA256,
+                    menolak akses tulis lintas departemen dengan status HTTP 403, serta mengamankan perubahan email dan
+                    kata sandi menggunakan verifikasi kode OTP 6-digit.</p>
                 </div>
               </div>
             </div>
@@ -2203,13 +2270,18 @@
                 <span class="faq-q-right">
                   <span class="faq-pill-tag">Dark Mode &amp; HEX</span>
                   <span class="faq-chevron-box" aria-hidden="true">
-                    <svg viewBox="0 0 256 256"><polyline points="208 96 128 176 48 96"/></svg>
+                    <svg viewBox="0 0 256 256">
+                      <polyline points="208 96 128 176 48 96" />
+                    </svg>
                   </span>
                 </span>
               </button>
               <div class="faq-accordion-panel">
                 <div class="faq-accordion-inner">
-                  <p class="faq-answer-body">Tersedia Mode Malam (Night-Comfort Dark Mode) yang tersinkronisasi di seluruh halaman, standar kontras teks 2-tier yang tajam, Studio Multi-Atribut Warna HEX (<code>#RRGGBB</code>), pilihan latar fotografi Magnifik atau foto PC, serta 3 tingkat kerapatan kaca buram.</p>
+                  <p class="faq-answer-body">Tersedia Mode Malam (Night-Comfort Dark Mode) yang tersinkronisasi di
+                    seluruh halaman, standar kontras teks 2-tier yang tajam, Studio Multi-Atribut Warna HEX
+                    (<code>#RRGGBB</code>), pilihan latar fotografi Magnifik atau foto PC, serta 3 tingkat kerapatan
+                    kaca buram.</p>
                 </div>
               </div>
             </div>
@@ -2220,13 +2292,17 @@
                 <span class="faq-q-right">
                   <span class="faq-pill-tag">Siap Uji</span>
                   <span class="faq-chevron-box" aria-hidden="true">
-                    <svg viewBox="0 0 256 256"><polyline points="208 96 128 176 48 96"/></svg>
+                    <svg viewBox="0 0 256 256">
+                      <polyline points="208 96 128 176 48 96" />
+                    </svg>
                   </span>
                 </span>
               </button>
               <div class="faq-accordion-panel">
                 <div class="faq-accordion-inner">
-                  <p class="faq-answer-body">Tersedia tombol masuk cepat 1-klik untuk akun demo CPMD Admin, Division Leader OPS, dan Executive BOD di halaman login aplikasi dengan kata sandi <code>rahma2026</code>.</p>
+                  <p class="faq-answer-body">Tersedia tombol masuk cepat 1-klik untuk akun demo CPMD Admin, Division
+                    Leader OPS, dan Executive BOD di halaman login aplikasi dengan kata sandi <code>rahma2026</code>.
+                  </p>
                 </div>
               </div>
             </div>
@@ -2255,8 +2331,10 @@
           <div class="span-4 stack-4">
             <div style="display:flex;align-items:center;gap:14px;flex-wrap:wrap;">
               <a class="nav__logo" href="#top"><img src="/images/rahma-logo.png" alt="Rahma" class="rahma-wordmark"></a>
-              <span style="width:1px;height:28px;background:rgba(15,23,42,0.16);display:inline-block;" aria-hidden="true"></span>
-              <img src="/images/gsi-logo.png" alt="PT Global Service Indonesia" style="height:36px;width:auto;object-fit:contain;">
+              <span style="width:1px;height:28px;background:rgba(15,23,42,0.16);display:inline-block;"
+                aria-hidden="true"></span>
+              <img src="/images/gsi-logo.png" alt="PT Global Service Indonesia"
+                style="height:36px;width:auto;object-fit:contain;">
             </div>
             <p class="footer__lede">Platform tata kelola KPI korporasi, mitigasi risiko wajib, dan pelaporan direksi
               mandiri.</p>
@@ -2292,7 +2370,8 @@
         </div>
         <div class="footer__legal" style="flex-wrap:wrap;gap:8px 16px;">
           <span>&copy; 2026 RAHMA KPI Governance &middot; PT Global Service Indonesia</span>
-          <span style="font-size:12px;color:#64748b;">Fotografi lanskap via Wikimedia Commons: Simo Räsänen, Sanshiro Kubota, Eric Kilby, Barry Marsh, Vincent van Zeijst (CC BY-SA).</span>
+          <span style="font-size:12px;color:#64748b;">Fotografi lanskap via Wikimedia Commons: Simo Räsänen, Sanshiro
+            Kubota, Eric Kilby, Barry Marsh, Vincent van Zeijst (CC BY-SA).</span>
         </div>
       </div>
     </div>
@@ -2492,7 +2571,7 @@
             localStorage.setItem('rahma_magnifik_scene', sceneId);
             localStorage.setItem('rahma_magnifik_url', img2400);
             localStorage.setItem('rahma_magnifik_label', label);
-          } catch (_e) {}
+          } catch (_e) { }
         }
 
         homeCards.forEach((card) => {
@@ -2561,11 +2640,11 @@
             if (isDark) {
               document.documentElement.removeAttribute('data-theme');
               document.documentElement.removeAttribute('data-tone');
-              try { localStorage.setItem('rahma_theme', 'light'); } catch (_e) {}
+              try { localStorage.setItem('rahma_theme', 'light'); } catch (_e) { }
             } else {
               document.documentElement.setAttribute('data-theme', 'dark');
               document.documentElement.setAttribute('data-tone', 'dark');
-              try { localStorage.setItem('rahma_theme', 'dark'); } catch (_e) {}
+              try { localStorage.setItem('rahma_theme', 'dark'); } catch (_e) { }
             }
             syncHomeThemeButton();
           });

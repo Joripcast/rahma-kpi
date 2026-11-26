@@ -927,15 +927,28 @@ async function getEnrichedKpis({ departmentId = null, year = 2026, month = 11 } 
       ytd,
       momDeltaPct,
       sparkline,
-      monthlyHistory: monthlyRecords.map((r) => ({
-        month: Number(r.period_month),
-        target_value: r.target_value,
-        actual_value: r.actual_value,
-        achievement_pct: r.achievement_pct,
-        weighted_score: r.weighted_score,
-        status_color: r.status_color,
-        is_draft: Boolean(r.is_draft)
-      }))
+      monthlyHistory: monthlyRecords.map((r) => {
+        let rTagIds = [];
+        try {
+          rTagIds = JSON.parse(r.mitigation_tags || '[]');
+        } catch {
+          rTagIds = [];
+        }
+        return {
+          month: Number(r.period_month),
+          target_value: r.target_value,
+          actual_value: r.actual_value,
+          achievement_pct: r.achievement_pct,
+          weighted_score: r.weighted_score,
+          status_color: r.status_color,
+          is_draft: Boolean(r.is_draft),
+          problem_identification: r.problem_identification || '',
+          corrective_action: r.corrective_action || '',
+          need_support: r.need_support || '',
+          mitigationTagIds: rTagIds,
+          mitigationTagObjects: rTagIds.map((id) => attrMap.get(id)).filter(Boolean)
+        };
+      })
     };
   });
 }

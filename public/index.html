@@ -752,6 +752,40 @@
     </div>
   </div>
 
+  <!-- ===================================================================== -->
+  <!-- MODAL 5: PERINCIAN DIVISI, GRAFIK BULANAN INTERAKTIF & CETAK LAPORAN  -->
+  <!-- ===================================================================== -->
+  <div class="kpi-modal-overlay" id="deptDetailModalOverlay" aria-hidden="true">
+    <div class="kpi-modal-drawer" id="deptDetailModalDrawer" style="width:min(1080px, 96vw);">
+      <div class="kpi-modal-header" id="deptModalHeaderBar">
+        <div class="kpi-modal-title-group">
+          <div class="kpi-modal-eyebrow" id="modalDeptEyebrow">DIVISI • PROFIL PERFORMA &amp; MITIGASI</div>
+          <h2 class="kpi-modal-title" id="modalDeptTitle">Rincian Performa Divisi</h2>
+          <div class="kpi-modal-leader" id="modalDeptLeader">Division Leader: -</div>
+        </div>
+        <div class="kpi-modal-actions" style="flex-wrap:wrap;justify-content:flex-end;">
+          <span class="status-pill" id="modalDeptStatusPill">GREEN</span>
+          <button type="button" class="btn-secondary" id="btnPrintDeptReport" title="Cetak Laporan Khusus Divisi Ini (PDF)">
+            <svg class="ph-icon" viewBox="0 0 256 256" aria-hidden="true"><polyline points="64 80 64 40 192 40 192 80"/><rect x="64" y="152" width="128" height="68"/><path d="M64,176H28a8,8,0,0,1-8-8V96c0-8.84,7.76-16,17.33-16H218.67C228.24,80,236,87.16,236,96v72a8,8,0,0,1-8,8H192"/><circle cx="188" cy="116" r="10"/></svg>
+            Cetak Laporan Divisi
+          </button>
+          <button type="button" class="btn-primary" id="btnDeptJumpInput">
+            <svg class="ph-icon" viewBox="0 0 256 256" aria-hidden="true"><path d="M92.69,216H48a8,8,0,0,1-8-8V163.31a8,8,0,0,1,2.34-5.65L165.66,34.34a8,8,0,0,1,11.31,0L221.66,79a8,8,0,0,1,0,11.31L98.34,213.66A8,8,0,0,1,92.69,216Z"/><line x1="136" y1="64" x2="192" y2="120"/></svg>
+            Input KPI Divisi
+          </button>
+          <button type="button" class="btn-ghost" data-close-modal="deptDetailModalOverlay" title="Tutup Perincian Divisi (Esc)">
+            <svg class="ph-icon ph-icon-sm" viewBox="0 0 256 256" aria-hidden="true"><line x1="200" y1="56" x2="56" y2="200"/><line x1="200" y1="200" x2="56" y2="56"/></svg>
+            Tutup <kbd>Esc</kbd>
+          </button>
+        </div>
+      </div>
+
+      <div class="kpi-modal-body" id="deptModalBodyContent">
+        <!-- Populated dynamically when a Division button/card is clicked -->
+      </div>
+    </div>
+  </div>
+
   <!-- ========================================================= -->
   <!-- ACCOUNT & WORKSPACE SETTINGS MODAL (BRANCHED NAVIGATION)  -->
   <!-- ========================================================= -->
