@@ -472,7 +472,7 @@ Berikut fitur dan penyempurnaan arsitektur yang telah dibangun pada codebase saa
 2. **Pengaturan Akun Bercabang & Verifikasi OTP Email:**
    - Modal pengaturan akun di dashboard memiliki 5 cabang: **Profil & Avatar** (foto avatar 256×256 per akun, ubah nama/jabatan), **Keamanan & OTP** (ubah email & kata sandi dengan kode OTP 6-digit), **Tampilan & Kaca** (wallpaper preset, foto PC terakhir, & intensitas *frosted glass*), **Preferensi & Data** (mode default Monthly/YTD & konfirmasi perubahan belum disimpan), serta **Tentang Rahma** (`Versi 1.0.0`).
 3. **Sistem Visual, Tipografi & Cetak PDF Eksekutif:**
-   - Menggunakan *co-branding* **Rahma** (`#007BC8`) dan **PT Global Service Indonesia (GSI)**, tipografi **Commissioner** (Title), **Figtree** (Body/UI), dan **IBM Plex Mono** (`<kbd>`/Monospace), serta desain *Beveled Frosted Glass*.
+   - Menggunakan *co-branding* **Rahma** (`#007BC8`) dan **PT Global Service Indonesia (GSI)**, tipografi **Figtree** (Title & Body/UI) dan **IBM Plex Mono** (`<kbd>`/Monospace), serta desain *Beveled Frosted Glass*.
    - **Sidebar Retractable:** Saat sidebar disembunyikan (`☰`), topbar menampilkan logo **Rahma | GSI** (menggantikan tombol Mode Rapat yang redundan).
    - **One-Click Executive PDF (`@media print`):** Mencetak laporan A4 Landscape dengan kartu grafik datar (*flat* putih tanpa bayangan/blur), warna aksen khusus sebagai *outline* kartu, serta tabel Heatmap 12 bulan + YTD penuh tanpa terpotong.
 4. **Homepage Komersial (`/home`):**
