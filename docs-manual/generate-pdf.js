@@ -90,7 +90,17 @@ async function captureApplicationScreenshots(browser) {
     document.querySelectorAll('.toast').forEach((t) => t.remove());
   });
 
-  console.log('📸 [6/10] Mengambil screenshot Drawer Perincian Individu KPI (12 Bulan)...');
+  console.log('📸 [6/11] Mengambil screenshot Modal Perincian Divisi & Grafik Bulanan Interaktif...');
+  const firstDeptBtn = await page.$('.mini-dept-card[data-detail-dept]');
+  if (firstDeptBtn) {
+    await firstDeptBtn.click();
+    await page.waitForTimeout(500);
+    await page.screenshot({ path: path.join(SCREENSHOTS_DIR, '06b-dept-detail-modal.png') });
+    await page.click('[data-close-modal="deptDetailModalOverlay"]');
+    await page.waitForTimeout(300);
+  }
+
+  console.log('📸 [7/11] Mengambil screenshot Drawer Perincian Individu KPI (12 Bulan)...');
   const firstKpiBtn = await page.$('[data-detail-kpi]');
   if (firstKpiBtn) {
     await firstKpiBtn.click();
