@@ -3376,27 +3376,35 @@ function openKpiDetailModal(kpiId) {
   statusPill.className = `status-pill status-${activeStatus}`;
   statusPill.textContent = `${activeStatus} (${state.mode})`;
 
-  // Jump to Input button handler
+  // Jump to Input button handler (hidden for EXECUTIVE & cross-department DIV_LEADER)
   const jumpBtn = document.getElementById('btnModalJumpInput');
-  jumpBtn.onclick = () => {
-    closeKpiDetailModal();
-    // Switch to input tab and focus this KPI's actual input
-    document.querySelectorAll('.nav-btn').forEach((b) => b.classList.remove('active'));
-    document.querySelectorAll('.tab-panel').forEach((p) => p.classList.remove('active'));
-    document.querySelector('.nav-btn[data-tab="input"]').classList.add('active');
-    document.getElementById('tab-input').classList.add('active');
-    state.inputDeptFilter = kpi.department_id;
-    document.getElementById('inputDeptSelect').value = kpi.department_id;
-    renderSpreadsheetInputView();
-    setTimeout(() => {
-      const card = document.getElementById(`row-card-${kpi.id}`);
-      if (card) {
-        card.scrollIntoView({ behavior: 'smooth', block: 'center' });
-        const inputEl = card.querySelector('.actual-input');
-        if (inputEl && !inputEl.disabled) inputEl.focus();
-      }
-    }, 100);
-  };
+  const isReadOnlyKpi =
+    state.role === 'EXECUTIVE' ||
+    (state.role === 'DIV_LEADER' && state.departmentId && state.departmentId !== kpi.department_id);
+  if (jumpBtn) {
+    jumpBtn.style.display = isReadOnlyKpi ? 'none' : '';
+    jumpBtn.onclick = () => {
+      if (isReadOnlyKpi) return;
+      closeKpiDetailModal();
+      // Switch to input tab and focus this KPI's actual input
+      document.querySelectorAll('.nav-btn').forEach((b) => b.classList.remove('active'));
+      document.querySelectorAll('.tab-panel').forEach((p) => p.classList.remove('active'));
+      document.querySelector('.nav-btn[data-tab="input"]').classList.add('active');
+      document.getElementById('tab-input').classList.add('active');
+      state.activeTab = 'input';
+      state.inputDeptFilter = kpi.department_id;
+      document.getElementById('inputDeptSelect').value = kpi.department_id;
+      renderSpreadsheetInputView();
+      setTimeout(() => {
+        const card = document.getElementById(`row-card-${kpi.id}`);
+        if (card) {
+          card.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          const inputEl = card.querySelector('.actual-input');
+          if (inputEl && !inputEl.disabled) inputEl.focus();
+        }
+      }, 100);
+    };
+  }
 
   const momText =
     kpi.momDeltaPct === null
