@@ -11,7 +11,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600;700&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="/styles.css" />
+  <link rel="stylesheet" href="/styles.css?v=20261127b" />
   <script>
     (function () {
       try {
@@ -356,6 +356,18 @@
           <div class="input-banner-right">
             <label for="inputDeptSelect" class="micro-label">FILTER DEPARTEMEN INPUT</label>
             <select id="inputDeptSelect" class="select-control"></select>
+            <div class="excel-import-toolbar">
+              <button type="button" class="btn-secondary" id="btnDownloadExcelTemplate"
+                title="Unduh Template Excel (.xlsx) untuk periode &amp; divisi aktif">
+                <svg class="ph-icon ph-icon-sm" viewBox="0 0 256 256" aria-hidden="true"><line x1="128" y1="144" x2="128" y2="32"/><polyline points="216 144 216 208 40 208 40 144"/><polyline points="168 104 128 144 88 104"/></svg>
+                Template .XLSX
+              </button>
+              <button type="button" class="btn-primary" id="btnOpenExcelImportModal"
+                title="Unggah Excel (.xlsx) dengan Validasi Dry-Run sebelum masuk ke PostgreSQL">
+                <svg class="ph-icon ph-icon-sm" viewBox="0 0 256 256" aria-hidden="true"><line x1="128" y1="32" x2="128" y2="144"/><polyline points="88 72 128 32 168 72"/><polyline points="216 144 216 208 40 208 40 144"/></svg>
+                Import Excel (.XLSX)
+              </button>
+            </div>
           </div>
         </div>
 
@@ -1190,7 +1202,80 @@
     </div>
   </div>
 
-  <script src="/app.js"></script>
+  <!-- ========================================================= -->
+  <!-- SMART EXCEL IMPORT (.XLSX) & DRY-RUN VALIDATION MODAL     -->
+  <!-- ========================================================= -->
+  <div class="kpi-modal-overlay" id="excelImportModalOverlay" role="dialog" aria-modal="true"
+    aria-labelledby="excelImportModalTitle" aria-hidden="true">
+    <div class="kpi-modal-drawer crud-modal-dialog crud-modal-wide" style="max-width:1040px;">
+      <div class="kpi-modal-header">
+        <div class="kpi-modal-title-group">
+          <div class="kpi-modal-eyebrow">Smart Excel Import (.xlsx) &bull; Dry-Run Validation</div>
+          <h2 class="kpi-modal-title" id="excelImportModalTitle">
+            <svg class="ph-icon" viewBox="0 0 256 256" aria-hidden="true"><path d="M32,56H224V192a8,8,0,0,1-8,8H40a8,8,0,0,1-8-8V56Z"/><line x1="32" y1="104" x2="224" y2="104"/><line x1="32" y1="152" x2="224" y2="152"/><line x1="88" y1="104" x2="88" y2="200"/></svg>
+            Impor Excel KPI dengan Validasi Dry-Run
+          </h2>
+          <div class="kpi-modal-subtitle" id="excelImportPeriodSubtitle">
+            Cek tipe data, kesesuaian polaritas, &amp; gerbang mitigasi &lt; 85% sebelum masuk ke PostgreSQL
+          </div>
+        </div>
+        <div class="kpi-modal-actions">
+          <button type="button" class="btn-secondary" id="btnModalDownloadTemplate">
+            <svg class="ph-icon ph-icon-sm" viewBox="0 0 256 256" aria-hidden="true"><line x1="128" y1="144" x2="128" y2="32"/><polyline points="216 144 216 208 40 208 40 144"/><polyline points="168 104 128 144 88 104"/></svg>
+            Download Template (.xlsx)
+          </button>
+          <button type="button" class="btn-ghost" data-close-modal="excelImportModalOverlay">
+            <svg class="ph-icon ph-icon-sm" viewBox="0 0 256 256" aria-hidden="true"><line x1="200" y1="56" x2="56" y2="200"/><line x1="200" y1="200" x2="56" y2="56"/></svg>
+            Tutup <kbd>Esc</kbd>
+          </button>
+        </div>
+      </div>
+
+      <div class="kpi-modal-body" style="display:flex;flex-direction:column;gap:16px;">
+        <div class="excel-dropzone" id="excelDropzone">
+          <input type="file" id="excelFileInput" accept=".xlsx,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" hidden />
+          <div class="excel-dropzone-info">
+            <strong id="excelSelectedFileName">Pilih atau jatuhkan berkas Excel (.xlsx) di sini</strong>
+            <span>Validasi Dry-Run otomatis memeriksa: (1) Tipe data numerik Target &amp; Actual, (2) Kesesuaian Polaritas (MAXIMIZE/MINIMIZE), (3) Gerbang Mitigasi wajib &lt; 85%, dan (4) Isolasi departemen RBAC.</span>
+          </div>
+          <div style="display:flex;gap:10px;flex-wrap:wrap;">
+            <button type="button" class="btn-secondary" id="btnChooseExcelFile">Pilih Berkas .xlsx</button>
+            <button type="button" class="btn-primary" id="btnRunExcelDryRun" disabled>Jalankan Dry-Run Validation</button>
+          </div>
+        </div>
+
+        <div id="excelDryRunResultContainer" style="display:none;flex-direction:column;gap:14px;">
+          <div id="excelDryRunBanner" class="excel-dryrun-banner"></div>
+          <div id="excelSummaryGrid" class="excel-summary-grid"></div>
+          <div class="table-responsive" style="max-height:360px;overflow-y:auto;">
+            <table class="data-table excel-dryrun-table" id="excelDryRunTable">
+              <thead>
+                <tr>
+                  <th>Baris</th>
+                  <th>Kode KPI</th>
+                  <th>Polaritas</th>
+                  <th style="text-align:right">Target</th>
+                  <th style="text-align:right">Actual</th>
+                  <th style="text-align:center">Capaian</th>
+                  <th style="text-align:center">Status Dry-Run</th>
+                  <th>Detail Validasi (Tipe Data / Polaritas / Gerbang &lt; 85%)</th>
+                </tr>
+              </thead>
+              <tbody id="excelDryRunTbody"></tbody>
+            </table>
+          </div>
+          <div style="display:flex;justify-content:flex-end;gap:10px;flex-wrap:wrap;padding-top:6px;">
+            <button type="button" class="btn-ghost" data-close-modal="excelImportModalOverlay">Batal</button>
+            <button type="button" class="btn-primary" id="btnCommitExcelImport" disabled>
+              Simpan Data Valid ke PostgreSQL
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="/app.js?v=20261127b"></script>
 </body>
 
 </html>

@@ -1852,6 +1852,7 @@ document.addEventListener('DOMContentLoaded', () => {
   initThemeController();
   initWallpaperStudio();
   initAccountSettingsModal();
+  initExcelImportModal();
   checkAuthAndBoot();
 });
 
@@ -3071,12 +3072,12 @@ function openDeptDetailModal(deptId, initialMonth = state.month) {
     </div>
 
     <!-- 4. SCORECARD LENGKAP SELURUH KPI DIVISI -->
-    <div class="detail-section-card">
+    <div class="detail-section-card scorecard-section-card">
       <h4>
         <span style="display:inline-flex;align-items:center;gap:6px">
           ${phIcon('table')} Tabel Scorecard Lengkap Seluruh Indikator KPI Divisi ${escapeHtml(dept.code)} (${deptKpis.length} KPI)
         </span>
-        <span style="font-size:12px;color:var(--text-caption)">Klik baris KPI untuk membuka detail individu</span>
+        <span class="print-hide-hint" style="font-size:12px;color:var(--text-caption)">Klik baris KPI untuk membuka detail individu</span>
       </h4>
       <div class="table-responsive">
         <table class="data-table">
@@ -4040,4 +4041,253 @@ function initRAHProtocol() {
       }, 1000);
     }
   }, 26);
+}
+
+// ============================================================================
+// SMART EXCEL IMPORT (.XLSX) & DRY-RUN VALIDATION CONTROLLER
+// ============================================================================
+function initExcelImportModal() {
+  const btnDownloadTemplate = document.getElementById('btnDownloadExcelTemplate');
+  const btnModalDownload = document.getElementById('btnModalDownloadTemplate');
+  const btnOpenModal = document.getElementById('btnOpenExcelImportModal');
+  const fileInput = document.getElementById('excelFileInput');
+  const btnChooseFile = document.getElementById('btnChooseExcelFile');
+  const btnRunDryRun = document.getElementById('btnRunExcelDryRun');
+  const btnCommit = document.getElementById('btnCommitExcelImport');
+  const dropzone = document.getElementById('excelDropzone');
+  const selectedNameEl = document.getElementById('excelSelectedFileName');
+  const resultContainer = document.getElementById('excelDryRunResultContainer');
+  const bannerEl = document.getElementById('excelDryRunBanner');
+  const summaryGridEl = document.getElementById('excelSummaryGrid');
+  const tbodyEl = document.getElementById('excelDryRunTbody');
+  const subtitleEl = document.getElementById('excelImportPeriodSubtitle');
+
+  let pendingFileBase64 = '';
+  let pendingFileName = '';
+
+  function downloadTemplate() {
+    const deptParam =
+      state.role === 'DIV_LEADER' && state.departmentId
+        ? state.departmentId
+        : state.inputDeptFilter || 'ALL';
+    const url = `/api/excel/template?year=${state.year}&month=${state.month}&departmentId=${encodeURIComponent(
+      deptParam
+    )}`;
+    window.location.href = url;
+    showToast('Mengunduh Template Excel (.xlsx) untuk periode aktif...');
+  }
+
+  function resetExcelImportState() {
+    pendingFileBase64 = '';
+    pendingFileName = '';
+    if (fileInput) fileInput.value = '';
+    if (selectedNameEl) {
+      selectedNameEl.textContent = 'Pilih atau jatuhkan berkas Excel (.xlsx) di sini';
+    }
+    if (btnRunDryRun) btnRunDryRun.disabled = true;
+    if (btnCommit) btnCommit.disabled = true;
+    if (resultContainer) resultContainer.style.display = 'none';
+  }
+
+  function handleSelectedFile(file) {
+    if (!file) return;
+    if (!file.name.toLowerCase().endsWith('.xlsx')) {
+      showToast('Format berkas tidak didukung. Harap unggah berkas Excel (.xlsx).', true);
+      return;
+    }
+    const reader = new FileReader();
+    reader.onload = () => {
+      pendingFileBase64 = String(reader.result || '');
+      pendingFileName = file.name;
+      if (selectedNameEl) {
+        selectedNameEl.textContent = `Berkas dipilih: ${file.name} (${Math.max(
+          1,
+          Math.round(file.size / 1024)
+        )} KB)`;
+      }
+      if (btnRunDryRun) btnRunDryRun.disabled = false;
+      if (btnCommit) btnCommit.disabled = true;
+      if (resultContainer) resultContainer.style.display = 'none';
+      runDryRunValidation();
+    };
+    reader.readAsDataURL(file);
+  }
+
+  function renderDryRunResult(data) {
+    const s = data.summary;
+    resultContainer.style.display = 'flex';
+
+    bannerEl.className = `excel-dryrun-banner ${s.canCommit ? 'ok' : 'fail'}`;
+    bannerEl.textContent = data.message;
+
+    summaryGridEl.innerHTML = `
+      <div class="excel-summary-stat"><span>Total Baris</span><strong>${s.totalRows}</strong></div>
+      <div class="excel-summary-stat"><span>Siap Impor (Valid)</span><strong style="color:var(--success-text)">${s.validCount}</strong></div>
+      <div class="excel-summary-stat"><span>Gagal Validasi</span><strong style="color:${
+        s.errorCount > 0 ? 'var(--danger-text)' : 'var(--text-h1)'
+      }">${s.errorCount}</strong></div>
+      <div class="excel-summary-stat"><span>Dilewati (Kosong)</span><strong>${s.skippedCount}</strong></div>
+      <div class="excel-summary-stat"><span>Zona Merah (&lt;85%)</span><strong style="color:${
+        s.redCount > 0 ? 'var(--danger-text)' : 'var(--text-h1)'
+      }">${s.redCount}</strong></div>
+    `;
+
+    tbodyEl.innerHTML = (data.rows || [])
+      .map((r) => {
+        const badgeCls =
+          r.status === 'VALID'
+            ? 'status-GREEN'
+            : r.status === 'ERROR'
+            ? 'status-RED'
+            : 'status-UNREPORTED';
+        const perfCls =
+          r.statusColor === 'RED'
+            ? 'status-RED'
+            : r.statusColor === 'YELLOW'
+            ? 'status-YELLOW'
+            : r.statusColor === 'GREEN'
+            ? 'status-GREEN'
+            : 'status-UNREPORTED';
+
+        const notes = [];
+        if (r.errors && r.errors.length > 0) {
+          notes.push(
+            `<ul style="margin:0;padding-left:16px;color:var(--danger-text);font-weight:600">${r.errors
+              .map((e) => `<li>${escapeHtml(e)}</li>`)
+              .join('')}</ul>`
+          );
+        }
+        if (r.warnings && r.warnings.length > 0) {
+          notes.push(
+            `<div style="color:var(--warning-text);font-size:11.5px">${r.warnings
+              .map((w) => escapeHtml(w))
+              .join('<br>')}</div>`
+          );
+        }
+        if (notes.length === 0) {
+          notes.push(
+            `<span style="color:var(--success-text);font-weight:600">Valid (Tipe data, polaritas &amp; mitigasi sesuai)</span>`
+          );
+        }
+
+        return `
+          <tr>
+            <td><strong>#${r.rowNumber}</strong></td>
+            <td>
+              <strong>${escapeHtml(r.code)}</strong>
+              <div style="font-size:11px;color:var(--text-caption)">${escapeHtml(r.departmentCode)} • ${escapeHtml(
+          r.title
+        )}</div>
+            </td>
+            <td><code>${escapeHtml(r.polarity)}</code></td>
+            <td style="text-align:right">${r.targetValue ?? '-'}</td>
+            <td style="text-align:right"><strong>${r.actualValue ?? '-'}</strong></td>
+            <td style="text-align:center">
+              <span class="status-pill ${perfCls}" style="min-height:26px;padding:2px 8px;font-size:11px">
+                ${r.achievementPct !== null ? `${r.achievementPct}%` : '-'}
+              </span>
+            </td>
+            <td style="text-align:center">
+              <span class="status-pill ${badgeCls}" style="min-height:26px;padding:2px 8px;font-size:11px">
+                ${escapeHtml(r.status)}
+              </span>
+            </td>
+            <td style="white-space:normal;min-width:240px;font-size:12px">${notes.join('')}</td>
+          </tr>
+        `;
+      })
+      .join('');
+
+    btnCommit.disabled = !s.canCommit;
+  }
+
+  async function runDryRunValidation() {
+    if (!pendingFileBase64) return;
+    btnRunDryRun.disabled = true;
+    btnCommit.disabled = true;
+    try {
+      const res = await fetch('/api/excel/dry-run', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          year: state.year,
+          month: state.month,
+          fileName: pendingFileName,
+          fileBase64: pendingFileBase64
+        })
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        showToast(data.error || 'Gagal menjalankan Dry-Run Validation.', true);
+        return;
+      }
+      renderDryRunResult(data);
+    } catch (_err) {
+      showToast('Terjadi kesalahan jaringan saat menjalankan Dry-Run Validation.', true);
+    } finally {
+      btnRunDryRun.disabled = false;
+    }
+  }
+
+  async function commitExcelImport() {
+    if (!pendingFileBase64) return;
+    btnCommit.disabled = true;
+    try {
+      const res = await fetch('/api/excel/commit', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          year: state.year,
+          month: state.month,
+          fileName: pendingFileName,
+          fileBase64: pendingFileBase64
+        })
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        showToast(data.error || 'Gagal menyimpan data Excel ke PostgreSQL.', true);
+        return;
+      }
+      showToast(data.message);
+      closeModalById('excelImportModalOverlay');
+      resetExcelImportState();
+      await refreshDashboardData();
+    } catch (_err) {
+      showToast('Terjadi kesalahan jaringan saat menyimpan impor Excel.', true);
+    }
+  }
+
+  if (btnDownloadTemplate) btnDownloadTemplate.addEventListener('click', downloadTemplate);
+  if (btnModalDownload) btnModalDownload.addEventListener('click', downloadTemplate);
+  if (btnOpenModal) {
+    btnOpenModal.addEventListener('click', () => {
+      resetExcelImportState();
+      if (subtitleEl) {
+        subtitleEl.textContent = `Periode: ${MONTH_NAMES[state.month - 1]} ${state.year} • Cek tipe data, polaritas, & gerbang < 85% sebelum masuk ke PostgreSQL`;
+      }
+      openModalById('excelImportModalOverlay');
+    });
+  }
+  if (btnChooseFile && fileInput) {
+    btnChooseFile.addEventListener('click', () => fileInput.click());
+    fileInput.addEventListener('change', (e) => {
+      handleSelectedFile(e.target.files?.[0]);
+    });
+  }
+  if (dropzone) {
+    dropzone.addEventListener('dragover', (e) => {
+      e.preventDefault();
+      dropzone.classList.add('is-dragover');
+    });
+    dropzone.addEventListener('dragleave', () => {
+      dropzone.classList.remove('is-dragover');
+    });
+    dropzone.addEventListener('drop', (e) => {
+      e.preventDefault();
+      dropzone.classList.remove('is-dragover');
+      handleSelectedFile(e.dataTransfer?.files?.[0]);
+    });
+  }
+  if (btnRunDryRun) btnRunDryRun.addEventListener('click', runDryRunValidation);
+  if (btnCommit) btnCommit.addEventListener('click', commitExcelImport);
 }

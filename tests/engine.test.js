@@ -15,6 +15,8 @@ const {
 } = require('../src/engine');
 
 const { initDatabase, getDashboardSummary, getAllAttributes, pool } = require('../src/db');
+const { buildXlsxBuffer, parseXlsxBuffer } = require('../src/xlsx');
+const { buildKpiExcelTemplateBuffer, validateExcelImportRows } = require('../src/excel-import');
 
 (async () => {
   console.log('🧪 Running RAHMA Standalone KPI Unit & Stress Tests (PostgreSQL)...\n');
@@ -108,6 +110,54 @@ const { initDatabase, getDashboardSummary, getAllAttributes, pool } = require('.
   assert.equal(summary.departments.length, 5);
   assert.ok(summary.redEscalations.length >= 3);
   console.log('✅ [PASS] PostgreSQL Database Integration (rahma_kpi)');
+
+  // 5b. Smart Excel (.xlsx) Template Round-Trip & Dry-Run Validation
+  const templateBuf = buildKpiExcelTemplateBuffer({
+    kpis: summary.kpis.slice(0, 3),
+    year: 2026,
+    month: 11,
+    departmentLabel: 'UAT'
+  });
+  const parsedTemplate = parseXlsxBuffer(templateBuf);
+  assert.equal(parsedTemplate.sheetName, 'Input KPI');
+  assert.equal(parsedTemplate.rows.length, 4);
+
+  const customXlsx = buildXlsxBuffer([
+    {
+      name: 'Input KPI',
+      rows: [
+        [
+          'Kode KPI',
+          'Polaritas',
+          'Target',
+          'Actual',
+          'Problem Identification',
+          'Corrective Action',
+          'Need Support BOD'
+        ],
+        [summary.kpis[0].code, summary.kpis[0].polarity, 100, 'bukan-angka', '', '', ''],
+        [
+          summary.kpis[1].code,
+          summary.kpis[1].polarity === 'MAXIMIZE' ? 'MINIMIZE' : 'MAXIMIZE',
+          100,
+          95,
+          '',
+          '',
+          ''
+        ],
+        [summary.kpis[2].code, summary.kpis[2].polarity, 100, 60, 'Pendek', '', '']
+      ]
+    }
+  ]);
+  const parsedCustom = parseXlsxBuffer(customXlsx);
+  const dryRunFail = validateExcelImportRows({
+    rows: parsedCustom.rows,
+    kpis: summary.kpis,
+    authUser: { role: 'CPMD_ADMIN' }
+  });
+  assert.equal(dryRunFail.summary.errorCount, 3);
+  assert.equal(dryRunFail.summary.canCommit, false);
+  console.log('✅ [PASS] Smart Excel (.xlsx) Round-Trip & Dry-Run Validation (Type, Polarity & < 85% Gate)');
 
   const startStress = performance.now();
   for (let i = 0; i < 10000; i++) {

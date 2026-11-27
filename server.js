@@ -30,6 +30,12 @@ const {
   validateMitigationGate
 } = require('./src/engine');
 
+const { parseXlsxBuffer } = require('./src/xlsx');
+const {
+  buildKpiExcelTemplateBuffer,
+  validateExcelImportRows
+} = require('./src/excel-import');
+
 const PORT = Number(process.env.PORT || 3456);
 const PUBLIC_DIR = path.join(__dirname, 'public');
 const DATA_DIR = path.join(__dirname, 'data');
@@ -914,6 +920,221 @@ const server = http.createServer(async (req, res) => {
         message: locked
           ? 'Periode pelaporan berhasil dikunci oleh CPMD.'
           : 'Kunci periode pelaporan berhasil dibuka kembali.'
+      });
+    }
+
+    // =========================================================================
+    // 5B. SMART EXCEL IMPORT (.xlsx) TEMPLATE, DRY-RUN & TRANSACTIONAL COMMIT
+    // =========================================================================
+    if (pathname === '/api/excel/template' && method === 'GET') {
+      if (authUser.role === 'EXECUTIVE') {
+        return sendJson(res, 403, {
+          error: 'Akses ditolak (RBAC 403): Role Executive (BOD) hanya memiliki akses Read-Only.'
+        });
+      }
+
+      const year = Number(parsedUrl.searchParams.get('year') || 2026);
+      const month = Number(parsedUrl.searchParams.get('month') || 11);
+      if (!Number.isInteger(year) || year < 2020 || year > 2100 || !Number.isInteger(month) || month < 1 || month > 12) {
+        return sendJson(res, 400, { error: 'Periode tahun atau bulan tidak valid.' });
+      }
+
+      const requestedDept = parsedUrl.searchParams.get('departmentId') || 'ALL';
+      const departmentId =
+        authUser.role === 'DIV_LEADER' && authUser.department_id
+          ? authUser.department_id
+          : requestedDept;
+
+      const kpis = await getEnrichedKpis({ departmentId, year, month });
+      let departmentLabel = 'Semua Divisi';
+      if (departmentId !== 'ALL') {
+        const deptRow = await db.get(`SELECT code, name FROM departments WHERE id = ?`, departmentId);
+        if (deptRow) departmentLabel = `${deptRow.code} — ${deptRow.name}`;
+      }
+
+      const xlsxBuf = buildKpiExcelTemplateBuffer({
+        kpis,
+        year,
+        month,
+        departmentLabel
+      });
+
+      const fileTag =
+        departmentId !== 'ALL' && kpis[0]?.department_code
+          ? kpis[0].department_code
+          : 'ALL';
+      const fileName = `RAHMA-Template-KPI-${fileTag}-${year}-${String(month).padStart(2, '0')}.xlsx`;
+
+      applySecurityHeaders(res);
+      res.writeHead(200, {
+        'Content-Type':
+          'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+        'Content-Disposition': `attachment; filename="${fileName}"`,
+        'Content-Length': xlsxBuf.length,
+        'Cache-Control': 'no-store'
+      });
+      return res.end(xlsxBuf);
+    }
+
+    if (
+      (pathname === '/api/excel/dry-run' || pathname === '/api/excel/commit') &&
+      method === 'POST'
+    ) {
+      if (authUser.role === 'EXECUTIVE') {
+        return sendJson(res, 403, {
+          error: 'Akses ditolak (RBAC 403): Role Executive (BOD) hanya memiliki akses Read-Only.'
+        });
+      }
+
+      const body = await parseJsonBody(req);
+      const numYear = Number(body.year || 2026);
+      const numMonth = Number(body.month || 11);
+      if (
+        !Number.isInteger(numYear) ||
+        numYear < 2020 ||
+        numYear > 2100 ||
+        !Number.isInteger(numMonth) ||
+        numMonth < 1 ||
+        numMonth > 12
+      ) {
+        return sendJson(res, 400, { error: 'Periode tahun atau bulan tidak valid.' });
+      }
+
+      const fileBase64 = String(body.fileBase64 || '').trim();
+      if (!fileBase64) {
+        return sendJson(res, 400, { error: 'Berkas Excel (.xlsx) wajib diunggah.' });
+      }
+
+      let parsedSheet;
+      try {
+        const cleanB64 = fileBase64.includes(',') ? fileBase64.split(',').pop() : fileBase64;
+        const buffer = Buffer.from(cleanB64, 'base64');
+        parsedSheet = parseXlsxBuffer(buffer);
+      } catch (parseErr) {
+        return sendJson(res, 400, {
+          error: `Gagal membaca berkas .xlsx: ${parseErr.message || 'Format berkas tidak valid.'}`
+        });
+      }
+
+      const [kpis, existingRows] = await Promise.all([
+        db.all(
+          `SELECT k.*, d.code as department_code
+           FROM kpi_dictionary k
+           JOIN departments d ON d.id = k.department_id
+           WHERE k.is_active = 1`
+        ),
+        db.all(
+          `SELECT * FROM kpi_monthly_records WHERE period_year = ? AND period_month = ?`,
+          numYear,
+          numMonth
+        )
+      ]);
+      const existingByKpi = new Map(existingRows.map((r) => [r.kpi_id, r]));
+
+      const validation = validateExcelImportRows({
+        rows: parsedSheet.rows,
+        kpis,
+        existingRecordsByKpiId: existingByKpi,
+        authUser
+      });
+
+      if (validation.fatalError) {
+        return sendJson(res, 400, { error: validation.fatalError });
+      }
+
+      if (pathname === '/api/excel/dry-run') {
+        return sendJson(res, 200, {
+          message: validation.summary.canCommit
+            ? `Dry-Run berhasil: ${validation.summary.validCount} baris KPI valid dan siap disimpan ke PostgreSQL.`
+            : `Dry-Run mendeteksi ${validation.summary.errorCount} baris bermasalah. Perbaiki berkas Excel sebelum commit.`,
+          sheetName: parsedSheet.sheetName,
+          ...validation
+        });
+      }
+
+      // POST /api/excel/commit
+      if (!validation.summary.canCommit) {
+        return sendJson(res, 422, {
+          error:
+            validation.summary.errorCount > 0
+              ? `Commit ditolak: terdapat ${validation.summary.errorCount} baris yang gagal validasi Dry-Run.`
+              : 'Commit ditolak: tidak ada baris KPI yang memiliki nilai Actual untuk diimpor.',
+          ...validation
+        });
+      }
+
+      const validRows = validation.rows.filter((r) => r.status === 'VALID');
+      const client = await db.pool.connect();
+      try {
+        await client.query('BEGIN');
+        for (const r of validRows) {
+          const existing = existingByKpi.get(r.kpiId);
+          if (existing) {
+            await client.query(
+              `UPDATE kpi_monthly_records
+               SET target_value = $1,
+                   actual_value = $2,
+                   achievement_pct = $3,
+                   weighted_score = $4,
+                   status_color = $5,
+                   problem_identification = $6,
+                   corrective_action = $7,
+                   need_support = $8,
+                   is_draft = 0,
+                   updated_by = $9,
+                   updated_at = CURRENT_TIMESTAMP::TEXT
+               WHERE id = $10`,
+              [
+                r.targetValue,
+                r.actualValue,
+                r.achievementPct,
+                r.weightedScore,
+                r.statusColor,
+                r.problemIdentification,
+                r.correctiveAction,
+                r.needSupport,
+                authUser.name,
+                existing.id
+              ]
+            );
+          } else {
+            const recId = `rec-${r.kpiId}-${numYear}-${numMonth}`;
+            await client.query(
+              `INSERT INTO kpi_monthly_records (
+                id, kpi_id, period_year, period_month, target_value, actual_value,
+                achievement_pct, weighted_score, status_color,
+                problem_identification, corrective_action, need_support, mitigation_tags,
+                is_draft, is_locked, updated_by
+              ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, '[]', 0, 0, $13)`,
+              [
+                recId,
+                r.kpiId,
+                numYear,
+                numMonth,
+                r.targetValue,
+                r.actualValue,
+                r.achievementPct,
+                r.weightedScore,
+                r.statusColor,
+                r.problemIdentification,
+                r.correctiveAction,
+                r.needSupport,
+                authUser.name
+              ]
+            );
+          }
+        }
+        await client.query('COMMIT');
+      } catch (txErr) {
+        await client.query('ROLLBACK').catch(() => {});
+        throw txErr;
+      } finally {
+        client.release();
+      }
+
+      return sendJson(res, 200, {
+        message: `Smart Excel Import berhasil: ${validRows.length} indikator KPI telah disimpan ke PostgreSQL.`,
+        importedCount: validRows.length
       });
     }
 
