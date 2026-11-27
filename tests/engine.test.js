@@ -73,7 +73,34 @@ const { buildKpiExcelTemplateBuffer, validateExcelImportRows } = require('../src
     isDraft: true
   });
   assert.equal(draftGate.valid, true);
-  console.log('✅ [PASS] Mandatory Risk Mitigation Logic Gate (Hard Server Validation)');
+
+  const ticketGateBlocked = validateMitigationGate({
+    statusColor: 'RED',
+    problemIdentification: 'Keterlambatan pengiriman komponen hidrolik selama 18 hari.',
+    correctiveAction: 'Realokasi 3 unit cadangan dari pool Balikpapan sebelum akhir bulan.',
+    needSupport: 'Persetujuan Direksi untuk Direct Contracting vendor OEM alternatif.',
+    actionPic: '',
+    actionDueDate: '',
+    actionStatus: 'OPEN',
+    requireTicketFields: true,
+    isDraft: false
+  });
+  assert.equal(ticketGateBlocked.valid, false);
+  assert.equal(ticketGateBlocked.errors.length, 2);
+
+  const ticketGatePassed = validateMitigationGate({
+    statusColor: 'RED',
+    problemIdentification: 'Keterlambatan pengiriman komponen hidrolik selama 18 hari.',
+    correctiveAction: 'Realokasi 3 unit cadangan dari pool Balikpapan sebelum akhir bulan.',
+    needSupport: 'Persetujuan Direksi untuk Direct Contracting vendor OEM alternatif.',
+    actionPic: 'Budi Santoso',
+    actionDueDate: '2026-11-30',
+    actionStatus: 'IN_PROGRESS',
+    requireTicketFields: true,
+    isDraft: false
+  });
+  assert.equal(ticketGatePassed.valid, true);
+  console.log('✅ [PASS] Mandatory Risk Mitigation Logic Gate & Ticket Fields (PIC, Due Date, Status)');
 
   // 4. YTD Aggregation (SUM, AVG, LAST_VALUE)
   const sampleSeries = [

@@ -2430,6 +2430,72 @@ kbd,
   overflow-y: auto;
 }
 
+.mitigation-ticket-row {
+  display: grid;
+  grid-template-columns: 1.2fr 0.9fr 0.9fr;
+  gap: 14px;
+  margin-top: 14px;
+  padding-top: 14px;
+  border-top: 1px dashed rgba(220, 38, 38, 0.28);
+}
+
+.mitigation-ticket-row label {
+  display: block;
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--danger-text);
+  margin-bottom: 6px;
+}
+
+.carryover-banner {
+  margin-top: 14px;
+  padding: 12px 14px;
+  border-radius: var(--radius-ui);
+  background: rgba(254, 243, 199, 0.65);
+  border: 1.5px solid rgba(245, 158, 11, 0.55);
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.carryover-banner-title {
+  font-size: 12.5px;
+  font-weight: 700;
+  color: var(--warning-text);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.carryover-ticket-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+  padding: 10px 12px;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.78);
+  border: 1px solid rgba(245, 158, 11, 0.35);
+  font-size: 12px;
+}
+
+.carryover-ticket-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+html[data-theme="dark"] .carryover-banner {
+  background: rgba(120, 53, 15, 0.42);
+  border-color: rgba(251, 146, 60, 0.48);
+}
+
+html[data-theme="dark"] .carryover-ticket-item {
+  background: rgba(15, 23, 42, 0.72);
+  border-color: rgba(251, 146, 60, 0.32);
+}
+
 /* ========================================================================= */
 /* CPMD HUB & ATTRIBUTE HEX STUDIO                                           */
 /* ========================================================================= */

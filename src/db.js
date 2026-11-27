@@ -180,12 +180,19 @@ async function initSchema() {
       corrective_action TEXT DEFAULT '',
       need_support TEXT DEFAULT '',
       mitigation_tags TEXT DEFAULT '[]',
+      action_pic TEXT DEFAULT '',
+      action_due_date TEXT DEFAULT '',
+      action_status TEXT DEFAULT 'OPEN',
       is_draft INTEGER DEFAULT 0,
       is_locked INTEGER DEFAULT 0,
       updated_by TEXT DEFAULT 'System Seed',
       updated_at TEXT DEFAULT CURRENT_TIMESTAMP::TEXT,
       UNIQUE(kpi_id, period_year, period_month)
     );
+
+    ALTER TABLE kpi_monthly_records ADD COLUMN IF NOT EXISTS action_pic TEXT DEFAULT '';
+    ALTER TABLE kpi_monthly_records ADD COLUMN IF NOT EXISTS action_due_date TEXT DEFAULT '';
+    ALTER TABLE kpi_monthly_records ADD COLUMN IF NOT EXISTS action_status TEXT DEFAULT 'OPEN';
 
     CREATE INDEX IF NOT EXISTS idx_records_period ON kpi_monthly_records(period_year, period_month);
     CREATE INDEX IF NOT EXISTS idx_kpi_dept ON kpi_dictionary(department_id, fiscal_year);
@@ -863,9 +870,39 @@ async function getEnrichedKpis({ departmentId = null, year = 2026, month = 11 } 
       corrective_action: '',
       need_support: '',
       mitigation_tags: '[]',
+      action_pic: '',
+      action_due_date: '',
+      action_status: 'OPEN',
       is_draft: 0,
       is_locked: 0
     };
+
+    const carryOverMitigations = monthlyRecords
+      .filter((r) => {
+        const m = Number(r.period_month);
+        if (m >= Number(month)) return false;
+        const st = (r.action_status || 'OPEN').toUpperCase();
+        if (st === 'CLOSED') return false;
+        const hasMitigation =
+          r.status_color === 'RED' ||
+          String(r.corrective_action || '').trim().length > 0 ||
+          String(r.need_support || '').trim().length > 0;
+        return hasMitigation;
+      })
+      .map((r) => ({
+        recordId: r.id,
+        kpi_id: kpi.id,
+        period_year: Number(r.period_year),
+        period_month: Number(r.period_month),
+        achievement_pct: r.achievement_pct,
+        status_color: r.status_color,
+        problem_identification: r.problem_identification || '',
+        corrective_action: r.corrective_action || '',
+        need_support: r.need_support || '',
+        action_pic: r.action_pic || kpi.leader_name || '',
+        action_due_date: r.action_due_date || '',
+        action_status: (r.action_status || 'OPEN').toUpperCase()
+      }));
 
     const prevRecord =
       Number(month) > 1
@@ -919,11 +956,15 @@ async function getEnrichedKpis({ departmentId = null, year = 2026, month = 11 } 
       primaryAccent,
       current: {
         ...currentRecord,
+        action_pic: currentRecord.action_pic || '',
+        action_due_date: currentRecord.action_due_date || '',
+        action_status: (currentRecord.action_status || 'OPEN').toUpperCase(),
         is_draft: Boolean(currentRecord.is_draft),
         is_locked: Boolean(currentRecord.is_locked),
         mitigationTagIds: parsedMitigationTags,
         mitigationTagObjects
       },
+      carryOverMitigations,
       ytd,
       momDeltaPct,
       sparkline,
@@ -1071,6 +1112,60 @@ async function getDashboardSummary({ year = 2026, month = 11, mode = 'MONTHLY' }
     return st === 'RED' || k.current.status_color === 'RED';
   });
 
+  const bodSupportRequests = [];
+  for (const k of kpis) {
+    const curSupport = String(k.current.need_support || '').trim();
+    if (curSupport.length > 0) {
+      bodSupportRequests.push({
+        recordId: k.current.id || null,
+        kpiId: k.id,
+        code: k.code,
+        title: k.title,
+        department_id: k.department_id,
+        department_code: k.department_code,
+        department_name: k.department_name,
+        leader_name: k.leader_name,
+        period_year: Number(year),
+        period_month: Number(month),
+        achievement_pct: k.current.achievement_pct,
+        status_color: k.current.status_color,
+        problem_identification: k.current.problem_identification || '',
+        corrective_action: k.current.corrective_action || '',
+        need_support: curSupport,
+        action_pic: k.current.action_pic || k.leader_name || '',
+        action_due_date: k.current.action_due_date || '',
+        action_status: k.current.action_status || 'OPEN',
+        isCarryOver: false
+      });
+    }
+    for (const co of k.carryOverMitigations || []) {
+      const coSupport = String(co.need_support || '').trim();
+      if (coSupport.length > 0) {
+        bodSupportRequests.push({
+          recordId: co.recordId,
+          kpiId: k.id,
+          code: k.code,
+          title: k.title,
+          department_id: k.department_id,
+          department_code: k.department_code,
+          department_name: k.department_name,
+          leader_name: k.leader_name,
+          period_year: co.period_year,
+          period_month: co.period_month,
+          achievement_pct: co.achievement_pct,
+          status_color: co.status_color,
+          problem_identification: co.problem_identification || '',
+          corrective_action: co.corrective_action || '',
+          need_support: coSupport,
+          action_pic: co.action_pic || k.leader_name || '',
+          action_due_date: co.action_due_date || '',
+          action_status: co.action_status || 'OPEN',
+          isCarryOver: true
+        });
+      }
+    }
+  }
+
   const submittedDepts = departmentSummaries.filter((d) => d.submissionStatus === 'SUBMITTED');
   const pendingDepts = departmentSummaries.filter((d) => d.submissionStatus !== 'SUBMITTED');
 
@@ -1115,6 +1210,7 @@ async function getDashboardSummary({ year = 2026, month = 11, mode = 'MONTHLY' }
     departments: departmentSummaries,
     attributes,
     redEscalations,
+    bodSupportRequests,
     kpis
   };
 }

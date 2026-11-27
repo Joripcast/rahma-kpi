@@ -191,6 +191,10 @@ function validateMitigationGate({
   problemIdentification,
   correctiveAction,
   needSupport,
+  actionPic,
+  actionDueDate,
+  actionStatus,
+  requireTicketFields = false,
   isDraft = false
 }) {
   if (isDraft || statusColor !== 'RED') {
@@ -222,6 +226,21 @@ function validateMitigationGate({
     errors.push(
       'Need Support (Bantuan Manajemen) wajib diisi minimal 10 karakter karena status KPI Merah.'
     );
+  }
+
+  if (requireTicketFields) {
+    const pic = String(actionPic || '').trim();
+    const due = String(actionDueDate || '').trim();
+    const status = String(actionStatus || 'OPEN').trim().toUpperCase();
+    if (pic.length < 2) {
+      errors.push('PIC Tindak Lanjut wajib diisi (minimal 2 karakter) untuk tiket mitigasi Merah.');
+    }
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(due)) {
+      errors.push('Due Date tindak lanjut wajib diisi (format YYYY-MM-DD) untuk tiket mitigasi Merah.');
+    }
+    if (!['OPEN', 'IN_PROGRESS', 'CLOSED'].includes(status)) {
+      errors.push('Status tiket tindak lanjut harus bernilai OPEN, IN_PROGRESS, atau CLOSED.');
+    }
   }
 
   return {

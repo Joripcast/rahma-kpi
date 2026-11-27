@@ -11,7 +11,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600;700&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="/styles.css?v=20261127b" />
+  <link rel="stylesheet" href="/styles.css?v=20261127c" />
   <script>
     (function () {
       try {
@@ -81,6 +81,17 @@
             <span class="nav-title">Executive Dashboard</span>
             <span class="nav-desc">Gauge, Heatmap &amp; PPT-Ready</span>
           </div>
+        </button>
+
+        <button class="nav-btn" data-tab="bod-support" id="navBodSupportBtn">
+          <span class="nav-icon-box" aria-hidden="true">
+            <svg class="ph-icon" viewBox="0 0 256 256"><circle cx="128" cy="128" r="96"/><circle cx="128" cy="128" r="40"/><line x1="99.72" y1="99.72" x2="60.12" y2="60.12"/><line x1="156.28" y1="99.72" x2="195.88" y2="60.12"/><line x1="156.28" y1="156.28" x2="195.88" y2="195.88"/><line x1="99.72" y1="156.28" x2="60.12" y2="195.88"/></svg>
+          </span>
+          <div class="nav-label-wrap">
+            <span class="nav-title">BOD Support Hub</span>
+            <span class="nav-desc">Eskalasi Bantuan Direksi</span>
+          </div>
+          <span class="nav-pill-alert" id="navBodSupportBadge">0</span>
         </button>
 
         <button class="nav-btn" data-tab="input">
@@ -336,6 +347,42 @@
             </div>
           </div>
           <div id="escalationBoardContainer"></div>
+        </div>
+      </section>
+
+      <!-- =================================================================== -->
+      <!-- TAB 1B: BOD SUPPORT ESCALATION HUB (KHUSUS EXECUTIVE & CPMD)        -->
+      <!-- =================================================================== -->
+      <section class="tab-panel" id="tab-bod-support">
+        <div class="card escalation-card">
+          <div class="card-header">
+            <div>
+              <div class="title-with-badge">
+                <h3>
+                  <svg class="ph-icon" viewBox="0 0 256 256" aria-hidden="true"><circle cx="128" cy="128" r="96"/><circle cx="128" cy="128" r="40"/><line x1="99.72" y1="99.72" x2="60.12" y2="60.12"/><line x1="156.28" y1="99.72" x2="195.88" y2="60.12"/><line x1="156.28" y1="156.28" x2="195.88" y2="195.88"/><line x1="99.72" y1="156.28" x2="60.12" y2="195.88"/></svg>
+                  BOD Support Escalation Flag — Rekap Permintaan Dukungan Direksi
+                </h3>
+                <span class="badge-danger" id="bodSupportCountBadge">0 Permintaan Aktif</span>
+              </div>
+              <p>
+                Seluruh permintaan <strong>Need Support BOD</strong> dari semua departemen (termasuk tiket carry-over
+                yang belum <em>Closed</em>) dikumpulkan di satu layar agar Direksi dapat langsung mengambil keputusan.
+              </p>
+            </div>
+            <div class="filter-bar-inline">
+              <select id="bodSupportDeptFilter" class="select-compact">
+                <option value="ALL">Semua Departemen</option>
+              </select>
+              <select id="bodSupportStatusFilter" class="select-compact">
+                <option value="ALL">Semua Status Tiket</option>
+                <option value="OPEN">Open</option>
+                <option value="IN_PROGRESS">In Progress</option>
+                <option value="CLOSED">Closed</option>
+              </select>
+            </div>
+          </div>
+          <div id="bodSupportSummaryRow" class="excel-summary-grid" style="margin-bottom:16px"></div>
+          <div id="bodSupportHubContainer"></div>
         </div>
       </section>
 
@@ -1275,7 +1322,7 @@
     </div>
   </div>
 
-  <script src="/app.js?v=20261127b"></script>
+  <script src="/app.js?v=20261127c"></script>
 </body>
 
 </html>

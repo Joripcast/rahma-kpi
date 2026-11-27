@@ -19,6 +19,8 @@ const state = {
   dashboard: null,
   dashDeptFilter: 'ALL',
   dashAttrFilter: 'ALL',
+  bodSupportDeptFilter: 'ALL',
+  bodSupportStatusFilter: 'ALL',
   inputDeptFilter: 'ALL',
   dictDeptFilter: 'ALL',
   attrGroupFilter: 'ALL'
@@ -340,6 +342,7 @@ async function refreshDashboardData() {
 
 function populateDepartmentSelects() {
   const dashSel = document.getElementById('dashDeptFilter');
+  const bodSel = document.getElementById('bodSupportDeptFilter');
   const inputSel = document.getElementById('inputDeptSelect');
   const dictSel = document.getElementById('dictDeptFilter');
   const formDept = document.getElementById('kpiFormDept');
@@ -349,6 +352,10 @@ function populateDepartmentSelects() {
     .join('');
 
   dashSel.innerHTML = `<option value="ALL">Semua Departemen (${state.departments.length})</option>` + deptOptions;
+  if (bodSel) {
+    bodSel.innerHTML = `<option value="ALL">Semua Departemen (${state.departments.length})</option>` + deptOptions;
+    bodSel.value = state.bodSupportDeptFilter;
+  }
   inputSel.innerHTML = `<option value="ALL">Semua Departemen (${state.departments.length})</option>` + deptOptions;
   dictSel.innerHTML = `<option value="ALL">Semua Departemen (${state.departments.length})</option>` + deptOptions;
   formDept.innerHTML = deptOptions;
@@ -374,12 +381,13 @@ function populateAttributeSelects() {
   renderKpiFormAttributePicker();
 }
 
-const dirtyTabs = new Set(['dashboard', 'input', 'cpmd', 'attributes']);
+const dirtyTabs = new Set(['dashboard', 'bod-support', 'input', 'cpmd', 'attributes']);
 
 function renderTabIfDirty(tab) {
   if (!state.dashboard || !dirtyTabs.has(tab)) return;
   dirtyTabs.delete(tab);
   if (tab === 'dashboard') renderExecutiveDashboard();
+  else if (tab === 'bod-support') renderBodSupportHubView();
   else if (tab === 'input') renderSpreadsheetInputView();
   else if (tab === 'cpmd') renderCpmdHubView();
   else if (tab === 'attributes') renderAttributesStudioView();
@@ -399,12 +407,20 @@ function renderAllViews() {
       state.mode === 'YTD' ? 'Akumulasi Year-to-Date (YTD)' : 'Bulan Berjalan (Monthly)'
     }`;
 
-  // Update Red counters
+  // Update Red counters & BOD Support badge
   const redTotal = d.corporate.redCount;
   document.getElementById('navRedBadge').textContent = `${redTotal} Merah`;
   document.getElementById('spotlightCountBadge').textContent = `(${redTotal})`;
 
+  const bodReqs = d.bodSupportRequests || [];
+  const activeBodCount = bodReqs.filter((r) => r.action_status !== 'CLOSED').length;
+  const navBodBadge = document.getElementById('navBodSupportBadge');
+  if (navBodBadge) {
+    navBodBadge.textContent = `${activeBodCount} Aktif`;
+  }
+
   dirtyTabs.add('dashboard');
+  dirtyTabs.add('bod-support');
   dirtyTabs.add('input');
   dirtyTabs.add('cpmd');
   dirtyTabs.add('attributes');
@@ -916,7 +932,77 @@ function renderSpreadsheetInputView() {
                 </span>
               </div>
             </div>
+
+            <div class="mitigation-ticket-row">
+              <div>
+                <label for="pic-${k.id}">4. PIC Tindak Lanjut *</label>
+                <input
+                  type="text"
+                  id="pic-${k.id}"
+                  class="input-control"
+                  placeholder="Nama PIC penanggung jawab aksi..."
+                  value="${escapeHtml(k.current.action_pic || k.leader_name || '')}"
+                  ${locked ? 'disabled' : ''}
+                />
+              </div>
+              <div>
+                <label for="due-${k.id}">5. Due Date Tindak Lanjut *</label>
+                <input
+                  type="date"
+                  id="due-${k.id}"
+                  class="input-control"
+                  value="${escapeHtml(k.current.action_due_date || '')}"
+                  ${locked ? 'disabled' : ''}
+                />
+              </div>
+              <div>
+                <label for="actstatus-${k.id}">6. Status Tiket Mitigasi *</label>
+                <select id="actstatus-${k.id}" class="select-control" ${locked ? 'disabled' : ''}>
+                  <option value="OPEN" ${(k.current.action_status || 'OPEN') === 'OPEN' ? 'selected' : ''}>Open</option>
+                  <option value="IN_PROGRESS" ${k.current.action_status === 'IN_PROGRESS' ? 'selected' : ''}>In Progress</option>
+                  <option value="CLOSED" ${k.current.action_status === 'CLOSED' ? 'selected' : ''}>Closed</option>
+                </select>
+              </div>
+            </div>
           </div>
+
+          ${
+            k.carryOverMitigations && k.carryOverMitigations.length > 0
+              ? `<div class="carryover-banner">
+                  <div class="carryover-banner-title">
+                    ${phIcon('clock', 'ph-icon-sm')} Pengingat Carry-Over Bulan Sebelumnya (${k.carryOverMitigations.length} Tiket Belum Closed)
+                  </div>
+                  ${k.carryOverMitigations
+                    .map(
+                      (co) => `
+                    <div class="carryover-ticket-item">
+                      <div style="flex:1;min-width:240px;">
+                        <strong>${MONTH_NAMES[co.period_month - 1]} ${co.period_year}</strong>
+                        • Capaian: <strong>${co.achievement_pct ?? '-'}%</strong>
+                        • PIC: <strong>${escapeHtml(co.action_pic || '-')}</strong>
+                        ${co.action_due_date ? `• Due: <code>${escapeHtml(co.action_due_date)}</code>` : ''}
+                        <div style="margin-top:4px;color:var(--text-body)">
+                          <strong>Action:</strong> ${escapeHtml(co.corrective_action || '-')}
+                          ${co.need_support ? `<br><strong>BOD Support:</strong> ${escapeHtml(co.need_support)}` : ''}
+                        </div>
+                      </div>
+                      <div class="carryover-ticket-actions">
+                        <select class="select-compact carryover-status-select" data-record-id="${escapeHtml(co.recordId)}" ${locked ? 'disabled' : ''}>
+                          <option value="OPEN" ${co.action_status === 'OPEN' ? 'selected' : ''}>Open</option>
+                          <option value="IN_PROGRESS" ${co.action_status === 'IN_PROGRESS' ? 'selected' : ''}>In Progress</option>
+                          <option value="CLOSED" ${co.action_status === 'CLOSED' ? 'selected' : ''}>Closed</option>
+                        </select>
+                        <button type="button" class="btn-secondary btn-update-carryover" data-record-id="${escapeHtml(co.recordId)}" style="min-height:34px;padding:4px 12px;font-size:12px" ${locked ? 'disabled' : ''}>
+                          Update Tiket
+                        </button>
+                      </div>
+                    </div>
+                  `
+                    )
+                    .join('')}
+                </div>`
+              : ''
+          }
         </div>
       `;
     })
@@ -1014,6 +1100,30 @@ function bindSpreadsheetInputEvents() {
     btn.addEventListener('click', () => saveKpiRecord(btn.dataset.kpiId, true));
   });
 
+  document.querySelectorAll('.btn-update-carryover').forEach((btn) => {
+    btn.addEventListener('click', async () => {
+      const recordId = btn.dataset.recordId;
+      const sel = document.querySelector(`.carryover-status-select[data-record-id="${recordId}"]`);
+      const actionStatus = sel ? sel.value : 'OPEN';
+      try {
+        const res = await fetch('/api/records/action-status', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ recordId, actionStatus })
+        });
+        const data = await res.json();
+        if (!res.ok) {
+          showToast(data.error || 'Gagal memperbarui status tiket mitigasi.', true);
+          return;
+        }
+        showToast(data.message);
+        await refreshDashboardData();
+      } catch (_err) {
+        showToast('Gagal menghubungi server untuk memperbarui status tiket.', true);
+      }
+    });
+  });
+
   bindDetailTriggerButtons(document.getElementById('tab-input'));
 
   document.querySelectorAll('#tab-input .escalation-grid textarea').forEach((ta) => {
@@ -1030,10 +1140,16 @@ async function saveKpiRecord(kpiId, isDraft = false) {
   const probEl = document.getElementById(`prob-${kpiId}`);
   const corrEl = document.getElementById(`corr-${kpiId}`);
   const suppEl = document.getElementById(`supp-${kpiId}`);
+  const picEl = document.getElementById(`pic-${kpiId}`);
+  const dueEl = document.getElementById(`due-${kpiId}`);
+  const statusEl = document.getElementById(`actstatus-${kpiId}`);
 
   const problemIdentification = probEl?.value || '';
   const correctiveAction = corrEl?.value || '';
   const needSupport = suppEl?.value || '';
+  const actionPic = picEl?.value || '';
+  const actionDueDate = dueEl?.value || '';
+  const actionStatus = statusEl?.value || 'OPEN';
 
   // Reset inline error indicators
   [
@@ -1059,6 +1175,9 @@ async function saveKpiRecord(kpiId, isDraft = false) {
     problemIdentification,
     correctiveAction,
     needSupport,
+    actionPic,
+    actionDueDate,
+    actionStatus,
     mitigationTagIds: selectedChips,
     isDraft,
     updatedBy: state.role
@@ -1572,6 +1691,20 @@ document.addEventListener('DOMContentLoaded', () => {
     state.dashDeptFilter = e.target.value;
     renderExecutiveDashboard();
   });
+  const bodDeptSel = document.getElementById('bodSupportDeptFilter');
+  if (bodDeptSel) {
+    bodDeptSel.addEventListener('change', (e) => {
+      state.bodSupportDeptFilter = e.target.value;
+      renderBodSupportHubView();
+    });
+  }
+  const bodStatusSel = document.getElementById('bodSupportStatusFilter');
+  if (bodStatusSel) {
+    bodStatusSel.addEventListener('change', (e) => {
+      state.bodSupportStatusFilter = e.target.value;
+      renderBodSupportHubView();
+    });
+  }
   document.getElementById('dashAttrFilter').addEventListener('change', (e) => {
     state.dashAttrFilter = e.target.value;
     renderExecutiveDashboard();
@@ -2307,12 +2440,14 @@ function applyRbacUiVisibility() {
   const isCpmd = role === 'CPMD_ADMIN';
   const isExec = role === 'EXECUTIVE';
 
+  const navBodSupport = document.getElementById('navBodSupportBtn');
   const navInput = document.querySelector('.nav-btn[data-tab="input"]');
   const navCpmd = document.querySelector('.nav-btn[data-tab="cpmd"]');
   const navAttrs = document.querySelector('.nav-btn[data-tab="attributes"]');
   const btnBackup = document.getElementById('btnExportBackup');
   const inputDeptSel = document.getElementById('inputDeptSelect');
 
+  if (navBodSupport) navBodSupport.style.display = isExec || isCpmd ? '' : 'none';
   if (navInput) navInput.style.display = isExec ? 'none' : '';
   if (navCpmd) navCpmd.style.display = isCpmd ? '' : 'none';
   if (navAttrs) navAttrs.style.display = isCpmd ? '' : 'none';
@@ -4290,4 +4425,114 @@ function initExcelImportModal() {
   }
   if (btnRunDryRun) btnRunDryRun.addEventListener('click', runDryRunValidation);
   if (btnCommit) btnCommit.addEventListener('click', commitExcelImport);
+}
+
+// ============================================================================
+// VIEW 1B: BOD SUPPORT ESCALATION HUB (KHUSUS EXECUTIVE & CPMD)
+// ============================================================================
+function renderBodSupportHubView() {
+  const d = state.dashboard;
+  if (!d) return;
+
+  const allReqs = d.bodSupportRequests || [];
+  let filtered = allReqs.slice();
+  if (state.bodSupportDeptFilter !== 'ALL') {
+    filtered = filtered.filter((r) => r.department_id === state.bodSupportDeptFilter);
+  }
+  if (state.bodSupportStatusFilter !== 'ALL') {
+    filtered = filtered.filter((r) => r.action_status === state.bodSupportStatusFilter);
+  }
+
+  const openCount = allReqs.filter((r) => r.action_status === 'OPEN').length;
+  const inProgCount = allReqs.filter((r) => r.action_status === 'IN_PROGRESS').length;
+  const closedCount = allReqs.filter((r) => r.action_status === 'CLOSED').length;
+  const carryOverCount = allReqs.filter((r) => r.isCarryOver).length;
+
+  const badgeEl = document.getElementById('bodSupportCountBadge');
+  if (badgeEl) {
+    badgeEl.textContent = `${openCount + inProgCount} Permintaan Aktif (${allReqs.length} Total)`;
+  }
+
+  const summaryRow = document.getElementById('bodSupportSummaryRow');
+  if (summaryRow) {
+    summaryRow.innerHTML = `
+      <div class="excel-summary-stat"><span>Total Permintaan BOD</span><strong>${allReqs.length}</strong></div>
+      <div class="excel-summary-stat"><span>Status Open</span><strong style="color:var(--danger-text)">${openCount}</strong></div>
+      <div class="excel-summary-stat"><span>Status In Progress</span><strong style="color:var(--warning-text)">${inProgCount}</strong></div>
+      <div class="excel-summary-stat"><span>Status Closed</span><strong style="color:var(--success-text)">${closedCount}</strong></div>
+      <div class="excel-summary-stat"><span>Carry-Over Bln Lalu</span><strong>${carryOverCount}</strong></div>
+    `;
+  }
+
+  const container = document.getElementById('bodSupportHubContainer');
+  if (!container) return;
+
+  if (filtered.length === 0) {
+    container.innerHTML = `<div style="padding:16px;background:var(--success-bg);color:var(--success-text);border-radius:15px;font-weight:700;display:flex;align-items:center;gap:8px">
+      ${phIcon('check-circle')} Tidak ada permintaan Need Support BOD yang sesuai filter saat ini.
+    </div>`;
+    return;
+  }
+
+  container.innerHTML = `
+    <div class="escalation-grid">
+      ${filtered
+        .map((r) => {
+          const ticketPillCls =
+            r.action_status === 'CLOSED'
+              ? 'status-GREEN'
+              : r.action_status === 'IN_PROGRESS'
+              ? 'status-YELLOW'
+              : 'status-RED';
+          const ticketLabel =
+            r.action_status === 'CLOSED'
+              ? 'Closed'
+              : r.action_status === 'IN_PROGRESS'
+              ? 'In Progress'
+              : 'Open';
+          return `
+            <div class="escalation-item">
+              <div class="kpi-left-accent-bar" style="background:${r.status_color === 'RED' ? '#DC2626' : '#007BC8'}"></div>
+              <div class="esc-header">
+                <div>
+                  <span style="font-size:12px;font-weight:700;color:var(--text-caption)">
+                    ${escapeHtml(r.department_code)} • ${escapeHtml(r.code)} • ${MONTH_NAMES[r.period_month - 1]} ${r.period_year}
+                    ${r.isCarryOver ? ' • <strong style="color:var(--warning-text)">Carry-Over</strong>' : ''}
+                  </span>
+                  <h4 style="font-size:15px;font-weight:700;color:var(--text-h1);margin:2px 0">${escapeHtml(r.title)}</h4>
+                  <div style="font-size:11.5px;color:var(--text-body)">
+                    PIC: <strong>${escapeHtml(r.action_pic || '-')}</strong>
+                    ${r.action_due_date ? ` • Due: <code>${escapeHtml(r.action_due_date)}</code>` : ''}
+                  </div>
+                </div>
+                <div style="text-align:right;display:flex;flex-direction:column;align-items:flex-end;gap:6px">
+                  <span class="status-pill ${ticketPillCls}" style="min-height:28px;padding:3px 10px;font-size:11px">
+                    Tiket: ${ticketLabel} • ${r.achievement_pct ?? '-'}%
+                  </span>
+                  <button type="button" class="btn-detail-trigger" data-detail-kpi="${r.kpiId}">
+                    ${phIcon('magnifying-glass')} Rincian KPI
+                  </button>
+                </div>
+              </div>
+              <div class="esc-boxes">
+                <div class="esc-box support-box">
+                  <strong>${phIcon('lifebuoy', 'ph-icon-sm')} Need Support BOD (Permintaan Dukungan Direksi)</strong>
+                  <div class="prob-input-text">${escapeHtml(r.need_support)}</div>
+                </div>
+                <div class="esc-box">
+                  <strong>${phIcon('check-circle', 'ph-icon-sm')} Corrective Action &amp; Akar Masalah</strong>
+                  <div class="prob-input-text">
+                    <strong>Action:</strong> ${escapeHtml(r.corrective_action || '-')}<br/>
+                    <strong>Problem:</strong> ${escapeHtml(r.problem_identification || '-')}
+                  </div>
+                </div>
+              </div>
+            </div>
+          `;
+        })
+        .join('')}
+    </div>
+  `;
+
+  bindDetailTriggerButtons(container);
 }

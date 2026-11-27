@@ -68,6 +68,7 @@ const rateLimitStore = new Map(); // key -> { count, resetAt }
 const ALLOWED_POLARITIES = new Set(['MAXIMIZE', 'MINIMIZE']);
 const ALLOWED_YTD_METHODS = new Set(['SUM', 'AVG', 'LAST_VALUE']);
 const ALLOWED_ATTR_GROUPS = new Set(['PERSPECTIVE', 'CATEGORY', 'PRIORITY', 'MITIGATION_TAG']);
+const ALLOWED_ACTION_STATUSES = new Set(['OPEN', 'IN_PROGRESS', 'CLOSED']);
 
 function getClientIp(req) {
   return req.socket?.remoteAddress || '127.0.0.1';
@@ -729,6 +730,9 @@ const server = http.createServer(async (req, res) => {
         problemIdentification = '',
         correctiveAction = '',
         needSupport = '',
+        actionPic = '',
+        actionDueDate = '',
+        actionStatus = 'OPEN',
         mitigationTagIds = [],
         isDraft = false
       } = body;
@@ -797,12 +801,23 @@ const server = http.createServer(async (req, res) => {
         ? classifyStatusColor(achievementPct, kpi.red_threshold, kpi.yellow_threshold)
         : 'UNREPORTED';
 
+      const normalizedActionStatus = String(actionStatus || 'OPEN').trim().toUpperCase();
+      if (!ALLOWED_ACTION_STATUSES.has(normalizedActionStatus)) {
+        return sendJson(res, 400, {
+          error: 'Status tiket tindak lanjut harus OPEN, IN_PROGRESS, atau CLOSED.'
+        });
+      }
+
       // MANDATORY MITIGATION LOGIC GATE
       const gateResult = validateMitigationGate({
         statusColor,
         problemIdentification,
         correctiveAction,
         needSupport,
+        actionPic,
+        actionDueDate,
+        actionStatus: normalizedActionStatus,
+        requireTicketFields: true,
         isDraft: Boolean(isDraft)
       });
 
@@ -830,6 +845,9 @@ const server = http.createServer(async (req, res) => {
                corrective_action = ?,
                need_support = ?,
                mitigation_tags = ?,
+               action_pic = ?,
+               action_due_date = ?,
+               action_status = ?,
                is_draft = ?,
                updated_by = ?,
                updated_at = CURRENT_TIMESTAMP::TEXT
@@ -843,6 +861,9 @@ const server = http.createServer(async (req, res) => {
           correctiveAction.trim(),
           needSupport.trim(),
           tagsJson,
+          String(actionPic || '').trim(),
+          String(actionDueDate || '').trim(),
+          normalizedActionStatus,
           isDraft ? 1 : 0,
           updatedBy,
           existing.id
@@ -854,8 +875,9 @@ const server = http.createServer(async (req, res) => {
             id, kpi_id, period_year, period_month, target_value, actual_value,
             achievement_pct, weighted_score, status_color,
             problem_identification, corrective_action, need_support, mitigation_tags,
+            action_pic, action_due_date, action_status,
             is_draft, is_locked, updated_by
-          ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 0, ?)`,
+          ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 0, ?)`,
           recId,
           kpiId,
           Number(year),
@@ -869,6 +891,9 @@ const server = http.createServer(async (req, res) => {
           correctiveAction.trim(),
           needSupport.trim(),
           tagsJson,
+          String(actionPic || '').trim(),
+          String(actionDueDate || '').trim(),
+          normalizedActionStatus,
           isDraft ? 1 : 0,
           updatedBy
         );
@@ -886,6 +911,66 @@ const server = http.createServer(async (req, res) => {
           ? 'Draft realisasi KPI berhasil disimpan otomatis.'
           : 'Laporan realisasi KPI berhasil disubmit.',
         kpi: updatedKpi
+      });
+    }
+
+    // =========================================================================
+    // 4B. POST /api/records/action-status (Update Mitigation Ticket / Carry-Over)
+    // =========================================================================
+    if (pathname === '/api/records/action-status' && method === 'POST') {
+      if (authUser.role === 'EXECUTIVE') {
+        return sendJson(res, 403, {
+          error: 'Akses ditolak (RBAC 403): Role Executive (BOD) hanya memiliki akses Read-Only.'
+        });
+      }
+
+      const body = await parseJsonBody(req);
+      const { recordId, actionStatus, actionPic, actionDueDate } = body;
+      if (!recordId) {
+        return sendJson(res, 400, { error: 'ID record mitigasi wajib disertakan.' });
+      }
+
+      const nextStatus = String(actionStatus || '').trim().toUpperCase();
+      if (!ALLOWED_ACTION_STATUSES.has(nextStatus)) {
+        return sendJson(res, 400, {
+          error: 'Status tiket tindak lanjut harus OPEN, IN_PROGRESS, atau CLOSED.'
+        });
+      }
+
+      const existingRec = await db.get(
+        `SELECT r.*, k.department_id, k.code as kpi_code
+         FROM kpi_monthly_records r
+         JOIN kpi_dictionary k ON k.id = r.kpi_id
+         WHERE r.id = ?`,
+        recordId
+      );
+      if (!existingRec) {
+        return sendJson(res, 404, { error: 'Tiket tindak lanjut mitigasi tidak ditemukan.' });
+      }
+
+      if (authUser.role === 'DIV_LEADER' && existingRec.department_id !== authUser.department_id) {
+        return sendJson(res, 403, {
+          error: 'Akses ditolak (RBAC 403): Anda tidak dapat mengubah tiket mitigasi divisi lain.'
+        });
+      }
+
+      await db.run(
+        `UPDATE kpi_monthly_records
+         SET action_status = ?,
+             action_pic = ?,
+             action_due_date = ?,
+             updated_by = ?,
+             updated_at = CURRENT_TIMESTAMP::TEXT
+         WHERE id = ?`,
+        nextStatus,
+        actionPic !== undefined ? String(actionPic).trim() : existingRec.action_pic || '',
+        actionDueDate !== undefined ? String(actionDueDate).trim() : existingRec.action_due_date || '',
+        authUser.name,
+        recordId
+      );
+
+      return sendJson(res, 200, {
+        message: `Status tiket mitigasi ${existingRec.kpi_code} (Bulan ${existingRec.period_month}) diperbarui menjadi ${nextStatus}.`
       });
     }
 
