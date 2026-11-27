@@ -2894,6 +2894,7 @@ tr.kpi-clickable-row:hover {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
   gap: 14px;
+  flex-shrink: 0;
 }
 
 .detail-stat-box {
@@ -2928,9 +2929,11 @@ tr.kpi-clickable-row:hover {
   padding: 18px 20px;
   background: rgba(255, 255, 255, 0.50);
   box-shadow: var(--glass-bevel-shadow);
+  flex-shrink: 0;
   min-width: 0;
   max-width: 100%;
-  overflow: hidden;
+  overflow-x: clip;
+  overflow-y: visible;
 }
 
 .table-responsive {
